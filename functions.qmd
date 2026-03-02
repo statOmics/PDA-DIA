@@ -1,0 +1,267 @@
+Useful functions that will be included in the next release of msqrob2. 
+
+# Normalisation functions 
+
+Here we provide functions to calculate normalisation factors that can be used in conjunction with the sweep function to produce a new summarised experiment in a qfeatures object with normalised intensities.
+
+## Get Dia-NN normfactors 
+
+```{r} 
+getDiannNormFactors <- function(qf, i, nf_name = "Normalisation.Factor", log = TRUE, base = 2) 
+{
+  out <- sapply(colnames(qf[[i]]), function(ii, qf, ids, nf_name) rowData(qf[[ii]])[ids,nf_name], qf = qf, ids = rownames(qf[[i]]), nf_name = nf_name)
+  if (log) out <- log(out, base = base)
+  rownames(out) <- rownames(qf[[i]])
+  return(out)
+}
+```
+
+## Median normalisation 
+
+A very popular approach is to use median normalisation, wich 
+
+1. Calculates the sample medians of the intensity assay of summarised experiment `i` in qfeatures object `qf` 
+2. Defines the log norm factor by subtracting the median of the sample medians from each sample median,  so as to center the intensities of all samples around the median intensity in the experiment. 
+
+```{r}
+nf_log_med <- function(qf, i, base = 2){
+  nf_log <- assay(qf[[i]]) |> 
+    colMedians(na.rm = TRUE) #1.
+  nf_log <- nf_log - median(nf_log) #2. 
+  return(nf_log)
+}
+```
+
+## Total loading normalisation
+
+DIA-NN for instance by default corrects for the total loading, i.e. the sum of all raw intensities of reliable precursors. Particularly, they scale the precursor intensities to the loading of a reference sample, i.e. the median loading over all samples. 
+
+This function 
+
+1. extracts the log-transformed intensities according with base `base` in summarized experiment `i` of QFeatures object `qf`
+2. calculates the total log-transformed loading, by 
+    a. converting the intensities back to the original scale
+    b. calculating the total loading in each run (column)
+    c. transforming it back to the log-scale 
+3. rescaling it to the median loading
+
+```{r}
+nf_log_tot <- function(qf, i, base = 2){
+  log_val <- assay(qf[[i]]) #1. 
+  tot_log_loading <- base^log_val |> #2.a
+    colSums(na.rm = TRUE) |> #2.b
+    log(base = base) #2.c
+  nf_log <- tot_log_loading - median(tot_log_loading) #3.
+  
+  return(nf_log)
+}
+```
+
+## Median of Ratio's 
+
+The bulk RNA-seq tool DESeq 2 for instance uses the median of ratio's approach. 
+We provide a function to calculate these log-norm factors that 
+
+1. We first create a pseudo-reference sample (row-wise mean of log2 
+intensities, which corresponds to the log2 transformed geometric 
+mean). 
+2. Calculate the log2 ratios of each sample w.r.t. the 
+pseudo-reference 
+3. Subsequently take the column wise median of these log2 ratios to 
+obtain the sample based normalisation factor on the log2 scale.
+
+```{r}
+nf_log_medrat <- function(qf, i, base = 2){
+  pseudoref <- assay(qf[[i]]) |> 
+    rowMeans(na.rm = TRUE) #1. 
+ 
+  nf_log <- sweep(
+    assay(qf[[i]]), 
+    MARGIN = 1, 
+    pseudoref) |> #2. Subtract the row means row-by-row (MARGIN = 1)
+    colMedians(na.rm = TRUE)  #3. Calculate the column median 
+  
+  return(nf_log)
+}
+```
+
+### DIA-NN style Retention time normalisation. 
+
+Note, that in DIA-NN also can perform an additional retention time normalisation used, which calculates a custom normalisation factor for each intensity based on its retention time. Particularly, it is based on a running median smoother, that smooths the intensities across retention time by calculating the median log2 intensities in a retention time window of a particular size. 
+
+    
+1. Helper functions for running median on grid and to interpolate running median on grid
+```{r}
+
+run_median_on_grid_knn <- function(x, y, grid, k = 500) {
+  
+  ok <- is.finite(x) & is.finite(y)
+  if (length(x) < k)
+    return(rep(NA_real_, length(grid)))
+  
+  sapply(grid, function(g, x, y, k) {
+    ord <- order(abs(x - g))
+    idx <- ord[seq_len(min(k, length(ord)))]
+    median(y[idx], na.rm = TRUE)
+  }, x = x[ok], y = y[ok], k = k)
+}
+
+run_median_on_grid <- function(x, y, grid, w, n_min = 300) {
+    ok <- is.finite(x) & is.finite(y)
+    sapply(grid, function(g, x, y) {
+      idx <- abs(x - g) <= w
+      #if (sum(idx, na.rm = TRUE) < 5) return(NA_real_)
+      if (sum(idx, na.rm = TRUE) < n_min) idx <- order(abs(x - g))[1:n_min]
+      median(y[idx], na.rm = TRUE)
+    }, x = x[ok], y = y[ok])
+  }
+
+interp_run_med_on_grid <- function(grid, run_med_on_grid, x) 
+  {
+      ok_grid <- is.finite(run_med_on_grid) & is.finite(grid)
+      approx(
+      grid[ok_grid],
+      run_med_on_grid[ok_grid],
+      xout = x,
+      rule = 2)$y
+  }
+```
+  
+2. Function for retention time log normalisation factor
+
+```{r}
+nf_log_rt <- function(
+    qf,
+    i,
+    rt = "RT",
+    window = 2,
+    n_min = 300,
+    #k = 50,
+    grid_length = 500
+) {
+  
+  log_mat <- assay(qf[[i]])
+  rt_mat <- assay(qf[[i]], rt)
+  nr <- nrow(log_mat)
+  nc <- ncol(log_mat)
+
+  # --- Shared RT grid ---
+  rt_min <- min(rt_mat, na.rm = TRUE)
+  rt_max <- max(rt_mat, na.rm = TRUE)
+  rt_grid <- seq(rt_min, rt_max, length.out = grid_length)
+  
+  # --- Compute per-run trends ---
+  run_trends <- sapply(1:nc,
+                       function(j, rt_mat, log_mat, rt_grid, window, n_min)
+                         run_median_on_grid(
+                           rt_mat[,j],
+                           log_mat[,j],
+                           rt_grid,
+                           window,
+                           n_min),
+                       # function(j, rt_mat, log_mat, rt_grid, k)
+                       #   run_median_on_grid_knn(
+                       #     rt_mat[,j],
+                       #     log_mat[,j],
+                       #     rt_grid, 
+                       #     k),
+                       rt_mat = rt_mat,
+                       log_mat = log_mat,
+                       rt_grid = rt_grid, 
+                       window = window,
+                       n_min = n_min
+                       #k=k
+                       )
+  
+  # --- Reference trend ---
+  ref_trend <- apply(run_trends, 1, median, na.rm = TRUE)
+  
+  # --- Interpolate run trends and reference trend back to obtain normalisation factors for original retention times ---
+  nf <- sapply(1:nc,
+                       function(j, rt_mat, rt_grid, run_trends, ref_trend)
+                       {
+                         interp_run <- interp_run_med_on_grid(
+                           rt_grid,
+                           run_trends[,j],
+                           rt_mat[,j])
+                         interp_ref <- interp_run_med_on_grid(
+                           rt_grid,
+                           ref_trend,
+                           rt_mat[,j])
+                         return(interp_run - interp_ref)
+                       },
+               rt_mat = rt_mat,
+               rt_grid = rt_grid,
+               run_trends = run_trends,
+               ref_trend = ref_trend
+               )
+  
+  return(nf)
+}
+```
+
+A matrix of log normalisation factors is generated as a different normalisation factor is used for each sample according to its retention time. It has to be swept out using MARGIN  = 1:2
+
+Note, that DIA-NN typically first adopts total loading normalisation prior to retention time normalisation. 
+
+# Plots
+
+## Volcano-plots
+
+A volcano plot is a common visualisation that provides an overview of
+the hypothesis testing results, plotting the $-\log_{10}$ p-value^[Note, that upon this transformation a value of 1 represents a p-value of 0.1, 2 a p-value of 0.01, 3 a p-value of 0.001, etc.] as a function of
+the estimated log fold change. Volcano plots can be used to highlight
+the most interesting proteins that have large fold changes and/or are
+highly significant. We can use the table above directly to build a
+volcano plot using `ggplot2` functionality. We also highlight which
+proteins are UPS standards, known to be differentially abundant by
+experimental design.
+
+1. We calculate the adjusted significance level for the original p-values that corresponds to the nominal FDR significance level.
+2. We make the volcano plot by plotting statistial significance, i.e. -log10(pvalues), in function of the effect size or biological relevance, i.e. log2 FC or log2 RDA. We color the dots according to their significance, black if the adjusted p-value is higher than the FDR significance level and red if the adjusted p-value is lower than the FDR significance level. 
+3. We add a line with the adjusted significance level that corresponds to the original p-values
+4. We add the dots to the plot.
+5. We set the layout of the plot (theme, labels, etc.)
+
+```{r}
+plot_volcano <- function(results_table, effectsize = "logFC", adjPval = "adjPval", pval = "pval", significance_level = 0.05, significance_colors= c("FALSE" = "black", "TRUE" = "red"), opacity = .5)
+{
+
+#adjAlpha <- significance_level*mean(results_table[[adjPval]] < significance_level, na.rm = TRUE) #1.
+
+volcano_out <-
+  results_table |>
+  filter(!is.na(.data[[adjPval]])) |>
+  ggplot(
+          aes(x = .data[[effectsize]],
+              y = -log10(.data[[pval]]), col = .data[[adjPval]] < significance_level)) + #2.
+
+ # geom_hline(yintercept = -log10(adjAlpha)) + #3.
+
+  geom_point(size = 1, alpha = opacity) + #4.
+
+  theme_bw() + #5.
+  ylab("-log10(p-value)") +
+  scale_color_manual(values = significance_colors, breaks = c("TRUE", "FALSE")) +
+  labs(color=paste0("FDR < ",significance_level))
+return(volcano_out)
+}
+```
+
+
+# Inference 
+
+Function that automatically extracts the contrasts for all pairwise comparisons of the levels of a factor variable. 
+
+```{r}
+createPairwiseContrasts <- function(formula, coldata, var, ridge = FALSE, nullHypothesis = " = 0") {
+    params <- .getParamNames(formula, coldata, var, ridge)
+    out <- combn(params, 2)
+    out <- paste0(out[2, ], " - ", out[1, ])
+    hasIntercept <- attr(terms(formula), "intercept")
+    isFirst <- labels(terms(formula))[[1]] == var
+    if (hasIntercept && isFirst)
+        out <- c(out, params)
+    paste0(out, nullHypothesis)
+}
+```

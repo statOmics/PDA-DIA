@@ -1,0 +1,39 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  favicon: figs/msqrob2.png
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - text: "Topics"
+        icon: fa-chalkboard-teacher
+        menu:
+        - text: 1. Basic concepts
+          href: 01-dataprocessing.html
+        - text: 2. Workflow optimisation 
+          href: 02-workflow-optimisation.html
+        - text: 3.1. Inference
+          href: 03-inference.html
+        - text: 3.2. Wrapup Blocking
+          href: 03-blocking-wrapup.html
+
+          
+bibliography: references.bib
+
+execute:
+  freeze: auto
+
+format:
+  html:
+    theme:
+      - cosmo
+      - custom.scss
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+    number-depth: 3
+    code-copy: true

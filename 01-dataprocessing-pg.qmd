@@ -1,0 +1,344 @@
+# Differential abundance analysis with DIA-NN - starting from proteins groups table {-}
+
+```{r, echo = FALSE}
+source("R/knitr_setup.R")
+```
+
+
+```{r load_libraries}
+library("QFeatures")  
+library("dplyr") 
+library("tidyr")
+library("ggplot2")
+library("msqrob2")    
+library("stringr")
+library("ExploreModelMatrix")
+library("MsCoreUtils") 
+library("matrixStats")
+library("patchwork")
+library("kableExtra")
+library("ComplexHeatmap")
+library("purrr")
+library("tibble")
+library("scater")
+```
+
+We will now make a QFeatures object starting from the protein level summaries from DIA-NN.
+Normally we would start from the protein groups file that is provided by DIA-NN, i.e. the pg_matrix.tsv. 
+
+
+```{r}
+proteinGroupFile <- "data/spikein248-staesetal2024.pg_matrix.tsv"
+proteins <- data.table::fread(proteinGroupFile)
+```
+
+We add species information. Possible for this specific dataset, which is a benchmark dataset with lysate from human UPS proteins and Yeast proteins. 
+
+```{r}
+proteins <- proteins |> 
+  mutate(species = grepl(pattern = "UPS",Protein.Group) |> 
+           as.factor() |>
+           recode("TRUE"="ups","FALSE" = "yeast"))
+proteins |> 
+  pull(species) |>
+  table()
+```
+
+
+The protein group table is a file in wide format. 
+The columns with the raw file names contain the maxLFQ protein group intensities for the different samples.
+
+```{r}
+quantCols <- grep(".raw",names(proteins))
+names(proteins)[quantCols]
+```
+
+We will rename these columns so that they have shorter file names. 
+
+```{r}
+names(proteins)[quantCols] <- names(proteins)[quantCols] |> 
+    gsub(pattern = ".raw",replacement = "") |>
+    gsub(pattern = "_DIA",replacement = "") |>
+    strsplit(split="UPS2_") |>
+    sapply("[",2)
+names(proteins)
+```
+We now make the annotation file. 
+
+```{r}
+quantCols <- names(proteins)[quantCols]
+
+(annot_pg <- data.frame(quantCols = quantCols,
+                      condition = gsub("ratio", "", quantCols) |>
+                          strsplit(split="_") |>
+                          sapply("[",1) |>
+                          as.double() |>
+                          as.factor(),
+                      rep = gsub("ratio", "", quantCols) |>
+                          strsplit(split="_") |>
+                          sapply("[",2) |>
+                          replace_na(replace = "1") |> #4.c
+                          as.factor()
+                      )
+)
+```
+
+```{r}
+(qf_pg <- readQFeatures(
+  proteins, annot_pg, name = "proteins_raw", fnames = "Protein.Group"
+  )
+)
+```
+
+
+## log-transformation 
+
+We first convert zero's to NA and then we perform the log transformation. 
+
+```{r}
+qf_pg <- zeroIsNA(qf_pg, i = names(qf_pg))
+(
+  qf_pg <- logTransform(qf_pg,  base = 2 , i="proteins_raw" , name = "proteins")
+)
+```
+
+We plot the marginal intensity distributions to inspect if further normalisation is required. 
+
+```{r}
+qf_pg[, , "proteins"] |> #1.
+  longForm(colvars = c( "rep", "condition")) |>  #2. 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + #3.
+  aes(x = value,
+      colour = condition,
+      group = colname) +
+  geom_density() +
+  theme_minimal() 
+```
+
+```{r}
+qf_pg[, , "proteins"] |> #1.
+  longForm(colvars = c( "rep", "condition"), rowvars = "species") |>  #2. 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + #3.
+  aes(x = value,
+      colour = condition,
+      group = colname) +
+  geom_density() +
+  theme_minimal() + 
+  facet_wrap(~species)
+```
+
+```{r}
+qf_pg |> 
+  getWithColData("proteins") |> 
+  as("SingleCellExperiment") |> 
+  scater::runMDS(exprs_values = 1) |> 
+  scater::plotMDS(colour_by = "condition", shape_by = "rep") 
+```
+
+
+# Data Modeling  and Inference 
+
+Setup model and contrasts of interest. 
+
+```{r}
+model <- ~ condition
+
+vd <- ExploreModelMatrix::VisualizeDesign(
+    sampleData =  colData(qf_pg),
+    designFormula = model,
+    textSizeFitted = 4
+)
+vd$plotlist
+
+(allHypotheses <- createPairwiseContrasts(
+  model, colData(qf_pg), "condition"
+  )
+)
+
+(L <- makeContrast(
+  allHypotheses,
+  parameterNames = colnames(vd$designmatrix)
+))
+```
+
+Fit models and do inference. 
+
+```{r warning=FALSE}
+  qf_pg <- msqrob(
+    qf_pg,  
+    i = "proteins",
+    formula = model,
+    robust = TRUE) |> 
+  hypothesisTest(i = "proteins", contrast = L)
+```
+
+We extract all results tables
+
+```{r}
+inferences_pg <- 
+  msqrobCollect(qf_pg[["proteins"]], L) |>
+    mutate(species =  rep(rowData(qf_pg[["proteins"]])$species, ncol(L)))
+```
+
+
+
+
+# Assess performance
+
+Note, that the evaluations in this section are typically not possible on real experimental data. 
+Indeed, we are using a spike-in dataset so we know the ground truth: all human UPS proteins are differentially abundant (DA) between the conditions and the yeast proteins are non-DA.
+
+We use a nominal FDR level of 0.05
+
+```{r}
+alpha <- 0.05
+```
+
+## Real Fold changes 
+
+As this is a spike-in study with known ground truth, we can also plot the log2 fold change distributions against the expected values, in this case 0 for the yeast proteins and the difference of the log concentration for the spiked-in UPS standards. We first create a small table with the real values.
+
+As this is a spike-in study with known ground truth, we can also plot the log2 fold change distributions against the expected values, in this case 0 for the yeast proteins and the difference of the log concentration for the spiked-in UPS standards. We first create a small table with the real values.
+
+1. We extract the levels from factor condition
+2. We convert then into a number as they refer to the real ratio
+3. We log2-transform them 
+4. We calculate all pairwise differences between log2 transformed ratio's to obtain the log2 fold changes
+
+We use a similar operation to construct the name of the corresponding contrast.
+
+```{r}
+(realLogFC <- data.frame(
+    logFC = colData(qf_pg)$condition |> 
+        levels() |> # 1. 
+        as.double() |> # 2. 
+        log2() |> # 3. 
+        combn(m=2, FUN = diff), #4.
+    contrast = colData(qf_pg)$condition |> 
+        levels() |> 
+        combn(m=2, FUN= function(x) paste0(x[2]," - ",x[1])) |>
+        recode("4 - 2" = "condition4", 
+               "8 - 2" = "condition8",
+               "8 - 4" = "condition8 - condition4")
+    )
+)
+```
+
+We now evaluate of the estimated fold changes correspond to the real fold changes.
+
+1. We plot the log fold changes in function of the spikein condition and color according to spikein condition.
+2. We add a boxplot layer.
+3. We use custom colors. 
+4. We add a vertical line at 0, which corresponds to the known log2 fold change for yeast proteins
+5. We add a vertical lines for known log2 fold changes of the spiked UPS proteins. 
+
+```{r}
+logFC <- inferences_pg |> 
+  filter(!is.na(logFC)) |>
+  ggplot(aes(x = species, y = logFC, color= species)) + #1.
+  geom_boxplot() + #2.
+  theme_bw() + 
+  scale_color_manual( 
+    values = c("grey20", "firebrick"), #3. 
+    name = "",
+    labels = c("yeast", "ups")
+    ) + 
+  geom_hline(yintercept = 0, color="grey20") + # 4. 
+  facet_wrap(~contrast) +
+  geom_hline(aes(yintercept = logFC), color="firebrick", data=realLogFC) #5. 
+logFC
+```
+
+## True and false positives
+
+All human UPS proteins are differentially abundant (DA) between the conditions and the yeast proteins are non-DA.
+We make a new variable spikein in the inference_list. 
+
+```{r}
+tpFpTable <- group_by(inferences_pg, contrast) |>
+    filter(adjPval < alpha) |>
+    summarise("TP" = sum(species == "ups"),
+              "FP" = sum(species != "ups"),
+              "FDP" = mean(species != "ups")) 
+tpFpTable
+```
+
+
+## TPR - FDP curves
+
+We generate the TPR-FDP curves to assess the performance of the different workflows to prioritise differentially abundant proteins. Again, these curves are built using the ground truth information about which proteins are differentially abundant (spiked in) and which proteins are constant across samples. We create two functions to compute the TPR and the FDP.
+
+```{r}
+computeFDP <- function(pval, tp) {
+    ord <- order(pval)
+    fdp <- cumsum(!tp[ord]) / 1:length(tp)
+    fdp[order(ord)]
+}
+computeTPR <- function(pval, tp, nTP = NULL) {
+    if (is.null(nTP)) nTP <- sum(tp)
+    ord <- order(pval)
+    tpr <- cumsum(tp[ord]) / nTP
+    tpr[order(ord)]
+}
+```
+
+We apply these functions and compute the corresponding metric using the statistical inference results and the ground truth information.
+
+```{r}
+performance <- inferences_pg |> group_by(contrast) |> 
+    na.exclude() |>
+    mutate(tpr = computeTPR(pval, species == "ups"),
+           fdp = computeFDP(pval, species == "ups")) |>
+    arrange(fdp)
+```
+
+We also highlight the observed FDP at a $alpha = 5\%$ FDR threshold.
+
+```{r}
+workPoints <- performance |> 
+  group_by(contrast) |>
+    filter(adjPval < 0.05) |>
+    slice_max(pval)
+```
+
+```{r}
+ggplot(performance) +
+    aes(
+        y = fdp,
+        x = tpr,
+    ) +
+    geom_line() +
+    geom_point(data = workPoints, size = 3) +
+    geom_hline(yintercept = 0.05, linetype = 2) +
+    facet_wrap( ~ contrast) +
+    coord_flip(ylim = c(0, 0.2)) +
+    theme_minimal()
+```
+ 
+
+
+## volcano-plots
+
+We make a separate plot per contrast and compare the volcano plots for all normalisation x summarisation combinations.
+
+```{r}
+  inferences_pg |> 
+  plot_volcano() + 
+  facet_wrap(~contrast) +
+  aes(color = species, shape = adjPval < alpha) + 
+    scale_color_manual(
+      values = c("grey20", "firebrick"), 
+      name = "species",
+      labels = c("yeast", "ups")
+      ) +
+  labs(shape="FDR < 0.05") +
+  geom_vline(aes(xintercept = logFC), data = realLogFC , col ="firebrick") +
+  geom_hline(aes(yintercept = -log10(adjAlpha)), data = inferences_pg |> 
+               group_by(contrast) |> 
+               summarize(adjAlpha = alpha *mean(adjPval < alpha, na.rm=TRUE), .groups="drop"))
+```
+
