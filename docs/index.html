@@ -188,17 +188,14 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#preamble" id="toc-preamble" class="nav-link active" data-scroll-target="#preamble">Preamble</a>
-  <ul class="collapse">
+  <li><a href="#proteomics-data-analysis-for-data-independent-acquisition-pda-dia" id="toc-proteomics-data-analysis-for-data-independent-acquisition-pda-dia" class="nav-link active" data-scroll-target="#proteomics-data-analysis-for-data-independent-acquisition-pda-dia">Proteomics Data Analysis for Data-independent acquisition (PDA-DIA)</a></li>
   <li><a href="#why-msqrob2" id="toc-why-msqrob2" class="nav-link" data-scroll-target="#why-msqrob2">Why msqrob2?</a></li>
-  <li><a href="#outline" id="toc-outline" class="nav-link" data-scroll-target="#outline">Outline</a>
+  <li><a href="#outline" id="toc-outline" class="nav-link" data-scroll-target="#outline">Outline</a></li>
+  <li><a href="#data-processing" id="toc-data-processing" class="nav-link" data-scroll-target="#data-processing"><span class="header-section-number">1</span> Data Processing</a></li>
+  <li><a href="#statistical-inference-design-concepts" id="toc-statistical-inference-design-concepts" class="nav-link" data-scroll-target="#statistical-inference-design-concepts"><span class="header-section-number">2</span> Statistical Inference &amp; Design concepts</a></li>
+  <li><a href="#targeted-audience-and-assumed-background" id="toc-targeted-audience-and-assumed-background" class="nav-link" data-scroll-target="#targeted-audience-and-assumed-background"><span class="header-section-number">3</span> Targeted audience and assumed background</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup"><span class="header-section-number">4</span> Setup</a>
   <ul class="collapse">
-  <li><a href="#preample" id="toc-preample" class="nav-link" data-scroll-target="#preample">Preample</a></li>
-  <li><a href="#data-processing" id="toc-data-processing" class="nav-link" data-scroll-target="#data-processing">Data Processing</a></li>
-  <li><a href="#statistical-inference-design-concepts" id="toc-statistical-inference-design-concepts" class="nav-link" data-scroll-target="#statistical-inference-design-concepts">Statistical Inference &amp; Design concepts</a></li>
-  </ul></li>
-  <li><a href="#targeted-audience-and-assumed-background" id="toc-targeted-audience-and-assumed-background" class="nav-link" data-scroll-target="#targeted-audience-and-assumed-background">Targeted audience and assumed background</a></li>
-  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
   <li><a href="#license" id="toc-license" class="nav-link" data-scroll-target="#license">License</a></li>
   </ul></li>
   </ul>
@@ -214,8 +211,8 @@ div.csl-indent {
 
 
 
-<section id="preamble" class="level1">
-<h1>Preamble</h1>
+<section id="proteomics-data-analysis-for-data-independent-acquisition-pda-dia" class="level1 unnumbered">
+<h1 class="unnumbered">Proteomics Data Analysis for Data-independent acquisition (PDA-DIA)</h1>
 <p>This course provides comprehensive hands-on tutorials on how to apply the <code>msqrob2</code> software for the statistical analysis of mass spectrometry (MS)-based proteomics data. It has a particular focus on data dependent acquisition.<br>
 The course first introduces general concepts of statistical proteomics data analysis and <code>msqrob2</code>. Further chapters will demonstrate the application of <code>msqrob2</code> for assessing different biological questions starting from datasets with different experimental designs, acquisition strategies, instruments, and search engines. The book aims to help proteomics researchers and data analysists tailoring their statistical analysis workflow to their specific datasets and research questions.</p>
 <div class="cell">
@@ -228,8 +225,9 @@ The course first introduces general concepts of statistical proteomics data anal
 </div>
 </div>
 </div>
-<section id="why-msqrob2" class="level2">
-<h2 class="anchored" data-anchor-id="why-msqrob2">Why msqrob2?</h2>
+</section>
+<section id="why-msqrob2" class="level1 unnumbered">
+<h1 class="unnumbered">Why msqrob2?</h1>
 <p>MS-based proteomics experiments often imposes a complex correlation structure among observations. Addressing this correlation is key for correct statistical inference and reliable biomarker discovery. This <code>msqrob2</code> book provides a set of (mixed) model-based workflows dedicated to differential abundance analysis for label-free as well as labeled MS-based proteomics data. The key features of <code>msqrob2</code> workflows are:</p>
 <ol type="1">
 <li>Modularity: all core functions rely on the <code>QFeatures</code> class, a standardised data structure, meaning that output of a function can be fed as input to any other function. Hence, different functions are assembled as modular blocks into a complete data analysis workflows that can be easily adapted to the peculiarities of any MS-based proteomics data set. Therefore, the approach extends well beyond the use case presented in this chapter</li>
@@ -237,39 +235,33 @@ The course first introduces general concepts of statistical proteomics data anal
 <li>Performance: thanks to the inclusion of robust ridge regression, we demonstrated improved performance of <code>msqrob2</code> workflows upon the competing software <span class="citation" data-cites="Goeminne2016-tr Sticker2020-rl Vandenbulcke2025-sj">(<a href="#ref-Goeminne2016-tr" role="doc-biblioref">Goeminne, Gevaert, and Clement 2016</a>; <a href="#ref-Sticker2020-rl" role="doc-biblioref">Sticker et al. 2020</a>; <a href="#ref-Vandenbulcke2025-sj" role="doc-biblioref">Vandenbulcke et al. 2025</a>)</span>.</li>
 </ol>
 </section>
-<section id="outline" class="level2">
-<h2 class="anchored" data-anchor-id="outline">Outline</h2>
-<p>The course is divided in three parts.</p>
-<section id="preample" class="level3">
-<h3 class="anchored" data-anchor-id="preample">Preample</h3>
-<ul>
-<li>Useful functions that will be included in the next msqrob2 release</li>
-</ul>
+<section id="outline" class="level1 unnumbered">
+<h1 class="unnumbered">Outline</h1>
+<p>The course is divided in two parts.</p>
 </section>
-<section id="data-processing" class="level3">
-<h3 class="anchored" data-anchor-id="data-processing">Data Processing</h3>
+<section id="data-processing" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Data Processing</h1>
 <p>This parts introduces the user to the key concepts for data processing in differential proteomics data analysis and provides extensive description of the code. While this part is conceptual, the concepts are illustrated using a real spike-in study.</p>
 <ul>
 <li><a href="01-dataprocessing.html">Basic concepts</a></li>
 <li><a href="02-workflow-optimisation.html">Workflow optimisation</a></li>
 </ul>
 </section>
-<section id="statistical-inference-design-concepts" class="level3">
-<h3 class="anchored" data-anchor-id="statistical-inference-design-concepts">Statistical Inference &amp; Design concepts</h3>
+<section id="statistical-inference-design-concepts" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Statistical Inference &amp; Design concepts</h1>
 <ul>
 <li><a href="03-inference.html">Basics of Statistical Inference</a></li>
 <li><a href="03-blocking-wrapup.html">Wrapup Blocking</a></li>
 </ul>
 </section>
-</section>
-<section id="targeted-audience-and-assumed-background" class="level2">
-<h2 class="anchored" data-anchor-id="targeted-audience-and-assumed-background">Targeted audience and assumed background</h2>
+<section id="targeted-audience-and-assumed-background" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Targeted audience and assumed background</h1>
 <p>The course material is targeted to either proteomics practitioners or data analysts/bioinformaticians that would like to learn how to analyse proteomics data.</p>
 <p>A working knowledge of R (R syntax, commonly used functions, basic data structures such as data frames, vectors, matrices, … and their manipulation) is required. Familiarity with MS or proteomics in general is recommended, this would allow for a better understanding of the modelling assumptions taken throughout this book. Familiarity with other Bioconductor omics data classes and the tidyverse syntax is useful.</p>
 <p>We <strong>highly recommend</strong> reading the <a href="https://rformassspectrometry.github.io/book/sec-quant.html">quantitative proteomics chapter</a> of the R for mass spectrometry book.</p>
 </section>
-<section id="setup" class="level2">
-<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<section id="setup" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Setup</h1>
 <p>To install all the necessary package, please use the latest release of R and execute:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">"BiocManager"</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>))</span>
@@ -296,10 +288,14 @@ The course first introduces general concepts of statistical proteomics data anal
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>   <span class="st">"data.table"</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>All software versions used to generate this document are recorded at the end of the book in <strong>?@sec-end</strong>.</p>
-</section>
-<section id="license" class="level2">
-<h2 class="anchored" data-anchor-id="license">License</h2>
+<ul>
+<li>Useful functions that will be included in the next msqrob2 release. Source the following script in R</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"https://raw.githubusercontent.com/statOmics/PDA-DIA/master/R/utils.R"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="license" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="license">License</h2>
 <p><a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/88x31.png"></a><br>This material is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>. You are free to <strong>share</strong> (copy and redistribute the material in any medium or format) and <strong>adapt</strong> (remix, transform, and build upon the material) for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license as the original.</p>
 
 

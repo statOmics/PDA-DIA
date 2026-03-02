@@ -744,9 +744,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Preamble",
+    "title": "Proteomics Data Analysis for Data-independent acquisition (PDA-DIA)",
     "section": "",
-    "text": "This course provides comprehensive hands-on tutorials on how to apply the msqrob2 software for the statistical analysis of mass spectrometry (MS)-based proteomics data. It has a particular focus on data dependent acquisition.\nThe course first introduces general concepts of statistical proteomics data analysis and msqrob2. Further chapters will demonstrate the application of msqrob2 for assessing different biological questions starting from datasets with different experimental designs, acquisition strategies, instruments, and search engines. The book aims to help proteomics researchers and data analysists tailoring their statistical analysis workflow to their specific datasets and research questions.\n\n\n\n\n\nThe sticker is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.\n\n\n\n\n\n\nMS-based proteomics experiments often imposes a complex correlation structure among observations. Addressing this correlation is key for correct statistical inference and reliable biomarker discovery. This msqrob2 book provides a set of (mixed) model-based workflows dedicated to differential abundance analysis for label-free as well as labeled MS-based proteomics data. The key features of msqrob2 workflows are:\n\nModularity: all core functions rely on the QFeatures class, a standardised data structure, meaning that output of a function can be fed as input to any other function. Hence, different functions are assembled as modular blocks into a complete data analysis workflows that can be easily adapted to the peculiarities of any MS-based proteomics data set. Therefore, the approach extends well beyond the use case presented in this chapter\nFlexibility: the msqrob2 modelling approach relies on the lme4::lmer() model specification syntax, meaning that any linear model can be specified. For fixed effects, this includes modelling categorical and numerical variables, as well as their interaction. Moreover, msqrob2 can model both sample-specific and feature-specific (e.g. peptide or protein) covariates, which unlocks the inference to experiments with arbitrarily complex designs as well as to correct explicitly for feature-specific properties.\nPerformance: thanks to the inclusion of robust ridge regression, we demonstrated improved performance of msqrob2 workflows upon the competing software (Goeminne, Gevaert, and Clement 2016; Sticker et al. 2020; Vandenbulcke et al. 2025).\n\n\n\n\nThe course is divided in three parts.\n\n\n\nUseful functions that will be included in the next msqrob2 release\n\n\n\n\nThis parts introduces the user to the key concepts for data processing in differential proteomics data analysis and provides extensive description of the code. While this part is conceptual, the concepts are illustrated using a real spike-in study.\n\nBasic concepts\nWorkflow optimisation\n\n\n\n\n\nBasics of Statistical Inference\nWrapup Blocking\n\n\n\n\n\nThe course material is targeted to either proteomics practitioners or data analysts/bioinformaticians that would like to learn how to analyse proteomics data.\nA working knowledge of R (R syntax, commonly used functions, basic data structures such as data frames, vectors, matrices, … and their manipulation) is required. Familiarity with MS or proteomics in general is recommended, this would allow for a better understanding of the modelling assumptions taken throughout this book. Familiarity with other Bioconductor omics data classes and the tidyverse syntax is useful.\nWe highly recommend reading the quantitative proteomics chapter of the R for mass spectrometry book.\n\n\n\nTo install all the necessary package, please use the latest release of R and execute:\n\nif (!requireNamespace(\"BiocManager\", quietly = TRUE))\n    install.packages(\"BiocManager\")\nBiocManager::install(c(\n   \"BiocParallel\",\n   \"BiocFileCache\",\n   \"ComplexHeatmap\",\n   \"dplyr\",\n   \"ExploreModelMatrix\",\n   \"ggpattern\",\n   \"ggplot2\",\n   \"ggrepel\",\n   \"impute\",\n   \"MsDataHub\",\n   \"patchwork\",\n   \"scater\",\n   \"tidyr\",\n   \"bookdown\", \n   \"iq\",\n   \"QFeatures\",\n   \"msqrob2\",\n   \"kableExtra\",\n   \"data.table\"\n))\n\nAll software versions used to generate this document are recorded at the end of the book in ?@sec-end.\n\n\n\nThis material is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License. You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material) for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license as the original."
+    "text": "This course provides comprehensive hands-on tutorials on how to apply the msqrob2 software for the statistical analysis of mass spectrometry (MS)-based proteomics data. It has a particular focus on data dependent acquisition.\nThe course first introduces general concepts of statistical proteomics data analysis and msqrob2. Further chapters will demonstrate the application of msqrob2 for assessing different biological questions starting from datasets with different experimental designs, acquisition strategies, instruments, and search engines. The book aims to help proteomics researchers and data analysists tailoring their statistical analysis workflow to their specific datasets and research questions.\n\n\n\n\n\nThe sticker is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License."
   },
   {
     "objectID": "index.html#why-msqrob2",
@@ -766,22 +766,22 @@
     "objectID": "index.html#targeted-audience-and-assumed-background",
     "href": "index.html#targeted-audience-and-assumed-background",
     "title": "Preamble",
-    "section": "",
-    "text": "The course material is targeted to either proteomics practitioners or data analysts/bioinformaticians that would like to learn how to analyse proteomics data.\nA working knowledge of R (R syntax, commonly used functions, basic data structures such as data frames, vectors, matrices, … and their manipulation) is required. Familiarity with MS or proteomics in general is recommended, this would allow for a better understanding of the modelling assumptions taken throughout this book. Familiarity with other Bioconductor omics data classes and the tidyverse syntax is useful.\nWe highly recommend reading the quantitative proteomics chapter of the R for mass spectrometry book."
+    "section": "1.3 Targeted audience and assumed background",
+    "text": "1.3 Targeted audience and assumed background\nThe course material is targeted to either proteomics practitioners or data analysts/bioinformaticians that would like to learn how to analyse proteomics data.\nA working knowledge of R (R syntax, commonly used functions, basic data structures such as data frames, vectors, matrices, … and their manipulation) is required. Familiarity with MS or proteomics in general is recommended, this would allow for a better understanding of the modelling assumptions taken throughout this book. Familiarity with other Bioconductor omics data classes and the tidyverse syntax is useful.\nWe highly recommend reading the quantitative proteomics chapter of the R for mass spectrometry book."
   },
   {
     "objectID": "index.html#setup",
     "href": "index.html#setup",
     "title": "Preamble",
-    "section": "",
-    "text": "To install all the necessary package, please use the latest release of R and execute:\n\nif (!requireNamespace(\"BiocManager\", quietly = TRUE))\n    install.packages(\"BiocManager\")\nBiocManager::install(c(\n   \"BiocParallel\",\n   \"BiocFileCache\",\n   \"ComplexHeatmap\",\n   \"dplyr\",\n   \"ExploreModelMatrix\",\n   \"ggpattern\",\n   \"ggplot2\",\n   \"ggrepel\",\n   \"impute\",\n   \"MsDataHub\",\n   \"patchwork\",\n   \"scater\",\n   \"tidyr\",\n   \"bookdown\", \n   \"iq\",\n   \"QFeatures\",\n   \"msqrob2\",\n   \"kableExtra\",\n   \"data.table\"\n))\n\nAll software versions used to generate this document are recorded at the end of the book in ?@sec-end."
+    "section": "1.4 Setup",
+    "text": "1.4 Setup\nTo install all the necessary package, please use the latest release of R and execute:\n\nif (!requireNamespace(\"BiocManager\", quietly = TRUE))\n    install.packages(\"BiocManager\")\nBiocManager::install(c(\n   \"BiocParallel\",\n   \"BiocFileCache\",\n   \"ComplexHeatmap\",\n   \"dplyr\",\n   \"ExploreModelMatrix\",\n   \"ggpattern\",\n   \"ggplot2\",\n   \"ggrepel\",\n   \"impute\",\n   \"MsDataHub\",\n   \"patchwork\",\n   \"scater\",\n   \"tidyr\",\n   \"bookdown\", \n   \"iq\",\n   \"QFeatures\",\n   \"msqrob2\",\n   \"kableExtra\",\n   \"data.table\"\n))\n\n\nUseful functions that will be included in the next msqrob2 release"
   },
   {
     "objectID": "index.html#license",
     "href": "index.html#license",
-    "title": "Preamble",
-    "section": "",
-    "text": "This material is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License. You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material) for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license as the original."
+    "title": "Proteomics Data Analysis for Data-independent acquisition (PDA-DIA)",
+    "section": "License",
+    "text": "License\nThis material is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License. You are free to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material) for any purpose, even commercially, as long as you give appropriate credit and distribute your contributions under the same license as the original."
   },
   {
     "objectID": "03-blocking-wrapup.html",
@@ -880,5 +880,19 @@
     "title": "Wrapup Blocking",
     "section": "3.4 Inference",
     "text": "3.4 Inference\n\nlibrary(ExploreModelMatrix)\nVisualizeDesign(colData(qf),~ celltype + mouse)$plotlist\n\n[[1]]\n\n\n\n\n\n\n\n\nVisualizeDesign(colData(qf2),~ celltype)$plotlist\n\n[[1]]\n\n\n\n\n\n\n\n\n\n\nL &lt;- makeContrast(\"celltypeTreg = 0\", parameterNames = c(\"celltypeTreg\"))\nqf &lt;- hypothesisTest(object = qf, i = \"proteins\", contrast = L)\nqf &lt;- hypothesisTest(object = qf, i = \"proteins\", contrast = L, modelColumn = \"wrongModel\", resultsColumnNamePrefix=\"wrong\")\nqf2 &lt;- hypothesisTest(object = qf2, i = \"proteins\", contrast = L)"
+  },
+  {
+    "objectID": "index.html#data-processing",
+    "href": "index.html#data-processing",
+    "title": "Preamble",
+    "section": "1.1 Data Processing",
+    "text": "1.1 Data Processing\nThis parts introduces the user to the key concepts for data processing in differential proteomics data analysis and provides extensive description of the code. While this part is conceptual, the concepts are illustrated using a real spike-in study.\n\nBasic concepts\nWorkflow optimisation"
+  },
+  {
+    "objectID": "index.html#statistical-inference-design-concepts",
+    "href": "index.html#statistical-inference-design-concepts",
+    "title": "Preamble",
+    "section": "1.2 Statistical Inference & Design concepts",
+    "text": "1.2 Statistical Inference & Design concepts\n\nBasics of Statistical Inference\nWrapup Blocking"
   }
 ]

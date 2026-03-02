@@ -1,8 +1,6 @@
----
-number-sections: false
----
 
-# Preamble
+
+# Proteomics Data Analysis for Data-independent acquisition (PDA-DIA) {-}
 
 This course provides comprehensive hands-on tutorials on how to apply the
 `msqrob2` software for the statistical analysis of mass spectrometry
@@ -18,7 +16,7 @@ engines. The book aims to help proteomics researchers and data analysists tailor
 knitr::include_graphics("figs/msqrob2.png")
 ```
 
-## Why msqrob2?
+# Why msqrob2? {-}
 
 MS-based proteomics experiments often imposes a complex correlation
 structure among observations. Addressing this correlation is key for
@@ -48,27 +46,23 @@ workflows are:
    demonstrated improved performance of `msqrob2` workflows upon the
    competing software [@Goeminne2016-tr;@Sticker2020-rl;@Vandenbulcke2025-sj].
 
-## Outline
+# Outline {-}
 
-The course is divided in three parts.
+The course is divided in two parts.
 
-### Preample 
-
-- Useful functions that will be included in the next msqrob2 release 
-
-### Data Processing
+# Data Processing
 
 This parts introduces the user to the key concepts for data processing in differential proteomics data analysis and provides extensive description of the code. While this part is conceptual, the concepts are illustrated using a real spike-in study.
 
 -  [Basic concepts](01-dataprocessing.html)
 -  [Workflow optimisation](02-workflow-optimisation.html) 
 
-### Statistical Inference & Design concepts
+# Statistical Inference & Design concepts
 
 - [Basics of Statistical Inference](03-inference.html)
 - [Wrapup Blocking](03-blocking-wrapup.html)
 
-## Targeted audience and assumed background
+# Targeted audience and assumed background
 
 The course material is targeted to either proteomics practitioners or
 data analysts/bioinformaticians that would like to learn how to
@@ -86,7 +80,7 @@ We **highly recommend** reading the [quantitative proteomics
 chapter](https://rformassspectrometry.github.io/book/sec-quant.html)
 of the R for mass spectrometry book.
 
-## Setup
+# Setup
 
 To install all the necessary package, please use the latest release of
 R and execute:
@@ -117,10 +111,14 @@ BiocManager::install(c(
 ))
 ```
 
-All software versions used to generate this document are recorded at
-the end of the book in @sec-end.
+- Useful functions that will be included in the next msqrob2 release. Source the following script in R
 
-## License
+```{r, eval = FALSE}
+source("https://raw.githubusercontent.com/statOmics/PDA-DIA/master/R/utils.R")
+```
+
+
+## License {-}
 
 <a rel="license"
 href="http://creativecommons.org/licenses/by-sa/4.0/"><img
