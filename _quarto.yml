@@ -19,6 +19,11 @@ website:
           href: 03-inference.html
         - text: 3.2. Wrapup Blocking
           href: 03-blocking-wrapup.html
+      - text: "Tutorials"
+        icon: fa-chalkboard-teacher
+        menu:
+        - text: 1. Tutorial Data Processing
+          href: 01-tutorial-data-processing.html
 
           
 bibliography: references.bib

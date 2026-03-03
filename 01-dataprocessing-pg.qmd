@@ -4,7 +4,6 @@
 source("R/knitr_setup.R")
 ```
 
-
 ```{r load_libraries}
 library("QFeatures")  
 library("dplyr") 
