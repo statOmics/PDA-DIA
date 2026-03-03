@@ -4,7 +4,7 @@
 
 The result of a quantitative analysis is a list of precursor, peptide and/or protein abundances for every protein in different samples. In this tutorial we introduce a generic workflow for differential analysis of quantitative datasets with simple experimental designs.
 
-In order to extract relevant information from these high troughput datasets, we will use our [msqrob2](https://www.bioconductor.org/packages/release/bioc/html/msqrob2.html) software tool [@goeminne2016], [@goeminne2020] and [@sticker2020]. 
+In order to extract relevant information from these high troughput datasets, we will use our [msqrob2](https://www.bioconductor.org/packages/release/bioc/html/msqrob2.html) software tool.
 
 # Staes spike-in study (DIA-NN output)
 
@@ -56,6 +56,12 @@ Modify [Rmarkdown script](./staes-median-maxLFQ.html).
 Keep the same processing steps. 
 Below you can see the mappings of the DIA-NN variables to their spectronaut counterparts.
 
+Link to spectronaut file: 
+
+```{r eval=FALSE}
+precursorFile <- "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein248-staesetal2024-spectronaut.parquet"
+```
+
 ```{r eval = FALSE}
 precursors <- precursors |> 
   select(
@@ -83,4 +89,4 @@ precursors <- precursors |>
 ```
 
 
-### References
+# References

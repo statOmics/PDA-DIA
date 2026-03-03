@@ -204,10 +204,8 @@ div.csl-indent {
   <li><a href="#tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs" id="toc-tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs" class="nav-link active" data-scroll-target="#tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs">Tutorial on data processing and msqrob2 analysis of experiments with simple designs</a></li>
   <li><a href="#staes-spike-in-study-dia-nn-output" id="toc-staes-spike-in-study-dia-nn-output" class="nav-link" data-scroll-target="#staes-spike-in-study-dia-nn-output"><span class="header-section-number">1</span> Staes spike-in study (DIA-NN output)</a></li>
   <li><a href="#breast-cancer-example" id="toc-breast-cancer-example" class="nav-link" data-scroll-target="#breast-cancer-example"><span class="header-section-number">2</span> Breast cancer example</a></li>
-  <li><a href="#staes-spike-in-study---spectronaut-output" id="toc-staes-spike-in-study---spectronaut-output" class="nav-link" data-scroll-target="#staes-spike-in-study---spectronaut-output"><span class="header-section-number">3</span> Staes spike-in study - Spectronaut output</a>
-  <ul class="collapse">
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">3.0.1</span> References</a></li>
-  </ul></li>
+  <li><a href="#staes-spike-in-study---spectronaut-output" id="toc-staes-spike-in-study---spectronaut-output" class="nav-link" data-scroll-target="#staes-spike-in-study---spectronaut-output"><span class="header-section-number">3</span> Staes spike-in study - Spectronaut output</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
   </ul>
 </nav>
 </nav>
@@ -224,7 +222,7 @@ div.csl-indent {
 <section id="tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs" class="level1 unnumbered">
 <h1 class="unnumbered">Tutorial on data processing and msqrob2 analysis of experiments with simple designs</h1>
 <p>The result of a quantitative analysis is a list of precursor, peptide and/or protein abundances for every protein in different samples. In this tutorial we introduce a generic workflow for differential analysis of quantitative datasets with simple experimental designs.</p>
-<p>In order to extract relevant information from these high troughput datasets, we will use our <a href="https://www.bioconductor.org/packages/release/bioc/html/msqrob2.html">msqrob2</a> software tool <span class="citation" data-cites="goeminne2016">(<a href="#ref-goeminne2016" role="doc-biblioref"><strong>goeminne2016?</strong></a>)</span>, <span class="citation" data-cites="goeminne2020">(<a href="#ref-goeminne2020" role="doc-biblioref"><strong>goeminne2020?</strong></a>)</span> and <span class="citation" data-cites="sticker2020">(<a href="#ref-sticker2020" role="doc-biblioref"><strong>sticker2020?</strong></a>)</span>.</p>
+<p>In order to extract relevant information from these high troughput datasets, we will use our <a href="https://www.bioconductor.org/packages/release/bioc/html/msqrob2.html">msqrob2</a> software tool.</p>
 </section>
 <section id="staes-spike-in-study-dia-nn-output" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Staes spike-in study (DIA-NN output)</h1>
@@ -258,40 +256,44 @@ div.csl-indent {
 <section id="staes-spike-in-study---spectronaut-output" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Staes spike-in study - Spectronaut output</h1>
 <p>Redo the data analysis for the spectronaut output file. Modify <a href="./staes-median-maxLFQ.html">Rmarkdown script</a>. Keep the same processing steps. Below you can see the mappings of the DIA-NN variables to their spectronaut counterparts.</p>
+<p>Link to spectronaut file:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> precursors <span class="sc">|&gt;</span> </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>         R.FileName, <span class="co">#Run, </span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>         EG.PrecursorId, <span class="co">#Precursor.Id, </span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>         EG.ModifiedSequence, <span class="co">#Modified.Sequence, </span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>         PEP.StrippedSequence, <span class="co">#Stripped.Sequence, </span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>         FG.Charge, <span class="co">#Precursor.Charge, </span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>         PG.ProteinGroups, <span class="co">#Protein.Group, </span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>         PG.ProteinNames, <span class="co">#Protein.Names,</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>         PG.ProteinAccessions, <span class="co">#Protein.Ids,</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>         PG.Genes, <span class="co">#Genes,</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>         FG.MS2RawQuantity, <span class="co">#Precursor.Quantity,</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>         FG.MS2Quantity, <span class="co">#No DIA-NN counterpart </span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>         FG.Quantity, <span class="co">#Precursor.Normalised, </span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>         FG.MS1RawQuantity, <span class="co">#Ms1.Area,</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>         FG.MS1Quantity, <span class="co">#Ms1.Normalised #No real DIA-NN counterpart </span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>         EG.Qvalue, <span class="co">#Q.Value, </span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>         <span class="co">#No spectronaut counterpart #Lib.Q.Value,</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>         PG.Qvalue, <span class="co"># PG.Q.Value,</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>         <span class="co">#No spectronaut counterpart #Lib.PG.Q.Value</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>         PEP.IsProteotypic, <span class="co">#Proteotypic,</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>         EG.IsDecoy, <span class="co">#Decoy,</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>         EG.ApexRT) <span class="co">#RT)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">&lt;-</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein248-staesetal2024-spectronaut.parquet"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="references" class="level3" data-number="3.0.1">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> precursors <span class="sc">|&gt;</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>         R.FileName, <span class="co">#Run, </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>         EG.PrecursorId, <span class="co">#Precursor.Id, </span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>         EG.ModifiedSequence, <span class="co">#Modified.Sequence, </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>         PEP.StrippedSequence, <span class="co">#Stripped.Sequence, </span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>         FG.Charge, <span class="co">#Precursor.Charge, </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>         PG.ProteinGroups, <span class="co">#Protein.Group, </span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>         PG.ProteinNames, <span class="co">#Protein.Names,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>         PG.ProteinAccessions, <span class="co">#Protein.Ids,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>         PG.Genes, <span class="co">#Genes,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>         FG.MS2RawQuantity, <span class="co">#Precursor.Quantity,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>         FG.MS2Quantity, <span class="co">#No DIA-NN counterpart </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>         FG.Quantity, <span class="co">#Precursor.Normalised, </span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>         FG.MS1RawQuantity, <span class="co">#Ms1.Area,</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>         FG.MS1Quantity, <span class="co">#Ms1.Normalised #No real DIA-NN counterpart </span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>         EG.Qvalue, <span class="co">#Q.Value, </span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>         <span class="co">#No spectronaut counterpart #Lib.Q.Value,</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>         PG.Qvalue, <span class="co"># PG.Q.Value,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>         <span class="co">#No spectronaut counterpart #Lib.PG.Q.Value</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>         PEP.IsProteotypic, <span class="co">#Proteotypic,</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>         EG.IsDecoy, <span class="co">#Decoy,</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>         EG.ApexRT) <span class="co">#RT)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="references" class="level1" data-number="4">
 
 
 
 
 </section>
-</section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">3.0.1 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">4 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Staes2024" class="csl-entry" role="listitem">
 Staes, An, Teresa Mendes Maia, Sara Dufour, Robbin Bouwmeester, Ralf Gabriels, Lennart Martens, Kris Gevaert, Francis Impens, and Simon Devos. 2024. <span>“Benefit of in Silico Predicted Spectral Libraries in Data‑independent Acquisition Data Analysis Workflows.”</span> <em>Journal of Proteome Research</em> 23 (6): 2078–89. <a href="https://doi.org/10.1021/acs.jproteome.4c00048">https://doi.org/10.1021/acs.jproteome.4c00048</a>.
 </div>

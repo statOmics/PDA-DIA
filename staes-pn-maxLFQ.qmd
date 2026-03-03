@@ -385,6 +385,8 @@ precursors |>
   theme_minimal()
 ```
 
+Note, that the retention time normalisation assumes that all samples have the same complexity across retention time. This typically works well for many experiments. However, this does not apply for e.g. single cell data, where the complexity can vary drastically from cell to cell. 
+
 ## Summarisation
 
 Here, we summarise the precursor-level data into protein intensities using maxLFQ. 
