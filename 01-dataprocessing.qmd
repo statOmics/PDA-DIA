@@ -743,7 +743,7 @@ object with a new set that we called `proteins`.
 (qf <- aggregateFeatures(
   qf, i = "precursors_norm", 
   name = "proteins",
-  fcol = "Protein.Ids", 
+  fcol = "Protein.Group", 
 #  fun = MsCoreUtils::medianPolish,
 #  na.rm = TRUE
   fun = function(X) iq::maxLFQ(X)$estimate

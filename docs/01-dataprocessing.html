@@ -1754,7 +1754,7 @@ Hence, it first eliminates peptide effects. It then estimates the summaries by s
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>(qf <span class="ot">&lt;-</span> <span class="fu">aggregateFeatures</span>(</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  qf, <span class="at">i =</span> <span class="st">"precursors_norm"</span>, </span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"proteins"</span>,</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">fcol =</span> <span class="st">"Protein.Ids"</span>, </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">fcol =</span> <span class="st">"Protein.Group"</span>, </span>
 <span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="co">#  fun = MsCoreUtils::medianPolish,</span></span>
 <span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co">#  na.rm = TRUE</span></span>
 <span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">fun =</span> <span class="cf">function</span>(X) iq<span class="sc">::</span><span class="fu">maxLFQ</span>(X)<span class="sc">$</span>estimate</span>

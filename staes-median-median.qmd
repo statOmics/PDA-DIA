@@ -412,7 +412,7 @@ Note, that we also have to set na.rm = TRUE as an optional argument to handle mi
 (qf <- aggregateFeatures(
   qf, i = "precursors_norm", 
   name = "proteins",
-  fcol = "Protein.Ids", 
+  fcol = "Protein.Group", 
   fun = matrixStats::colMedians, 
   na.rm = TRUE)
  )

@@ -414,7 +414,7 @@ object with a new set that we called `proteins`.
 (qf_pn <- aggregateFeatures(
   qf_pn, i = "precursors_log", 
   name = "proteins",
-  fcol = "Protein.Ids", 
+  fcol = "Protein.Group", 
   fun = function(X) iq::maxLFQ(X)$estimate
 ))
 ```
