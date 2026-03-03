@@ -1,4 +1,4 @@
-# Introduction to proteomics data analysis with data independent acquisition: data processing {-}
+# Tutorial: Intro to DIA proteomics data processing {-}
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")
@@ -49,10 +49,10 @@ library("scater")
 
 ## Precursor table
 
-We load the output from DIA-NN parquet file.
+We load the output from DIA-NN parquet file. Can be file path to local file or url to file that lives on the web.
 
 ```{r import_data}
-precursorFile <- "data/spikein24-staesetal2024.parquet" 
+precursorFile <- "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein24-staesetal2024.parquet" 
 ```
 
 
@@ -333,8 +333,7 @@ systematic fluctuations from run-to-run that shift the measured
 intensity distribution. We can this explore as follows:
 
 1. We extract the sets containing the log transformed data. This is 
-performed using `QFeatures`' 3-way subsetting^[We will explain this
-with more details at the end of the [summarisation step](#sec-summarisation)].
+performed using `QFeatures`' 3-way subsetting.
 2. We use `longForm()` to convert the `QFeatures` object into a long
 table, including `condition` and `concentration` for filtering and
 colouring.
@@ -343,7 +342,7 @@ sample. We colour each sample based on its spike-in condition.
 
 ```{r}
 qf[, , "precursors_log"] |> #1.
-  longForm(colvars = c( "rep", "condition")) |>  #2. 
+  longForm(colvars = colnames(colData(qf))) |>  #2. 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + #3.
@@ -382,7 +381,7 @@ that the distribution of the $y_{ip}^{\text{norm}}$ nicely overlap (using the sa
 
 ```{r}
 qf[, , "precursors_norm"] |>
-  longForm(colvars = c( "rep", "condition")) |> 
+  longForm(colvars = colnames(colData(qf))) |> 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + 
@@ -431,7 +430,24 @@ Data exploration aims to highlight the main sources of variation in
 the data prior to data modelling and can pinpoint to outlying or
 off-behaving samples. 
 
-A common approach for data exploration is to
+First assess distribution of marginal protein intensities. 
+
+```{r}
+qf[, , "proteins"] |>
+    longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = condition,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 protein intensities")
+```
+
+
+Another common approach for data exploration is to
 perform dimension reduction, such as Multi Dimensional Scaling (MDS).
 We will first extract the set to explore along the sample annotations
 (used for plot colouring).
@@ -509,7 +525,7 @@ Below we define the contrast and construct the corresponding contrast matrix.
 ```{r}
 contrast <- "condition4 = 0"
 (L <- makeContrast(
-  "condition4 = 0",
+  contrast,
    parameterNames = colnames(vd$designmatrix)
 ))
 ```
@@ -544,7 +560,8 @@ We report all results that are significant at the nominal FDR level of 5%.
 alpha  <- 0.05
 inference |> 
   filter(adjPval < alpha) |> 
-  arrange(pval)
+  arrange(pval) |>
+  knitr::kable()
 ```
 
 We observe that the results only contain spiked UPS proteins. 
@@ -579,7 +596,7 @@ sig <- inference |>
 se <- getWithColData(qf, "proteins")
 quants <- t(scale(t(assay(se[sig,])))) #2. 
 
-colnames(quants) <- paste0("con", se$condition,"_rep",se$rep)
+colnames(quants) <- paste0("con", se$condition,"_rep",se$rep) #specific to this dataset to get short colnames
 annotations <- columnAnnotation(
   condition = se$condition
 ) #3.

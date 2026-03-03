@@ -230,7 +230,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction-to-proteomics-data-analysis-with-data-independent-acquisition-data-processing" id="toc-introduction-to-proteomics-data-analysis-with-data-independent-acquisition-data-processing" class="nav-link active" data-scroll-target="#introduction-to-proteomics-data-analysis-with-data-independent-acquisition-data-processing">Introduction to proteomics data analysis with data independent acquisition: data processing</a></li>
+  <li><a href="#tutorial-intro-to-dia-proteomics-data-processing" id="toc-tutorial-intro-to-dia-proteomics-data-processing" class="nav-link active" data-scroll-target="#tutorial-intro-to-dia-proteomics-data-processing">Tutorial: Intro to DIA proteomics data processing</a></li>
   <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background"><span class="header-section-number">1</span> Background</a></li>
   <li><a href="#load-packages" id="toc-load-packages" class="nav-link" data-scroll-target="#load-packages"><span class="header-section-number">2</span> Load packages</a></li>
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">3</span> Data</a>
@@ -286,8 +286,8 @@ window.Quarto = {
 
 
 
-<section id="introduction-to-proteomics-data-analysis-with-data-independent-acquisition-data-processing" class="level1 unnumbered">
-<h1 class="unnumbered">Introduction to proteomics data analysis with data independent acquisition: data processing</h1>
+<section id="tutorial-intro-to-dia-proteomics-data-processing" class="level1 unnumbered">
+<h1 class="unnumbered">Tutorial: Intro to DIA proteomics data processing</h1>
 </section>
 <section id="background" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Background</h1>
@@ -325,9 +325,9 @@ window.Quarto = {
 <h1 data-number="3"><span class="header-section-number">3</span> Data</h1>
 <section id="precursor-table" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="precursor-table"><span class="header-section-number">3.1</span> Precursor table</h2>
-<p>We load the output from DIA-NN parquet file.</p>
+<p>We load the output from DIA-NN parquet file. Can be file path to local file or url to file that lives on the web.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">&lt;-</span> <span class="st">"data/spikein24-staesetal2024.parquet"</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">&lt;-</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein24-staesetal2024.parquet"</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can import the report.parquet file using the <code>read_parquet</code> function from the <code>arrow</code> package. Note, that older versions of DIA-NN store the output as report.tsv.</p>
 <div class="cell">
@@ -1171,13 +1171,13 @@ window.Quarto = {
 <h2 data-number="4.4" class="anchored" data-anchor-id="sec-norm"><span class="header-section-number">4.4</span> Normalisation</h2>
 <p>The most common objective of MS-based proteomics experiments is to understand the biological changes in protein abundance between experimental conditions. However, changes in measurements between groups can be caused due to technical factors. For instance, there are systematic fluctuations from run-to-run that shift the measured intensity distribution. We can this explore as follows:</p>
 <ol type="1">
-<li>We extract the sets containing the log transformed data. This is performed using <code>QFeatures</code>’ 3-way subsetting<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</li>
+<li>We extract the sets containing the log transformed data. This is performed using <code>QFeatures</code>’ 3-way subsetting.</li>
 <li>We use <code>longForm()</code> to convert the <code>QFeatures</code> object into a long table, including <code>condition</code> and <code>concentration</code> for filtering and colouring.</li>
 <li>We visualise the density of the quantitative values within each sample. We colour each sample based on its spike-in condition.</li>
 </ol>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>qf[, , <span class="st">"precursors_log"</span>] <span class="sc">|&gt;</span> <span class="co">#1.</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>)) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf))) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co">#3.</span></span>
@@ -1212,7 +1212,7 @@ y_{ip}^{\text{norm}} = y_{ip} - \log_2(nf_i)
 <p>with <span class="math inline">\(y_ip\)</span> the log2-transformed intensities and <span class="math inline">\(nf_i\)</span> the log2-transformed norm factor. Upon normalisation, we can see that the distribution of the <span class="math inline">\(y_{ip}^{\text{norm}}\)</span> nicely overlap (using the same code as above)</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>qf[, , <span class="st">"precursors_norm"</span>] <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf))) <span class="sc">|&gt;</span> </span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
@@ -1263,17 +1263,38 @@ Hence, it first eliminates peptide effects. It then estimates the summaries by s
 <section id="data-exploration" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Data exploration</h1>
 <p>Data exploration aims to highlight the main sources of variation in the data prior to data modelling and can pinpoint to outlying or off-behaving samples.</p>
-<p>A common approach for data exploration is to perform dimension reduction, such as Multi Dimensional Scaling (MDS). We will first extract the set to explore along the sample annotations (used for plot colouring).</p>
+<p>First assess distribution of marginal protein intensities.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>qf <span class="sc">|&gt;</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">getWithColData</span>(<span class="st">"proteins"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"SingleCellExperiment"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  scater<span class="sc">::</span><span class="fu">runMDS</span>(<span class="at">exprs_values =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  scater<span class="sc">::</span><span class="fu">plotMDS</span>(<span class="at">colour_by =</span> <span class="st">"condition"</span>, <span class="at">shape_by =</span> <span class="st">"rep"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>qf[, , <span class="st">"proteins"</span>] <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf))) <span class="sc">|&gt;</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> value,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">colour =</span> condition,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> colname) <span class="sc">+</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>   <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"Normalised log2 protein intensities"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Another common approach for data exploration is to perform dimension reduction, such as Multi Dimensional Scaling (MDS). We will first extract the set to explore along the sample annotations (used for plot colouring).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>qf <span class="sc">|&gt;</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">getWithColData</span>(<span class="st">"proteins"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as</span>(<span class="st">"SingleCellExperiment"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  scater<span class="sc">::</span><span class="fu">runMDS</span>(<span class="at">exprs_values =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  scater<span class="sc">::</span><span class="fu">plotMDS</span>(<span class="at">colour_by =</span> <span class="st">"condition"</span>, <span class="at">shape_by =</span> <span class="st">"rep"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1288,19 +1309,19 @@ Hence, it first eliminates peptide effects. It then estimates the summaries by s
 <li><p>We fit the model to each protein in the <code>proteins</code> summarised experiment of the QFeatures object <code>qf</code> using the msqrob function.</p></li>
 </ol>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="er">~</span> condition</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">msqrob</span>(</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  qf,</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">i =</span> <span class="st">"proteins"</span>,</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> model,</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">robust =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="er">~</span> condition</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">msqrob</span>(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  qf,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">i =</span> <span class="st">"proteins"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> model,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">robust =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We enabled M-estimation (<code>robust = TRUE</code>) for improved robustness against outliers.</p>
 <p>The fitting results are available in the <code>msqrobModels</code> column of the <code>rowData</code>. More specifically, the modelling output is stored in the <code>rowData</code> as a <code>statModel</code> object, one model per row (protein). We will see in a later section how to perform statistical inference on the estimated parameters.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">rowData</span>(qf[[<span class="st">"proteins"</span>]])[[<span class="st">"msqrobModels"</span>]]</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>models[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">rowData</span>(qf[[<span class="st">"proteins"</span>]])[[<span class="st">"msqrobModels"</span>]]</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>models[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$D6VTK4
 Object of class "StatModel"
@@ -1325,19 +1346,19 @@ There number of elements is 5 </code></pre>
 <p>In other words, we need to translate this question in a null and alternative hypothesis on a single model parameter or a linear combination of model parameters, which is also referred to with a <a href="#sec-inference">contrast</a>.</p>
 <p>To aid defining contrasts, we will visualise the experimental design using the <code>ExploreModelMatrix</code> package.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>vd <span class="ot">&lt;-</span> ExploreModelMatrix<span class="sc">::</span><span class="fu">VisualizeDesign</span>(</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">sampleData =</span>  <span class="fu">colData</span>(qf),</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">designFormula =</span> model,</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">textSizeFitted =</span> <span class="dv">4</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>vd<span class="sc">$</span>plotlist</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>vd <span class="ot">&lt;-</span> ExploreModelMatrix<span class="sc">::</span><span class="fu">VisualizeDesign</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">sampleData =</span>  <span class="fu">colData</span>(qf),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">designFormula =</span> model,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">textSizeFitted =</span> <span class="dv">4</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>vd<span class="sc">$</span>plotlist</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[[1]]</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1349,11 +1370,11 @@ There number of elements is 5 </code></pre>
 H_0 \log_2 \widehat{\text{FC}}^{4-2} = 0 \text{ or } condition4 = 0
 \]</span> Below we define the contrast and construct the corresponding contrast matrix.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>contrast <span class="ot">&lt;-</span> <span class="st">"condition4 = 0"</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>(L <span class="ot">&lt;-</span> <span class="fu">makeContrast</span>(</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"condition4 = 0"</span>,</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">parameterNames =</span> <span class="fu">colnames</span>(vd<span class="sc">$</span>designmatrix)</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>contrast <span class="ot">&lt;-</span> <span class="st">"condition4 = 0"</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>(L <span class="ot">&lt;-</span> <span class="fu">makeContrast</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  contrast,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">parameterNames =</span> <span class="fu">colnames</span>(vd<span class="sc">$</span>designmatrix)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>            condition4
 (Intercept)          0
@@ -1362,12 +1383,12 @@ condition4           1</code></pre>
 </div>
 <p>We assess the contrast for each protein.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">hypothesisTest</span>(qf, <span class="at">i =</span> <span class="st">"proteins"</span>, <span class="at">contrast =</span> L)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">hypothesisTest</span>(qf, <span class="at">i =</span> <span class="st">"proteins"</span>, <span class="at">contrast =</span> L)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We extract the results table from the <code>proteins</code> summarised experiment in the <code>qf</code> object.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>inference <span class="ot">&lt;-</span> </span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">msqrobCollect</span>(qf[[<span class="st">"proteins"</span>]], L)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>inference <span class="ot">&lt;-</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">msqrobCollect</span>(qf[[<span class="st">"proteins"</span>]], L)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="report-results" class="level2" data-number="6.3">
@@ -1382,91 +1403,249 @@ condition4           1</code></pre>
 <li>We arrange them according to statistical significance</li>
 </ol>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>alpha  <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>inference <span class="sc">|&gt;</span> </span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(adjPval <span class="sc">&lt;</span> alpha) <span class="sc">|&gt;</span> </span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pval)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>                                             logFC         se       df
-condition4.UPS|P06732ups|KCRM_HUMAN_UPS  1.0414277 0.07234688 6.959144
-condition4.UPS|P63165ups|SUMO1_HUMAN_UPS 1.0163520 0.08053195 6.866653
-condition4.UPS|P00918ups|CAH2_HUMAN_UPS  0.9086773 0.07611463 6.959144
-condition4.UPS|P02144ups|MYG_HUMAN_UPS   0.9318251 0.07899946 6.956179
-condition4.UPS|P62937ups|PPIA_HUMAN_UPS  0.9200761 0.08058026 6.959144
-condition4.UPS|Q06830ups|PRDX1_HUMAN_UPS 0.8447312 0.07435803 6.959144
-condition4.UPS|P12081ups|SYHC_HUMAN_UPS  0.9713095 0.09430065 6.959144
-condition4.UPS|P04040ups|CATA_HUMAN_UPS  0.8861956 0.09176158 6.959144
-condition4.UPS|P01008ups|ANT3_HUMAN_UPS  0.8422834 0.08819589 6.828752
-condition4.UPS|P02768ups|ALBU_HUMAN_UPS  0.9191774 0.08753252 6.145572
-condition4.UPS|P00915ups|CAH1_HUMAN_UPS  0.8328668 0.08242386 6.229835
-condition4.UPS|P02753ups|RETBP_HUMAN_UPS 1.0895831 0.12517685 6.770179
-condition4.UPS|P68871ups|HBB_HUMAN_UPS   0.8624507 0.09948675 6.573357
-condition4.UPS|P15559ups|NQO1_HUMAN_UPS  0.9035798 0.11526559 6.956179
-condition4.UPS|O76070ups|SYUG_HUMAN_UPS  1.1703480 0.14962531 6.929708
-condition4.UPS|P63279ups|UBC9_HUMAN_UPS  0.8651241 0.11515540 6.769757
-condition4.UPS|P01031ups|CO5_HUMAN_UPS   0.9456788 0.12716021 6.783414
-condition4.UPS|P62988ups|UBIQ_HUMAN_UPS  0.8008501 0.09686447 5.764874
-condition4.UPS|P69905ups|HBA_HUMAN_UPS   0.8960557 0.12731346 6.927275
-                                                 t         pval     adjPval
-condition4.UPS|P06732ups|KCRM_HUMAN_UPS  14.394922 1.960380e-06 0.004758391
-condition4.UPS|P63165ups|SUMO1_HUMAN_UPS 12.620482 5.297384e-06 0.004758391
-condition4.UPS|P00918ups|CAH2_HUMAN_UPS  11.938274 6.890058e-06 0.004758391
-condition4.UPS|P02144ups|MYG_HUMAN_UPS   11.795334 7.490870e-06 0.004758391
-condition4.UPS|P62937ups|PPIA_HUMAN_UPS  11.418132 9.269161e-06 0.004758391
-condition4.UPS|Q06830ups|PRDX1_HUMAN_UPS 11.360322 9.587088e-06 0.004758391
-condition4.UPS|P12081ups|SYHC_HUMAN_UPS  10.300135 1.832226e-05 0.007794811
-condition4.UPS|P04040ups|CATA_HUMAN_UPS   9.657589 2.794636e-05 0.010403032
-condition4.UPS|P01008ups|ANT3_HUMAN_UPS   9.550144 3.391767e-05 0.011155830
-condition4.UPS|P02768ups|ALBU_HUMAN_UPS  10.500982 3.746081e-05 0.011155830
-condition4.UPS|P00915ups|CAH1_HUMAN_UPS  10.104680 4.301615e-05 0.011645644
-condition4.UPS|P02753ups|RETBP_HUMAN_UPS  8.704350 6.435066e-05 0.015969689
-condition4.UPS|P68871ups|HBB_HUMAN_UPS    8.669001 7.815601e-05 0.017903737
-condition4.UPS|P15559ups|NQO1_HUMAN_UPS   7.839111 1.072271e-04 0.022021334
-condition4.UPS|O76070ups|SYUG_HUMAN_UPS   7.821858 1.109201e-04 0.022021334
-condition4.UPS|P63279ups|UBC9_HUMAN_UPS   7.512667 1.604841e-04 0.029618193
-condition4.UPS|P01031ups|CO5_HUMAN_UPS    7.436908 1.690763e-04 0.029618193
-condition4.UPS|P62988ups|UBIQ_HUMAN_UPS   8.267738 2.083113e-04 0.033647024
-condition4.UPS|P69905ups|HBA_HUMAN_UPS    7.038185 2.146721e-04 0.033647024
-                                           contrast
-condition4.UPS|P06732ups|KCRM_HUMAN_UPS  condition4
-condition4.UPS|P63165ups|SUMO1_HUMAN_UPS condition4
-condition4.UPS|P00918ups|CAH2_HUMAN_UPS  condition4
-condition4.UPS|P02144ups|MYG_HUMAN_UPS   condition4
-condition4.UPS|P62937ups|PPIA_HUMAN_UPS  condition4
-condition4.UPS|Q06830ups|PRDX1_HUMAN_UPS condition4
-condition4.UPS|P12081ups|SYHC_HUMAN_UPS  condition4
-condition4.UPS|P04040ups|CATA_HUMAN_UPS  condition4
-condition4.UPS|P01008ups|ANT3_HUMAN_UPS  condition4
-condition4.UPS|P02768ups|ALBU_HUMAN_UPS  condition4
-condition4.UPS|P00915ups|CAH1_HUMAN_UPS  condition4
-condition4.UPS|P02753ups|RETBP_HUMAN_UPS condition4
-condition4.UPS|P68871ups|HBB_HUMAN_UPS   condition4
-condition4.UPS|P15559ups|NQO1_HUMAN_UPS  condition4
-condition4.UPS|O76070ups|SYUG_HUMAN_UPS  condition4
-condition4.UPS|P63279ups|UBC9_HUMAN_UPS  condition4
-condition4.UPS|P01031ups|CO5_HUMAN_UPS   condition4
-condition4.UPS|P62988ups|UBIQ_HUMAN_UPS  condition4
-condition4.UPS|P69905ups|HBA_HUMAN_UPS   condition4
-                                                               feature
-condition4.UPS|P06732ups|KCRM_HUMAN_UPS   UPS|P06732ups|KCRM_HUMAN_UPS
-condition4.UPS|P63165ups|SUMO1_HUMAN_UPS UPS|P63165ups|SUMO1_HUMAN_UPS
-condition4.UPS|P00918ups|CAH2_HUMAN_UPS   UPS|P00918ups|CAH2_HUMAN_UPS
-condition4.UPS|P02144ups|MYG_HUMAN_UPS     UPS|P02144ups|MYG_HUMAN_UPS
-condition4.UPS|P62937ups|PPIA_HUMAN_UPS   UPS|P62937ups|PPIA_HUMAN_UPS
-condition4.UPS|Q06830ups|PRDX1_HUMAN_UPS UPS|Q06830ups|PRDX1_HUMAN_UPS
-condition4.UPS|P12081ups|SYHC_HUMAN_UPS   UPS|P12081ups|SYHC_HUMAN_UPS
-condition4.UPS|P04040ups|CATA_HUMAN_UPS   UPS|P04040ups|CATA_HUMAN_UPS
-condition4.UPS|P01008ups|ANT3_HUMAN_UPS   UPS|P01008ups|ANT3_HUMAN_UPS
-condition4.UPS|P02768ups|ALBU_HUMAN_UPS   UPS|P02768ups|ALBU_HUMAN_UPS
-condition4.UPS|P00915ups|CAH1_HUMAN_UPS   UPS|P00915ups|CAH1_HUMAN_UPS
-condition4.UPS|P02753ups|RETBP_HUMAN_UPS UPS|P02753ups|RETBP_HUMAN_UPS
-condition4.UPS|P68871ups|HBB_HUMAN_UPS     UPS|P68871ups|HBB_HUMAN_UPS
-condition4.UPS|P15559ups|NQO1_HUMAN_UPS   UPS|P15559ups|NQO1_HUMAN_UPS
-condition4.UPS|O76070ups|SYUG_HUMAN_UPS   UPS|O76070ups|SYUG_HUMAN_UPS
-condition4.UPS|P63279ups|UBC9_HUMAN_UPS   UPS|P63279ups|UBC9_HUMAN_UPS
-condition4.UPS|P01031ups|CO5_HUMAN_UPS     UPS|P01031ups|CO5_HUMAN_UPS
-condition4.UPS|P62988ups|UBIQ_HUMAN_UPS   UPS|P62988ups|UBIQ_HUMAN_UPS
-condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>alpha  <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>inference <span class="sc">|&gt;</span> </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(adjPval <span class="sc">&lt;</span> alpha) <span class="sc">|&gt;</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pval) <span class="sc">|&gt;</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 31%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">logFC</th>
+<th style="text-align: right;">se</th>
+<th style="text-align: right;">df</th>
+<th style="text-align: right;">t</th>
+<th style="text-align: right;">pval</th>
+<th style="text-align: right;">adjPval</th>
+<th style="text-align: left;">contrast</th>
+<th style="text-align: left;">feature</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P06732ups|KCRM_HUMAN_UPS</td>
+<td style="text-align: right;">1.0414277</td>
+<td style="text-align: right;">0.0723469</td>
+<td style="text-align: right;">6.959144</td>
+<td style="text-align: right;">14.394922</td>
+<td style="text-align: right;">0.0000020</td>
+<td style="text-align: right;">0.0047584</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P06732ups|KCRM_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P63165ups|SUMO1_HUMAN_UPS</td>
+<td style="text-align: right;">1.0163520</td>
+<td style="text-align: right;">0.0805320</td>
+<td style="text-align: right;">6.866652</td>
+<td style="text-align: right;">12.620482</td>
+<td style="text-align: right;">0.0000053</td>
+<td style="text-align: right;">0.0047584</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P63165ups|SUMO1_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P00918ups|CAH2_HUMAN_UPS</td>
+<td style="text-align: right;">0.9086773</td>
+<td style="text-align: right;">0.0761146</td>
+<td style="text-align: right;">6.959144</td>
+<td style="text-align: right;">11.938274</td>
+<td style="text-align: right;">0.0000069</td>
+<td style="text-align: right;">0.0047584</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P00918ups|CAH2_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P02144ups|MYG_HUMAN_UPS</td>
+<td style="text-align: right;">0.9318251</td>
+<td style="text-align: right;">0.0789995</td>
+<td style="text-align: right;">6.956179</td>
+<td style="text-align: right;">11.795334</td>
+<td style="text-align: right;">0.0000075</td>
+<td style="text-align: right;">0.0047584</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P02144ups|MYG_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P62937ups|PPIA_HUMAN_UPS</td>
+<td style="text-align: right;">0.9200761</td>
+<td style="text-align: right;">0.0805803</td>
+<td style="text-align: right;">6.959144</td>
+<td style="text-align: right;">11.418132</td>
+<td style="text-align: right;">0.0000093</td>
+<td style="text-align: right;">0.0047584</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P62937ups|PPIA_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|Q06830ups|PRDX1_HUMAN_UPS</td>
+<td style="text-align: right;">0.8447312</td>
+<td style="text-align: right;">0.0743580</td>
+<td style="text-align: right;">6.959144</td>
+<td style="text-align: right;">11.360322</td>
+<td style="text-align: right;">0.0000096</td>
+<td style="text-align: right;">0.0047584</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|Q06830ups|PRDX1_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P12081ups|SYHC_HUMAN_UPS</td>
+<td style="text-align: right;">0.9713095</td>
+<td style="text-align: right;">0.0943007</td>
+<td style="text-align: right;">6.959144</td>
+<td style="text-align: right;">10.300135</td>
+<td style="text-align: right;">0.0000183</td>
+<td style="text-align: right;">0.0077948</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P12081ups|SYHC_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P04040ups|CATA_HUMAN_UPS</td>
+<td style="text-align: right;">0.8861956</td>
+<td style="text-align: right;">0.0917616</td>
+<td style="text-align: right;">6.959144</td>
+<td style="text-align: right;">9.657589</td>
+<td style="text-align: right;">0.0000279</td>
+<td style="text-align: right;">0.0104030</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P04040ups|CATA_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P01008ups|ANT3_HUMAN_UPS</td>
+<td style="text-align: right;">0.8422834</td>
+<td style="text-align: right;">0.0881959</td>
+<td style="text-align: right;">6.828752</td>
+<td style="text-align: right;">9.550144</td>
+<td style="text-align: right;">0.0000339</td>
+<td style="text-align: right;">0.0111558</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P01008ups|ANT3_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P02768ups|ALBU_HUMAN_UPS</td>
+<td style="text-align: right;">0.9191774</td>
+<td style="text-align: right;">0.0875325</td>
+<td style="text-align: right;">6.145572</td>
+<td style="text-align: right;">10.500982</td>
+<td style="text-align: right;">0.0000375</td>
+<td style="text-align: right;">0.0111558</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P02768ups|ALBU_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P00915ups|CAH1_HUMAN_UPS</td>
+<td style="text-align: right;">0.8328668</td>
+<td style="text-align: right;">0.0824239</td>
+<td style="text-align: right;">6.229835</td>
+<td style="text-align: right;">10.104680</td>
+<td style="text-align: right;">0.0000430</td>
+<td style="text-align: right;">0.0116456</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P00915ups|CAH1_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P02753ups|RETBP_HUMAN_UPS</td>
+<td style="text-align: right;">1.0895831</td>
+<td style="text-align: right;">0.1251768</td>
+<td style="text-align: right;">6.770179</td>
+<td style="text-align: right;">8.704350</td>
+<td style="text-align: right;">0.0000644</td>
+<td style="text-align: right;">0.0159697</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P02753ups|RETBP_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P68871ups|HBB_HUMAN_UPS</td>
+<td style="text-align: right;">0.8624507</td>
+<td style="text-align: right;">0.0994867</td>
+<td style="text-align: right;">6.573357</td>
+<td style="text-align: right;">8.669001</td>
+<td style="text-align: right;">0.0000782</td>
+<td style="text-align: right;">0.0179037</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P68871ups|HBB_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P15559ups|NQO1_HUMAN_UPS</td>
+<td style="text-align: right;">0.9035798</td>
+<td style="text-align: right;">0.1152656</td>
+<td style="text-align: right;">6.956179</td>
+<td style="text-align: right;">7.839111</td>
+<td style="text-align: right;">0.0001072</td>
+<td style="text-align: right;">0.0220213</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P15559ups|NQO1_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|O76070ups|SYUG_HUMAN_UPS</td>
+<td style="text-align: right;">1.1703480</td>
+<td style="text-align: right;">0.1496253</td>
+<td style="text-align: right;">6.929708</td>
+<td style="text-align: right;">7.821858</td>
+<td style="text-align: right;">0.0001109</td>
+<td style="text-align: right;">0.0220213</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|O76070ups|SYUG_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P63279ups|UBC9_HUMAN_UPS</td>
+<td style="text-align: right;">0.8651241</td>
+<td style="text-align: right;">0.1151554</td>
+<td style="text-align: right;">6.769757</td>
+<td style="text-align: right;">7.512667</td>
+<td style="text-align: right;">0.0001605</td>
+<td style="text-align: right;">0.0296182</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P63279ups|UBC9_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P01031ups|CO5_HUMAN_UPS</td>
+<td style="text-align: right;">0.9456788</td>
+<td style="text-align: right;">0.1271602</td>
+<td style="text-align: right;">6.783414</td>
+<td style="text-align: right;">7.436908</td>
+<td style="text-align: right;">0.0001691</td>
+<td style="text-align: right;">0.0296182</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P01031ups|CO5_HUMAN_UPS</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition4.UPS|P62988ups|UBIQ_HUMAN_UPS</td>
+<td style="text-align: right;">0.8008501</td>
+<td style="text-align: right;">0.0968645</td>
+<td style="text-align: right;">5.764874</td>
+<td style="text-align: right;">8.267738</td>
+<td style="text-align: right;">0.0002083</td>
+<td style="text-align: right;">0.0336470</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P62988ups|UBIQ_HUMAN_UPS</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition4.UPS|P69905ups|HBA_HUMAN_UPS</td>
+<td style="text-align: right;">0.8960557</td>
+<td style="text-align: right;">0.1273135</td>
+<td style="text-align: right;">6.927275</td>
+<td style="text-align: right;">7.038185</td>
+<td style="text-align: right;">0.0002147</td>
+<td style="text-align: right;">0.0336470</td>
+<td style="text-align: left;">condition4</td>
+<td style="text-align: left;">UPS|P69905ups|HBA_HUMAN_UPS</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <p>We observe that the results only contain spiked UPS proteins.</p>
@@ -1479,7 +1658,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1504,7 +1683,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">getWithColData</span>(qf, <span class="st">"proteins"</span>)</span>
 <span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>quants <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">scale</span>(<span class="fu">t</span>(<span class="fu">assay</span>(se[sig,])))) <span class="co">#2. </span></span>
 <span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(quants) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"con"</span>, se<span class="sc">$</span>condition,<span class="st">"_rep"</span>,se<span class="sc">$</span>rep)</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(quants) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"con"</span>, se<span class="sc">$</span>condition,<span class="st">"_rep"</span>,se<span class="sc">$</span>rep) <span class="co">#specific to this dataset to get short colnames</span></span>
 <span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>annotations <span class="ot">&lt;-</span> <span class="fu">columnAnnotation</span>(</span>
 <span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">condition =</span> se<span class="sc">$</span>condition</span>
 <span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>) <span class="co">#3.</span></span>
@@ -1520,7 +1699,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1556,7 +1735,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1581,7 +1760,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1660,7 +1839,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1729,7 +1908,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1754,7 +1933,7 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="staes-median-maxLFQ_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1765,17 +1944,11 @@ condition4.UPS|P69905ups|HBA_HUMAN_UPS     UPS|P69905ups|HBA_HUMAN_UPS</code></p
 </section>
 </section>
 
-
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Staes2024" class="csl-entry" role="listitem">
 Staes, An, Teresa Mendes Maia, Sara Dufour, Robbin Bouwmeester, Ralf Gabriels, Lennart Martens, Kris Gevaert, Francis Impens, and Simon Devos. 2024. <span>“Benefit of in Silico Predicted Spectral Libraries in Data‑independent Acquisition Data Analysis Workflows.”</span> <em>Journal of Proteome Research</em> 23 (6): 2078–89. <a href="https://doi.org/10.1021/acs.jproteome.4c00048">https://doi.org/10.1021/acs.jproteome.4c00048</a>.
 </div>
-</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>We will explain this with more details at the end of the <a href="#sec-summarisation">summarisation step</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
