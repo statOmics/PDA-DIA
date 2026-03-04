@@ -184,6 +184,15 @@ get_diann_nf <- function(qf, i, nf_name = "Normalisation.Factor", log = TRUE, ba
   return(out)
 }
 
+
+get_spectronaut_nf <- function(qf, i, nf_name = "EG_NormalizationFactor", log = TRUE, base = 2) 
+{
+  out <- sapply(colnames(qf[[i]]), function(ii, qf, ids, nf_name) rowData(qf[[ii]])[ids,nf_name], qf = qf, ids = rownames(qf[[i]]), nf_name = nf_name)
+  if (log) out <- -log(out, base = base)
+  rownames(out) <- rownames(qf[[i]])
+  return(out)
+}
+
 # Volcano plot
 #1. We calculate the adjusted significance level for the original p-values that corresponds to the nominal FDR significance level.
 #2. We make the volcano plot by plotting statistial significance, i.e. -log10(pvalues), in function of the effect size or biological relevance, i.e. log2 FC or log2 RDA. We color the dots according to their significance, black if the adjusted p-value is higher than the FDR significance level and red if the adjusted p-value is lower than the FDR significance level. 

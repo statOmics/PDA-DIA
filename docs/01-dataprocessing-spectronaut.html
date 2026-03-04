@@ -230,7 +230,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#differential-abundance-analysis-with-dia-nn---starting-from-fg_ms2rawquantity" id="toc-differential-abundance-analysis-with-dia-nn---starting-from-fg_ms2rawquantity" class="nav-link active" data-scroll-target="#differential-abundance-analysis-with-dia-nn---starting-from-fg_ms2rawquantity">Differential abundance analysis with DIA-NN - starting from FG_MS2RawQuantity</a></li>
+  <li><a href="#differential-abundance-analysis-with-spectronaut---starting-from-fg_ms2rawquantity" id="toc-differential-abundance-analysis-with-spectronaut---starting-from-fg_ms2rawquantity" class="nav-link active" data-scroll-target="#differential-abundance-analysis-with-spectronaut---starting-from-fg_ms2rawquantity">Differential abundance analysis with Spectronaut - starting from FG_MS2RawQuantity</a></li>
   <li><a href="#load-packages" id="toc-load-packages" class="nav-link" data-scroll-target="#load-packages"><span class="header-section-number">1</span> Load packages</a></li>
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">2</span> Data</a>
   <ul class="collapse">
@@ -285,9 +285,9 @@ window.Quarto = {
 
 
 
-<section id="differential-abundance-analysis-with-dia-nn---starting-from-fg_ms2rawquantity" class="level1 unnumbered">
-<h1 class="unnumbered">Differential abundance analysis with DIA-NN - starting from FG_MS2RawQuantity</h1>
-<p>This chapter explains the main concepts for data-processing and statistical analysis of (DIA) proteomics data using <code>msqrob2</code>. To illustrate these concepts, we will use using a publicly available spike-in study published by Staes et al. <span class="citation" data-cites="Staes2024">(<a href="#ref-Staes2024" role="doc-biblioref">Staes et al. 2024</a>)</span>. They spiked digested UPS proteins in a yeast digested background at the following ratio’s (yeast:ups ratio 10:1, 10:2, 10:4, 10:8, 10:10). Here we will use a subset of the data, i.e.&nbsp;dilutions 10:2, 10:4 and 10:8. We will use output of the search engine DIA-NN 2.2.0. The main search output for this DIA-NN version was stored in the report.parquet file in the DIA-NN output directory, which can be found under data/spikein248-staesetal2024.parquet</p>
+<section id="differential-abundance-analysis-with-spectronaut---starting-from-fg_ms2rawquantity" class="level1 unnumbered">
+<h1 class="unnumbered">Differential abundance analysis with Spectronaut - starting from FG_MS2RawQuantity</h1>
+<p>This chapter explains the main concepts for data-processing and statistical analysis of (DIA) proteomics data using <code>msqrob2</code>. To illustrate these concepts, we will use using a publicly available spike-in study published by Staes et al. <span class="citation" data-cites="Staes2024">(<a href="#ref-Staes2024" role="doc-biblioref">Staes et al. 2024</a>)</span>. They spiked digested UPS proteins in a yeast digested background at the following ratio’s (yeast:ups ratio 10:1, 10:2, 10:4, 10:8, 10:10). Here we will use a subset of the data, i.e.&nbsp;dilutions 10:2, 10:4 and 10:8. We will use output of the search engine Spectronaut. The main search output for this Spectronaut version was stored in the report.parquet file , which can be found under data/spikein248-staesetal2024-spectronaut.parquet</p>
 <p>Spectronaut provides multiple quantifications, e.g.&nbsp;derived from the MS1 or MS2 spectra, and at precursor or protein (protein group) level. The term ‘precursor’ refers to a charged peptide species and is the basic unit of identification and quantification in DIA. Hence, in the context of DIA we refer to a precursor table, instead of to a PSM table in DDA.</p>
 <p>Examples of different quantities are:</p>
 <ul>
@@ -321,14 +321,14 @@ window.Quarto = {
 <h1 data-number="2"><span class="header-section-number">2</span> Data</h1>
 <section id="precursor-table" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="precursor-table"><span class="header-section-number">2.1</span> Precursor table</h2>
-<p>We load the output from DIA-NN parquet file.</p>
+<p>We load the output from Spectronaut parquet file.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">&lt;-</span> <span class="st">"data/spikein248-staesetal2024-spectronaut.parquet"</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>We can import the report.parquet file using the <code>read_parquet</code> function from the <code>arrow</code> package. Note, that older versions of DIA-NN store the output as report.tsv.</p>
+<p>We can import the report.parquet file using the <code>read_parquet</code> function from the <code>arrow</code> package. Note, that older versions of Spectronaut store the output as report.tsv.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> arrow<span class="sc">::</span><span class="fu">read_parquet</span>(precursorFile) <span class="co"># function from the arrow package</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#precursors &lt;- data.table::fread(precursorFile) # For older versions of DIA-NN, where the results are stored as tsv files. Note that the precursorFile then would point to "report.tsv" </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#precursors &lt;- data.table::fread(precursorFile) # For older versions of Spectronaut, where the results are stored as tsv files. Note that the precursorFile then would point to "report.tsv" </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Each row in the precursor data table is in “long format” and contains information about one precursor in a specific run (the table below shows the first 6 rows). The columns contains various descriptors about the precursor, such as its sequence, its charge, run, etc.</p>
 <div class="cell">
@@ -847,7 +847,7 @@ window.Quarto = {
 </section>
 <section id="convert-to-qfeatures" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="convert-to-qfeatures"><span class="header-section-number">2.3</span> Convert to QFeatures</h2>
-<p>First, recall that the precursor table is file in long format. Every quantitative column in the precursor table contains information for multiple runs. Therefore, the function split the table based on the run identifier, given by the <code>runCol</code> argument (for DIA-NN, that identifier is contained in <code>run</code>). So, the <code>QFeatures</code> object after import will contain as many sets as there are runs. Next, the function links the annotation table with the PSM data. To achieve this, the annotation table must contain a <code>runCol</code> column that provides the run identifier in which each sample has been acquired, and this information will be used to match the identifiers in the <code>Run</code> column of the precursor table.</p>
+<p>First, recall that the precursor table is file in long format. Every quantitative column in the precursor table contains information for multiple runs. Therefore, the function split the table based on the run identifier, given by the <code>runCol</code> argument (for Spectronaut, that identifier is contained in <code>run</code>). So, the <code>QFeatures</code> object after import will contain as many sets as there are runs. Next, the function links the annotation table with the PSM data. To achieve this, the annotation table must contain a <code>runCol</code> column that provides the run identifier in which each sample has been acquired, and this information will be used to match the identifiers in the <code>Run</code> column of the precursor table.</p>
 <p>Here, we will use the <code>FG_MS2RawQuantity</code> column as quantification input.</p>
 <p>Note, that we filter a number of variables to reduce the footprint of the QFeatures object.</p>
 <div class="cell">
