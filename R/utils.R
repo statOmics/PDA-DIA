@@ -176,8 +176,9 @@ nf_log_medrat <- function(qf, i, base = 2){
   return(nf_log)
 }
 
-get_diann_nf <- function(qf, i, nf_name = "Normalisation.Factor", log = TRUE, base = 2) 
+get_searchengine_nf <- function(qf, i, nf_name, log = TRUE, base = 2) 
 {
+  #nf_name = "Normalisation.Factor" for DIA-NN and "EG_NormalizationFactor" for spectronaut
   out <- sapply(colnames(qf[[i]]), function(ii, qf, ids, nf_name) rowData(qf[[ii]])[ids,nf_name], qf = qf, ids = rownames(qf[[i]]), nf_name = nf_name)
   if (log) out <- -log(out, base = base)
   rownames(out) <- rownames(qf[[i]])
@@ -185,13 +186,6 @@ get_diann_nf <- function(qf, i, nf_name = "Normalisation.Factor", log = TRUE, ba
 }
 
 
-get_spectronaut_nf <- function(qf, i, nf_name = "EG_NormalizationFactor", log = TRUE, base = 2) 
-{
-  out <- sapply(colnames(qf[[i]]), function(ii, qf, ids, nf_name) rowData(qf[[ii]])[ids,nf_name], qf = qf, ids = rownames(qf[[i]]), nf_name = nf_name)
-  if (log) out <- -log(out, base = base)
-  rownames(out) <- rownames(qf[[i]])
-  return(out)
-}
 
 # Volcano plot
 #1. We calculate the adjusted significance level for the original p-values that corresponds to the nominal FDR significance level.

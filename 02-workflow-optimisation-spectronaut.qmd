@@ -397,35 +397,36 @@ qf[, , "precursors_log"] |> #1.
 It is clear that we will have to normalise the data. 
 
 
-1. no normalisation, STATS = 0 (we do not change the intensities)
+1. no normalisation, STATS = 0 (we do not change the intensities) this is normally not required as we can use the `percursors_log` summarised experiment right away for aggregation, we do it here for automation purposes. 
 2. median normalisation, 
 3. total loading normalisation, and
 4. median of ratio normalisation 
+5. internal normalisation factors of spectronaut
 
 ```{r}
-qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
+qf <- sweep( #1. Subtract log2 norm factor column-by-column (MARGIN = 2)
   qf,
   MARGIN = 2, 
   STATS = 0, #1.
   i = "precursors_log",
   name = "precursors_norm_no"
-)
+) #1.
 
-qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
+qf <- sweep( #2. Subtract log2 norm factor column-by-column (MARGIN = 2)
   qf,
   MARGIN = 2, 
   STATS = nf_log_med(qf, i="precursors_log"), #1.
   i = "precursors_log",
   name = "precursors_norm_med"
-)
+) 
 
-qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
+qf <- sweep( #3. Subtract log2 norm factor column-by-column (MARGIN = 2)
   qf,
   MARGIN = 2,
   STATS = nf_log_tot(qf, i="precursors_log"), #2.
   i = "precursors_log",
   name = "precursors_norm_tot"
-)
+) 
 
 qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
   qf,
@@ -433,15 +434,55 @@ qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
   STATS = nf_log_medrat(qf, i="precursors_log"), #3.
   i = "precursors_log",
   name = "precursors_norm_mr"
-)
+) 
+```
 
-qf <- sweep( #4. Subtract log2 norm factor matrix diann (MARGIN = 1:2)
+DIA-NN and Spectronaut also calculates normalisation factors internally, they are calculated on the original scale. 
+
+By default they use a global normalisation (sample-level) and additional retention time normalisation. 
+The assumption is that the complexity across samples at a particular retention time is similar. 
+This often holds. However, this assumption is typically violated for single cells, i.e. due to large differences in the proteome e.g. according to cell types and/or cell size. 
+
+They can be extracted using the `get_searchengine_nf` function, which has arguments `qf` for qfeatures object, `i` for summarized experiment name or number, `nf_name` for the variable name with the normalisation factors which is `Normalisation.Factor` for DIA-NN output and `EG_NormalizationFactor` for Spectronaut.  
+
+Note that a matrix of (log-transformed) normalisation factors is returned that has an equal size as the assay data. Therefore we can sweep these out by using the row and column dimensions, `MARGINS = 1:2`
+
+```{r}
+qf <- sweep( #5. Subtract log2 norm factor matrix diann (MARGIN = 1:2)
   qf,
   MARGIN = 1:2,
-  STATS = get_spectronaut_nf(qf, i="precursors_log"), #3.
+  STATS = get_searchengine_nf(qf, i="precursors_log", nf_name = "EG_NormalizationFactor"), #3.
   i = "precursors_log",
-  name = "precursors_norm_spectr"
+  name = "precursors_norm_diann"
 )
+```
+
+We illustrate that the `EG_NormalizationFactor` can be used to go from `FG_MS2RawQuantity` to `FG_MS2Quantity`
+
+```{r}
+precursors |> 
+  ggplot(aes(x=FG_MS2RawQuantity, y = FG_MS2Quantity)) +
+  geom_point() + 
+  theme_minimal()
+```
+
+```{r}
+precursors |> 
+  ggplot(aes(x=FG_MS2RawQuantity * EG_NormalizationFactor, y = FG_MS2Quantity)) +
+  geom_point() + 
+  theme_minimal()
+```
+
+Note, that the normalisation factor is different for each entry. 
+The variable `EG_NormalisationFactor` is the scaling factor for both global and retention time normalisation. 
+
+```{r}
+precursors |> 
+  arrange(EG_ApexRT) |> 
+  ggplot(aes(x = EG_ApexRT, y = -log2(EG_NormalizationFactor))) +
+  geom_line() +
+  facet_wrap(~ R_FileName) +
+  theme_minimal()
 ```
 
 We explore the effect of the total normalisation in the subsequent plot. 
