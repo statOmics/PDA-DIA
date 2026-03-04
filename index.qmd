@@ -62,6 +62,7 @@ This parts introduces the user to the key concepts for data processing in differ
 # Statistical Inference & Design concepts
 
 - [Basics of Statistical Inference](03-inference.html)
+- [Tutorial Design](03-tutorial-Design.html)
 - [Wrapup Blocking](03-blocking-wrapup.html)
 
 # Targeted audience and assumed background
