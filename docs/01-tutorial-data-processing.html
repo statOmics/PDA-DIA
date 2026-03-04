@@ -250,13 +250,13 @@ div.csl-indent {
 </section>
 <section id="van-leene-et-al.-study." class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Van Leene et al.&nbsp;study.</h1>
-<p>This data is a subset of the data from <span class="citation" data-cites="VanLeeneEtal2026">(<a href="#ref-VanLeeneEtal2026" role="doc-biblioref">Van Leene et al. 2026</a>)</span>, where a limited Limited Proteolysis (LiP) Treatment was conducted with rapamicin. The treatment consists of either 10 μM rapamycin (Sigma-Aldrich) in 0.1% dimethyl sulfoxide (DMSO; Sigma-Aldrich) or 0.1% DMSO as vehicle control.</p>
-<p>Analyse the data to prioritise proteins that are DA between rapamicin and control. Use either the DIA-NN or spectronaut output.</p>
+<p>This data is a subset of the data from <span class="citation" data-cites="VanLeeneEtal2026">(<a href="#ref-VanLeeneEtal2026" role="doc-biblioref">Van Leene et al. 2026</a>)</span>, where a Limited Proteolysis (LiP) Treatment was conducted with rapamicin. The treatment consists of either 10 μM rapamycin (Sigma-Aldrich) in 0.1% dimethyl sulfoxide (DMSO; Sigma-Aldrich) or 0.1% DMSO as vehicle control. In al LiP analysis Limited Proteolysis samples are typically taken together with trypsin control samples. The former are used to prioritise precursors that indicate conformational dynamics. The latter samples are used a control samples so as to correct for overall changes in the abundance of the entire proteome.</p>
+<p>Here, we will only use the trypsin control samples and perform differential abundance at the protein level. Analyse the data to prioritise proteins that are DA between rapamicin and control. Use either the DIA-NN or spectronaut output. Note, that the TC samples were search together with the LiP samples. So retention time normalisation does not seem to be advisable as the proteome complexity of LiP and TC samples is expected to differ across retention time.</p>
 <p>DIA-NN parquet file can be found online:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">=</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-diann.parquet"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Spectronaut parquet file can be found online:</p>
+<p>Spectronaut parquet file can be found online. <strong>Parquet file only includes a limited number of variables</strong>):</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">=</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-spectronaut.parquet"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
