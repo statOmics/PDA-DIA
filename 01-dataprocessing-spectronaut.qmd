@@ -1,4 +1,4 @@
-# Differential abundance analysis with DIA-NN - starting from Precursor.Normalised {-}
+# Differential abundance analysis with DIA-NN - starting from FG_MS2RawQuantity {-}
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")
@@ -16,10 +16,10 @@ Spectronaut provides multiple quantifications, e.g. derived from the MS1 or MS2 
 
 Examples of different quantities are:
 
-- raw MS1 area: Ms1.Area, normalised MS1 Area: Ms1.Normalised, MS2 Precursor quantities: Precursor.Quantity, Normalised MS2 Precursor quantities: Precursor.Normalised, etc., which are all at the precursor level 
-- MS2 based summary at the protein (protein group)-level: PG.MaxLFQ
+- raw MS1 quantity: FG_MS1RawQuantity, normalised MS1 quantity: FG_MS1Quantity, MS2 Precursor quantities: FG_MS2RawQuantity, Normalised MS2 Precursor quantities: FG_MS2Quantity, etc., which are all at the precursor level 
+- MS2 based summary at the protein (protein group)-level: PG_MaxLFQ
 
-Here, we will use the `Precursor.Normalised` column.
+Here, we will use the `FG_MS2RawQuantity` column.
 
 
 # Load packages
@@ -81,39 +81,79 @@ We filter the data to reduce the memory footprint (was already done to store sma
 ```{r eval = FALSE}
 precursors <- precursors |> 
   select(
-         R.FileName, #Run, 
-         EG.PrecursorId, #Precursor.Id, 
-         EG.ModifiedSequence, #Modified.Sequence, 
-         PEP.StrippedSequence, #Stripped.Sequence, 
-         FG.Charge, #Precursor.Charge, 
-         PG.ProteinGroups, #Protein.Group, 
-         #PG.ProteinNames, #Protein.Names,
-         PG.ProteinAccessions, #Protein.Ids,
-         #PG.Genes, #Genes,
-         FG.MS2RawQuantity, #Precursor.Quantity,
-         FG.MS2Quantity, #No DIA-NN counterpart 
-         FG.Quantity, #Precursor.Normalised, 
-         FG.MS1RawQuantity, #Ms1.Area,
-         FG.MS1Quantity, #Ms1.Normalised #No real DIA-NN counterpart 
-         EG.Qvalue, #Q.Value, 
+         R_FileName, #Run, 
+         EG_PrecursorId, #PrecursoR_Id, 
+         EG_ModifiedSequence, #Modified.Sequence, 
+         PEP_StrippedSequence, #Stripped.Sequence, 
+         FG_Charge, #PrecursoR_Charge, 
+         PG_ProteinGroups, #Protein.Group, 
+         PG_ProteinNames, #Protein.Names,
+         PG_ProteinAccessions, #Protein.Ids,
+         PG_Genes, #Genes,
+         FG_MS2RawQuantity, #PrecursoR_Quantity,
+         FG_MS2Quantity, #PrecursoR_Normalised,
+         FG_MS1RawQuantity, #Ms1.Area,
+         FG_MS1Quantity, #Ms1.Normalised #No real DIA-NN counterpart 
+         EG_NormalizationFactor, #Normalisation.Factor
+         EG_Qvalue, #Q.Value, 
          #No spectronaut counterpart #Lib.Q.Value,
-         PG.Qvalue, # PG.Q.Value,
-         #No spectronaut counterpart #Lib.PG.Q.Value
-         PEP.IsProteotypic, #Proteotypic,
-         EG.IsDecoy, #Decoy,
-         EG.ApexRT) #RT)
+         PG_Qvalue, # PG_Q.Value,
+         #No spectronaut counterpart #Lib.PG_Q.Value
+         PEP_IsProteotypic, #Proteotypic,
+         EG_IsDecoy, #Decoy,
+         EG_ApexRT,#RT
+         EG_IsImputed)
 ```
 
 We known the ground truth: UPS proteins are differentially abundant (DA, spiked in), Yeast proteins are not.  
 ```{r}
 precursors <- precursors |> 
-  mutate(species = grepl(pattern = "ups",PG.ProteinGroups) |> 
+  mutate(species = grepl(pattern = "ups",PG_ProteinGroups) |> 
            as.factor() |>
            recode("TRUE"="ups","FALSE" = "yeast"))
 precursors |> 
   pull(species) |>
   table()
 ```
+
+```{r}
+precursors
+```
+
+There is a problem with the encoding of EG_Qvalue. EG_Qvalue is a double while it should be a double. PEP_IsProteotypic is a character and not a logical. 
+
+```{r}
+precursors$EG_Qvalue |> head()
+precursors$PEP_IsProteotypic |> head()
+```
+
+Replace `,` in `.` and cast it into double
+
+```{r}
+precursors <- precursors |> 
+  mutate(EG_Qvalue = sub(pattern = ",",replacement = ".", EG_Qvalue) |> as.double(),
+         PEP_IsProteotypic = as.logical(PEP_IsProteotypic))
+precursors$EG_Qvalue |> head()
+precursors$PEP_IsProteotypic |> head()
+```
+
+
+Quick Check on distribution of intensities
+
+```{r}
+precursors |> 
+  ggplot(aes(x = log2(FG_MS2RawQuantity))) +
+  geom_density()
+```
+
+```{r}
+precursors |> 
+  ggplot(aes(x = log2(FG_MS2RawQuantity))) +
+  geom_density() + 
+  facet_wrap(~EG_IsImputed)
+```
+
+Imputation has occurred. 
 
 ## Sample annotation table
 
@@ -124,7 +164,7 @@ We will make a new data frame with the annotation.
 
 1. We first generate variable `runCol`, that gives an overview of the different runs in the experiment, i.e. the unique names in the column Run of the report file. This is a mandatory column in the annotation file that is required by the `readQFeatures` function that will be used to generate a QFeatures object with the quant data. 
 
-2. Next we generate variable `sampleId`, to pinpoint the different samples in the dataset. This can be extracted from the run names as the researchers have stored information on the meta data in the file names for each run. E.g. for run B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2 this is the ratio, i.e. ratio04, and the replicate, i.e. _2 after DIA. Note, that the first replicate has no number. 
+2. Next we generate variable `sampleId`, to pinpoint the different samples in the dataset. This can be extracted from the run names as the researchers have stored information on the meta data in the file names for each run. E.g. for run B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2 this is the ratio, i.e. ratio04, and the replicate, i.e. _2 after DIA. Note, that the first replicate has no numbeR_ 
     
     a. We first replace the redundant pattern "DIA" with an empty character string. 
     b. Next we split the strings according to the pattern "UPS2" using the `strsplit` function and
@@ -147,7 +187,7 @@ We will make a new data frame with the annotation.
     
 ```{r create_metadata}
 annot <- data.frame(runCol = precursors |> 
-                       pull(R.FileName) |> 
+                       pull(R_FileName) |> 
                        unique() # 1. 
                    ) |>
     mutate(sampleId = gsub(x = runCol, pattern = "_DIA", replacement = "") |> #2.a
@@ -187,16 +227,16 @@ that provides the run identifier in which each sample has been
 acquired, and this information will be used to match the identifiers
 in the `Run` column of the precursor table. 
 
-Here, we will use the `Precursor.Normalised` column as quantification input. 
+Here, we will use the `FG_MS2RawQuantity` column as quantification input. 
 
 Note, that we filter a number of variables to reduce the footprint of the QFeatures object. 
 
 ```{r}
 (qf <- readQFeatures(assayData = precursors,  
                               colData = annot,
-                              quantCols = "FG.MS2RawQuantity",
-                              runCol = "R.FileName",
-                              fnames = "EG.PrecursorId"))
+                              quantCols = "FG_MS2RawQuantity",
+                              runCol = "R_FileName",
+                              fnames = "EG_PrecursorId"))
 ```
 
 
@@ -225,26 +265,29 @@ Filtering removes low-quality and unreliable precursors that would otherwise int
 ### Remove questionable identifications
 
 
-We apply standard filtering advised by DIA-NN: 
+We apply standard filtering: 
 
-1. q-value threshold of 0.01 for the identification of precursors (`Q.Value`) and protein groups (`PG.Q.Value`). If the file is processed via matching between runs, it is also useful to filter on Lib.Q.Value and Lib.PG.Q.Value.
+1. q-value threshold of 0.01 for the identification of precursors (`EG_Qvalue`) and protein groups (`PG_Qvalue`). 
 
-2. Remove precursors that could not be mapped, i.e. when `Precursor.Id` column is an empty string.  
+2. Remove precursors that could not be mapped, i.e. when `EG_PrecursorId` column is an empty string.  
 
-3. Filter decoys, i.e. only keep precursors for which the `Decoy` column equals 0. (Note, that the `Decoy` column is not present in the output of older versions of DIA-NN)
+3. Filter decoys, i.e. only keep precursors for which the `EG_IsDecoy` column equals 0. 
 
 4. Keeping only proteotypic peptides, which map uniquely to a specific protein.
+
+5. Only keep non-imputed intensities: `EG_IsImputed` equals 0.
 
 
 ```{r}
 qf <-  qf |>
-  filterFeatures(~ EG.Qvalue <= 0.01 & #1.
-                     PG.Qvalue <= 0.01 &  #1.
+  filterFeatures(~ EG_Qvalue <= 0.01 & #1.
+                     PG_Qvalue <= 0.01 &  #1.
 #                     Lib.Q.Value <= 0.01 & #1.
-#                     Lib.PG.Q.Value <= 0.01 & #1.
-                     EG.PrecursorId != "" & #2.
-                     EG.IsDecoy == 0 & #3. (Note, that this filter is not available with previous versions of DIA-NN, as the report.tsv file did not include a Decoy column. So other strategies are needed if Decoys are in the output file.)
-                     PEP.IsProteotypic == 1) #4.
+#                     Lib.PG_Q.Value <= 0.01 & #1.
+                     EG_PrecursorId != "" & #2.
+                     EG_IsDecoy == 0 & #3.
+                     PEP_IsProteotypic == 1 & #4
+                     EG_IsImputed == 0) #5 
 ```
 
 
@@ -253,30 +296,28 @@ It can be shown that filtering will not induce bias results when the filtering c
 
 ### Assay joining
 
-Up to now, the data from different runs were kept in separate assays. We can now join the normalised sets into an precursor set using joinAssays(). Sets are joined by stacking the columns (samples) in a matrix and rows (features) are matched according to a row identifier, here the `Precursor.Id`.
+Up to now, the data from different runs were kept in separate assays. We can now join the normalised sets into an precursor set using joinAssays(). Sets are joined by stacking the columns (samples) in a matrix and rows (features) are matched according to a row identifier, here the `EG_PrecursorId`.
 We will store the result in the assay with name: `precursor`.
 
 ```{r}
 (qf <- joinAssays(
   x = qf,
   i = names(qf),
-  fcol = "EG.PrecursorId",
+  fcol = "EG_PrecursorId",
   name = "precursors"
   ))
 ```
 
 ### Filtering: Remove highly missing precursors
 
-We keep peptides that were observed at last 5 times out of the $n
+We keep peptides that were observed at last 4 times out of the $n
 = 9$ samples, so that we can estimate the peptide characteristics. 
 We tolerate the following proportion of NAs:
-$\text{pNA} = \frac{(n - 5)}{n} = 0.444$, so we keep peptides that
-are observed in at least 55.6% of the samples, which corresponds to one treatment condition. This is an arbitrary
-value that may need to be adjusted depending on the experiment and the
-data set.
+$\text{pNA} = \frac{(n - 4)}{n} = 0.556$, so we keep peptides that
+are observed in at least 44.4% of the samples, which corresponds to one treatment condition. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.
 
 ```{r}
-nObs <- 5
+nObs <- 4
 n <- ncol(qf[["precursors"]])
 
 (qf <- filterNA(qf, i = "precursors", pNA = (n - nObs) / n))
@@ -287,7 +328,7 @@ n <- ncol(qf[["precursors"]])
 
 Here, we remove proteins that can only be found by one peptide, as such proteins may not be trustworthy.
 
-1. We first calculate how many distinct peptides map to each protein (`Protein.id`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
+1. We first calculate how many distinct peptides map to each protein group (`PG_ProteinGroups`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
 
 2. We store this information in the row data of the precursors assay
 
@@ -298,9 +339,9 @@ Here, we remove proteins that can only be found by one peptide, as such proteins
 pepsPerProtDf <- qf[["precursors"]] |> 
     rowData() |> 
     data.frame() |>
-    dplyr::select("PEP.StrippedSequence", "PG.ProteinAccessions") |>
-    group_by(PG.ProteinAccessions) |>
-    mutate(pepsPerProt = PEP.StrippedSequence |>
+    dplyr::select("PEP_StrippedSequence", "PG_ProteinGroups") |>
+    group_by(PG_ProteinGroups) |>
+    mutate(pepsPerProt = PEP_StrippedSequence |>
                unique() |> length()
            ) #1.
 
@@ -334,8 +375,7 @@ systematic fluctuations from run-to-run that shift the measured
 intensity distribution. We can this explore as follows:
 
 1. We extract the sets containing the log transformed data. This is 
-performed using `QFeatures`' 3-way subsetting^[We will explain this
-with more details at the end of the [summarisation step](#sec-summarisation)].
+performed using `QFeatures`' 3-way subsetting.
 2. We use `longForm()` to convert the `QFeatures` object into a long
 table, including `condition` and `concentration` for filtering and
 colouring.
@@ -386,7 +426,7 @@ $$
 y_{ip}^{\text{norm}} = y_{ip} - \log_2(nf_i)
 $$
 
-with $y_ip$ the log2-transformed intensities and $nf_i$ the log2-transformed norm factor. Upon normalisation, we can see
+with $y_ip$ the log2-transformed intensities and $nf_i$ the log2-transformed norm factoR_ Upon normalisation, we can see
 that the distribution of the $y_{ip}^{\text{norm}}$ nicely overlap (using the same code as above)
 
 ```{r}
@@ -419,7 +459,7 @@ It is implemented in the `maxLFQ` function of the `iq` package.
 
 `aggregateFeatures()` streamlines summarisation. It requires the name
 of a `rowData` column to group the precursors into proteins (or
-protein groups), here `Protein.Ids`. We provide the summarisation
+protein groups), here `PG_ProteinGroups`. We provide the summarisation
 approach through the `fun` argument. Other summarisation methods
 are available from the `MsCoreUtils` package, see `?aggregateFeatures`
 for a comprehensive list. The function will return a `QFeatures`
@@ -429,25 +469,71 @@ object with a new set that we called `proteins`.
 (qf <- aggregateFeatures(
   qf, i = "precursors_norm", 
   name = "proteins",
-  fcol = "PG.ProteinGroups", 
+  fcol = "PG_ProteinGroups", 
   fun = function(X) iq::maxLFQ(X)$estimate
 ))
 ```
 
 
 
-# Data exploration
+# Data exploration and QC
 
 Data exploration aims to highlight the main sources of variation in
 the data prior to data modelling and can pinpoint to outlying or
 off-behaving samples. 
 
+## Marginal distribution at precursor and protein level 
 
-First assess distribution of marginal protein intensities. 
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = condition,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 precursor intensities")
+```
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = condition,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 precursor intensities")
+```
 
 ```{r}
 qf[, , "proteins"] |>
-    longForm(colvars = colnames(colData(qf))) |> 
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = condition,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 protein intensities")
+```
+
+```{r}
+qf[, , "proteins"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + 
@@ -459,18 +545,90 @@ qf[, , "proteins"] |>
    labs(subtitle = "Normalised log2 protein intensities")
 ```
 
-Another common approach for data exploration is to
+## Charge state 
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf)), rowvars = "FG_Charge") |>
+  as.data.frame() |>
+  filter(!is.na(value)) |>
+  filter(FG_Charge<=4) |> 
+ggplot(aes(x = sampleId)) +
+  geom_bar(aes(fill = factor(FG_Charge, levels = 4:1)),
+           colour = "black") +
+  labs(title = "Peptide types per sample",
+       x = "Sample",
+       fill = "Charge state") +
+  theme_bw()
+```
+
+## Identifications per sample 
+
+```{r}
+qf[,,"precursors_norm"] |> 
+  longForm(colvars = colnames(colData(qf)), 
+           rowvars= c("EG_PrecursorId", 
+                      "PG_ProteinGroups", 
+                      "PEP_StrippedSequence",
+                      "FG_Charge")) |>
+  data.frame() |>
+  filter(!is.na(value)) |>
+  mutate(cond_rep = paste0("ratio", condition, "_", rep)) |>
+  group_by(condition, cond_rep) |>
+  summarise(Precursors = length(unique(EG_PrecursorId)),
+            `Protein Groups` = length(unique(PG_ProteinGroups))) |> 
+  pivot_longer(-(1:2),
+               names_to = "Feature",
+               values_to = "IDs") |> 
+  ggplot(aes(x = cond_rep, y = IDs, fill = condition)) +
+  geom_col() +
+  #scale_fill_observable() +
+  facet_wrap(~Feature,
+             scales = "free_y") +
+  labs(title = "Precursor and protein group identificiations per sample",
+       x = "Sample",
+       y = "Identifications") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+# Data Modeling (Robust Regression){#sec-modelling}
+```
+
+## Dimensionality reduction plot 
+
+A common approach for data exploration is to
 perform dimension reduction, such as Multi Dimensional Scaling (MDS).
 We will first extract the set to explore along the sample annotations
 (used for plot colouring).
 
 ```{r}
-qf |> 
-  getWithColData("proteins") |> 
+getWithColData(qf, "proteins") |> 
   as("SingleCellExperiment") |> 
-  scater::runMDS(exprs_values = 1) |> 
-  scater::plotMDS(colour_by = "condition", shape_by = "rep") 
+  runMDS(exprs_values = 1) |> 
+  plotMDS(colour_by = "condition", shape_by = "rep") 
 ```
+
+
+This plot reveals interesting information. First, we see that the
+samples are nicely separated according to their spike-in condition.
+Interestingly, the conditions are sorted by the concentration.
+
+## Correlation matrix
+
+```{r}
+corMat <- qf[["proteins"]] |> 
+  assay() |>
+  cor(method = "spearman", use = "pairwise.complete.obs") 
+ 
+colnames(corMat) <- qf$sampleId
+rownames(corMat) <- qf$sampleId
+corMat |> 
+  ggcorrplot::ggcorrplot() +
+  scale_fill_viridis_c() +
+  labs(title = "Correlation matrix",
+       fill = "Correlation") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
 
 # Data Modeling (Robust Regression){#sec-modelling}
 
@@ -617,7 +775,7 @@ We use a similar operation to construct the name of the corresponding contrast.
 We now evaluate of the estimated fold changes correspond to the real fold changes.
 
 1. We plot the log fold changes in function of the spikein condition and color according to spikein condition.
-2. We add a boxplot layer.
+2. We add a boxplot layeR_
 3. We use custom colors. 
 4. We add a vertical line at 0, which corresponds to the known log2 fold change for yeast proteins
 5. We add a vertical lines for known log2 fold changes of the spiked UPS proteins. 

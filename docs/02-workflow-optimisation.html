@@ -516,10 +516,10 @@ window.Quarto = {
 </section>
 <section id="filtering-remove-highly-missing-precursors" class="level3" data-number="4.2.3">
 <h3 data-number="4.2.3" class="anchored" data-anchor-id="filtering-remove-highly-missing-precursors"><span class="header-section-number">4.2.3</span> Filtering: Remove highly missing precursors</h3>
-<p>We keep peptides that were observed at last 5 times out of the <span class="math inline">\(n
-= 9\)</span> samples, so that we can estimate the peptide characteristics. We tolerate the following proportion of NAs: <span class="math inline">\(\text{pNA} = \frac{(n - 5)}{n} = 0.45\)</span>, so we keep peptides that are observed in at least 55% of the samples. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.</p>
+<p>We keep peptides that were observed at last 4 times out of the <span class="math inline">\(n
+= 9\)</span> samples, so that we can estimate the peptide characteristics. We tolerate the following proportion of NAs: <span class="math inline">\(\text{pNA} = \frac{(n - 4)}{n} = 0.556\)</span>, so we keep peptides that are observed in at least 44.4% of the samples, which corresponds to one treatment condition. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>nObs <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>nObs <span class="ot">&lt;-</span> <span class="dv">4</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="fu">ncol</span>(qf[[<span class="st">"precursors"</span>]])</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>(qf <span class="ot">&lt;-</span> <span class="fu">filterNA</span>(qf, <span class="at">i =</span> <span class="st">"precursors"</span>, <span class="at">pNA =</span> (n <span class="sc">-</span> nObs) <span class="sc">/</span> n))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -532,7 +532,7 @@ window.Quarto = {
  ...
  [8] B000306_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_3: SummarizedExperiment with 32829 rows and 1 columns 
  [9] B000310_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_3: SummarizedExperiment with 32128 rows and 1 columns 
- [10] precursors: SummarizedExperiment with 33156 rows and 9 columns </code></pre>
+ [10] precursors: SummarizedExperiment with 34796 rows and 9 columns </code></pre>
 </div>
 </div>
 </section>
@@ -540,7 +540,7 @@ window.Quarto = {
 <h3 data-number="4.2.4" class="anchored" data-anchor-id="filter-one-hit-wonders"><span class="header-section-number">4.2.4</span> Filter one-hit wonders</h3>
 <p>Here, we remove proteins that can only be found by one peptide, as such proteins may not be trustworthy.</p>
 <ol type="1">
-<li><p>We first calculate how many distinct peptides map to each protein (<code>Protein.id</code>). We use the stripped precursor sequence, i.e.&nbsp;sequence of the base peptide for this purpose.</p></li>
+<li><p>We first calculate how many distinct peptides map to each protein (<code>Protein.Group</code>). We use the stripped precursor sequence, i.e.&nbsp;sequence of the base peptide for this purpose.</p></li>
 <li><p>We store this information in the row data of the precursors assay</p></li>
 <li><p>We filter precursors of one-hit wonder proteins.</p></li>
 </ol>
@@ -549,8 +549,8 @@ window.Quarto = {
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>pepsPerProtDf <span class="ot">&lt;-</span> qf[[<span class="st">"precursors"</span>]] <span class="sc">|&gt;</span> </span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rowData</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="st">"Stripped.Sequence"</span>, <span class="st">"Protein.Ids"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(Protein.Ids) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="st">"Stripped.Sequence"</span>, <span class="st">"Protein.Group"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(Protein.Group) <span class="sc">|&gt;</span></span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">pepsPerProt =</span> Stripped.Sequence <span class="sc">|&gt;</span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>               <span class="fu">unique</span>() <span class="sc">|&gt;</span> <span class="fu">length</span>()</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>           ) <span class="co">#1.</span></span>
@@ -1334,134 +1334,174 @@ condition8                        1          0          1</code></pre>
 <span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>iq<span class="sc">::</span><span class="fu">maxLFQ</span>(y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$estimate
-[1] 20.57494 21.42881 22.56073 20.62293 21.44205 22.55148 20.71444 21.46497
-[9] 22.68304
+[1] 20.53323 21.52162 22.58807 20.63971 21.48595 22.65723 20.61512 21.49817
+[9] 22.74086
 
 $annotation
 [1] ""</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">medpolish</span>(y, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>1: 20.08445
-2: 16.89575
-3: 16.29621
-Final: 16.29107</code></pre>
+<pre><code>1: 27.03885
+2: 21.51699
+3: 20.60512
+Final: 20.51207</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Median Polish Results (Dataset: "y")
 
-Overall: 21.67983
+Overall: 21.49856
 
 Row Effects:
-    ANRPFLVFIR3   EVPLNTIIFMGR2 LQPLDFKENAEQSR2    TSDQIHFFFAK3    TSDQIHFFFAK2 
-     1.18756046      0.74892151     -4.42356524      1.02741575     -0.18199279 
-      FSPENTRK2 LQPLDFKENAEQSR3        LQPLDFK2 
-    -1.49771568      0.07320434     -0.07320434 
+             ANRPFLVFIR3            EVPLNTIIFMGR2          LQPLDFKENAEQSR2 
+              1.45949968               0.80865066              -4.15512862 
+            TSDQIHFFFAK3                 FSPENTR2             TSDQIHFFFAK2 
+              1.15429948              -1.80192690              -0.03968189 
+             FRIEDGFSLK3                FSPENTRK2          LQPLDFKENAEQSR3 
+             -0.57284565              -1.43798653               0.20792709 
+                LQPLDFK2 EVPLNTIIFM(UniMod:35)GR2       ATEDEGSEQKIPEATNR3 
+              0.03968189               0.90031966              -0.35676250 
 
 Column Effects:
   B000254_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA 
-                                        -0.720301347 
+                                        -0.944476047 
   B000258_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA 
-                                         0.004610105 
+                                         0.131622701 
   B000262_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA 
-                                         1.040559871 
+                                         1.085461577 
 B000278_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_2 
-                                        -0.746362078 
+                                        -0.635781205 
 B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2 
-                                         0.002358862 
+                                        -0.001896752 
 B000286_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_2 
-                                         1.123182299 
+                                         1.199301101 
 B000302_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_3 
-                                        -0.710251928 
+                                        -1.060247490 
 B000306_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_3 
-                                        -0.190210363 
+                                        -0.126469561 
 B000310_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_3 
-                                         1.401119194 
+                                         1.299805343 
 
 Residuals:
-                B000254_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA
-ANRPFLVFIR3                                               -0.17199
-EVPLNTIIFMGR2                                             -0.34571
-LQPLDFKENAEQSR2                                            0.37291
-TSDQIHFFFAK3                                                    NA
-TSDQIHFFFAK2                                                    NA
-FSPENTRK2                                                       NA
-LQPLDFKENAEQSR3                                                 NA
-LQPLDFK2                                                   0.17199
-                B000258_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA
-ANRPFLVFIR3                                              -0.146868
-EVPLNTIIFMGR2                                             0.000000
-LQPLDFKENAEQSR2                                           0.849206
-TSDQIHFFFAK3                                             -0.247944
-TSDQIHFFFAK2                                             -0.808378
-FSPENTRK2                                                 0.000000
-LQPLDFKENAEQSR3                                           0.076890
-LQPLDFK2                                                  0.053157
-                B000262_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA
-ANRPFLVFIR3                                              0.4450546
-EVPLNTIIFMGR2                                           -0.0996985
-LQPLDFKENAEQSR2                                          0.5047349
-TSDQIHFFFAK3                                             0.0025712
-TSDQIHFFFAK2                                            -0.0025712
-FSPENTRK2                                                0.1122859
-LQPLDFKENAEQSR3                                         -0.0303951
-LQPLDFK2                                                -0.1210227
-                B000278_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_2
-ANRPFLVFIR3                                                -0.126906
-EVPLNTIIFMGR2                                               0.000000
-LQPLDFKENAEQSR2                                                   NA
-TSDQIHFFFAK3                                                      NA
-TSDQIHFFFAK2                                                      NA
-FSPENTRK2                                                   0.085637
-LQPLDFKENAEQSR3                                                   NA
-LQPLDFK2                                                          NA
-                B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2
-ANRPFLVFIR3                                                 0.055509
-EVPLNTIIFMGR2                                               0.324899
-LQPLDFKENAEQSR2                                            -0.375271
-TSDQIHFFFAK3                                                      NA
-TSDQIHFFFAK2                                                      NA
-FSPENTRK2                                                   0.172358
-LQPLDFKENAEQSR3                                            -0.055509
-LQPLDFK2                                                   -0.188957
-                B000286_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_2
-ANRPFLVFIR3                                                 0.469121
-EVPLNTIIFMGR2                                               0.061861
-LQPLDFKENAEQSR2                                            -1.022725
-TSDQIHFFFAK3                                               -0.558610
-TSDQIHFFFAK2                                                0.064095
-FSPENTRK2                                                  -0.061861
-LQPLDFKENAEQSR3                                             0.177862
-LQPLDFK2                                                   -0.139901
-                B000302_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_3
-ANRPFLVFIR3                                                  0.00000
-EVPLNTIIFMGR2                                                0.33170
-LQPLDFKENAEQSR2                                             -0.61051
-TSDQIHFFFAK3                                                      NA
-TSDQIHFFFAK2                                                      NA
-FSPENTRK2                                                         NA
-LQPLDFKENAEQSR3                                                   NA
-LQPLDFK2                                                          NA
-                B000306_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_3
-ANRPFLVFIR3                                                 1.048992
-EVPLNTIIFMGR2                                               0.669922
-LQPLDFKENAEQSR2                                            -1.134492
-TSDQIHFFFAK3                                                0.000000
-TSDQIHFFFAK2                                                0.015427
-FSPENTRK2                                                  -0.416767
-LQPLDFKENAEQSR3                                            -0.030630
-LQPLDFK2                                                    0.000000
-                B000310_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_3
-ANRPFLVFIR3                                               -0.0042931
-EVPLNTIIFMGR2                                             -0.4397209
-LQPLDFKENAEQSR2                                            0.7299667
-TSDQIHFFFAK3                                               0.2191540
-TSDQIHFFFAK2                                              -0.9434469
-FSPENTRK2                                                 -1.1594647
-LQPLDFKENAEQSR3                                            0.0278239
-LQPLDFK2                                                   0.0042931</code></pre>
+                         B000254_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA
+ANRPFLVFIR3                                                       -0.038487
+EVPLNTIIFMGR2                                                      0.000000
+LQPLDFKENAEQSR2                                                    0.509919
+TSDQIHFFFAK3                                                             NA
+FSPENTR2                                                                 NA
+TSDQIHFFFAK2                                                             NA
+FRIEDGFSLK3                                                       -0.253588
+FSPENTRK2                                                                NA
+LQPLDFKENAEQSR3                                                          NA
+LQPLDFK2                                                           0.464550
+EVPLNTIIFM(UniMod:35)GR2                                                 NA
+ATEDEGSEQKIPEATNR3                                                       NA
+                         B000258_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA
+ANRPFLVFIR3                                                      -0.3590779
+EVPLNTIIFMGR2                                                     0.0000000
+LQPLDFKENAEQSR2                                                   0.6404990
+TSDQIHFFFAK3                                                     -0.3150982
+FSPENTR2                                                                 NA
+TSDQIHFFFAK2                                                     -0.8909601
+FRIEDGFSLK3                                                              NA
+FSPENTRK2                                                         0.0000000
+LQPLDFKENAEQSR3                                                   0.0018968
+LQPLDFK2                                                          0.0000000
+EVPLNTIIFM(UniMod:35)GR2                                                 NA
+ATEDEGSEQKIPEATNR3                                                0.2753182
+                         B000262_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA
+ANRPFLVFIR3                                                        0.307713
+EVPLNTIIFMGR2                                                     -0.024830
+LQPLDFKENAEQSR2                                                    0.370896
+TSDQIHFFFAK3                                                       0.010285
+FSPENTR2                                                          -0.304741
+TSDQIHFFFAK2                                                      -0.010285
+FRIEDGFSLK3                                                              NA
+FSPENTRK2                                                          0.187154
+LQPLDFKENAEQSR3                                                   -0.030521
+LQPLDFK2                                                          -0.099312
+EVPLNTIIFM(UniMod:35)GR2                                           0.329396
+ATEDEGSEQKIPEATNR3                                                       NA
+                         B000278_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_2
+ANRPFLVFIR3                                                         -0.339116
+EVPLNTIIFMGR2                                                        0.000000
+LQPLDFKENAEQSR2                                                            NA
+TSDQIHFFFAK3                                                               NA
+FSPENTR2                                                                   NA
+TSDQIHFFFAK2                                                               NA
+FRIEDGFSLK3                                                                NA
+FSPENTRK2                                                            0.085637
+LQPLDFKENAEQSR3                                                            NA
+LQPLDFK2                                                                   NA
+EVPLNTIIFM(UniMod:35)GR2                                                   NA
+ATEDEGSEQKIPEATNR3                                                         NA
+                         B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2
+ANRPFLVFIR3                                                         -0.026198
+EVPLNTIIFMGR2                                                        0.455402
+LQPLDFKENAEQSR2                                                     -0.453475
+TSDQIHFFFAK3                                                               NA
+FSPENTR2                                                                   NA
+TSDQIHFFFAK2                                                               NA
+FRIEDGFSLK3                                                                NA
+FSPENTRK2                                                            0.302861
+LQPLDFKENAEQSR3                                                      0.000000
+LQPLDFK2                                                            -0.111611
+EVPLNTIIFM(UniMod:35)GR2                                             0.121074
+ATEDEGSEQKIPEATNR3                                                         NA
+                         B000286_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_2
+ANRPFLVFIR3                                                          0.297085
+EVPLNTIIFMGR2                                                        0.102035
+LQPLDFKENAEQSR2                                                     -1.191258
+TSDQIHFFFAK3                                                        -0.585590
+FSPENTR2                                                            -0.308477
+TSDQIHFFFAK2                                                         0.021687
+FRIEDGFSLK3                                                          0.095383
+FSPENTRK2                                                           -0.021687
+LQPLDFKENAEQSR3                                                      0.143042
+LQPLDFK2                                                            -0.152884
+EVPLNTIIFM(UniMod:35)GR2                                            -0.114765
+ATEDEGSEQKIPEATNR3                                                   0.399466
+                         B000302_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_3
+ANRPFLVFIR3                                                           0.24601
+EVPLNTIIFMGR2                                                         0.78992
+LQPLDFKENAEQSR2                                                      -0.36100
+TSDQIHFFFAK3                                                               NA
+FSPENTR2                                                                   NA
+TSDQIHFFFAK2                                                               NA
+FRIEDGFSLK3                                                                NA
+FSPENTRK2                                                                  NA
+LQPLDFKENAEQSR3                                                            NA
+LQPLDFK2                                                                   NA
+EVPLNTIIFM(UniMod:35)GR2                                                   NA
+ATEDEGSEQKIPEATNR3                                                   -0.24601
+                         B000306_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_3
+ANRPFLVFIR3                                                         0.8969377
+EVPLNTIIFMGR2                                                       0.7300775
+LQPLDFKENAEQSR2                                                    -1.2830435
+TSDQIHFFFAK3                                                       -0.0069988
+FSPENTR2                                                            0.4386879
+TSDQIHFFFAK2                                                       -0.0069988
+FRIEDGFSLK3                                                         0.0170767
+FSPENTRK2                                                          -0.3566108
+LQPLDFKENAEQSR3                                                    -0.0454679
+LQPLDFK2                                                            0.0069988
+EVPLNTIIFM(UniMod:35)GR2                                                   NA
+ATEDEGSEQKIPEATNR3                                                         NA
+                         B000310_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_3
+ANRPFLVFIR3                                                          0.012038
+EVPLNTIIFMGR2                                                       -0.211180
+LQPLDFKENAEQSR2                                                      0.749800
+TSDQIHFFFAK3                                                         0.380540
+FSPENTR2                                                             0.297365
+TSDQIHFFFAK2                                                        -0.797488
+FRIEDGFSLK3                                                         -0.012038
+FSPENTRK2                                                           -0.930924
+LQPLDFKENAEQSR3                                                      0.181371
+LQPLDFK2                                                             0.179677
+EVPLNTIIFM(UniMod:35)GR2                                            -0.276490
+ATEDEGSEQKIPEATNR3                                                  -0.298075</code></pre>
 </div>
 </div>
 <div class="cell">

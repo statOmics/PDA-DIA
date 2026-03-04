@@ -52,41 +52,9 @@ Three QFeatures objects are available (you can simply modify the url above repla
 # Staes spike-in study - Spectronaut output
 
 Redo the data analysis for the spectronaut output file. 
-Modify [Rmarkdown script](./staes-median-maxLFQ.html). 
-Keep the same processing steps. 
-Below you can see the mappings of the DIA-NN variables to their spectronaut counterparts.
 
-Link to spectronaut file: 
-
-```{r eval=FALSE}
-precursorFile <- "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein248-staesetal2024-spectronaut.parquet"
-```
-
-```{r eval = FALSE}
-precursors <- precursors |> 
-  select(
-         R.FileName, #Run, 
-         EG.PrecursorId, #Precursor.Id, 
-         EG.ModifiedSequence, #Modified.Sequence, 
-         PEP.StrippedSequence, #Stripped.Sequence, 
-         FG.Charge, #Precursor.Charge, 
-         PG.ProteinGroups, #Protein.Group, 
-         PG.ProteinNames, #Protein.Names,
-         PG.ProteinAccessions, #Protein.Ids,
-         PG.Genes, #Genes,
-         FG.MS2RawQuantity, #Precursor.Quantity,
-         FG.MS2Quantity, #No DIA-NN counterpart 
-         FG.Quantity, #Precursor.Normalised, 
-         FG.MS1RawQuantity, #Ms1.Area,
-         FG.MS1Quantity, #Ms1.Normalised #No real DIA-NN counterpart 
-         EG.Qvalue, #Q.Value, 
-         #No spectronaut counterpart #Lib.Q.Value,
-         PG.Qvalue, # PG.Q.Value,
-         #No spectronaut counterpart #Lib.PG.Q.Value
-         PEP.IsProteotypic, #Proteotypic,
-         EG.IsDecoy, #Decoy,
-         EG.ApexRT) #RT)
-```
+- [Spectronaut - Raw MS2](01-dataprocessing-spectronaut.qmd)
+- [Spectronaut - Processed MS2](01-dataprocessing-spectronaut-pn.qmd)
 
 
 # References

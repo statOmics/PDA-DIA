@@ -100,6 +100,7 @@ library("ComplexHeatmap")
 library("purrr")
 library("tibble")
 library("scater")
+library("ggcorrplot")
 ```
 
 ## Parallelisation {#sec-parallel}
@@ -454,16 +455,14 @@ assay(qf [["precursors"]])[1:5, 1:5]
 
 ### Filtering: Remove highly missing precursors
 
-We keep peptides that were observed at last 5 times out of the $n
+We keep peptides that were observed at last 4 times out of the $n
 = 9$ samples, so that we can estimate the peptide characteristics. 
 We tolerate the following proportion of NAs:
-$\text{pNA} = \frac{(n - 5)}{n} = 0.444$, so we keep peptides that
-are observed in at least 55.6% of the samples, which corresponds to one treatment condition. This is an arbitrary
-value that may need to be adjusted depending on the experiment and the
-data set.
+$\text{pNA} = \frac{(n - 4)}{n} = 0.556$, so we keep peptides that
+are observed in at least 44.4% of the samples, which corresponds to one treatment condition. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.
 
 ```{r}
-nObs <- 5
+nObs <- 4
 n <- ncol(qf[["precursors"]])
 
 (qf <- filterNA(qf, i = "precursors", pNA = (n - nObs) / n))
@@ -474,7 +473,7 @@ n <- ncol(qf[["precursors"]])
 
 Here, we remove proteins that can only be found by one peptide, as such proteins may not be trustworthy.
 
-1. We first calculate how many distinct peptides map to each protein (`Protein.id`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
+1. We first calculate how many distinct peptides map to each protein (`Protein.Group`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
 
 2. We store this information in the row data of the precursors assay
 
@@ -485,8 +484,8 @@ Here, we remove proteins that can only be found by one peptide, as such proteins
 pepsPerProtDf <- qf[["precursors"]] |> 
     rowData() |> 
     data.frame() |>
-    dplyr::select("Stripped.Sequence", "Protein.Ids") |>
-    group_by(Protein.Ids) |>
+    dplyr::select("Stripped.Sequence", "Protein.Group") |>
+    group_by(Protein.Group) |>
     mutate(pepsPerProt = Stripped.Sequence |>
                unique() |> length()
            ) #1.
@@ -733,7 +732,7 @@ It is implemented in the `maxLFQ` function of the `iq` package.
 
 `aggregateFeatures()` streamlines summarisation. It requires the name
 of a `rowData` column to group the precursors into proteins (or
-protein groups), here `Protein.Ids`. We provide the summarisation
+protein groups), here `Protein.Group`. We provide the summarisation
 approach through the `fun` argument. Other summarisation methods
 are available from the `MsCoreUtils` package, see `?aggregateFeatures`
 for a comprehensive list. The function will return a `QFeatures`
@@ -793,11 +792,124 @@ The data processing is complete.
 plot(qf)
 ```
 
-# Data exploration
+# Data exploration and QC
 
 Data exploration aims to highlight the main sources of variation in
 the data prior to data modelling and can pinpoint to outlying or
 off-behaving samples. 
+
+## Marginal distribution at precursor and protein level 
+
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = condition,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 precursor intensities")
+```
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = condition,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 precursor intensities")
+```
+
+```{r}
+qf[, , "proteins"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = condition,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 protein intensities")
+```
+
+```{r}
+qf[, , "proteins"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = condition,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Normalised log2 protein intensities")
+```
+
+## Charge state 
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf)), rowvars = "Precursor.Charge") |>
+  as.data.frame() |>
+  filter(!is.na(value)) |>
+  filter(Precursor.Charge<=4) |> 
+ggplot(aes(x = sampleId)) +
+  geom_bar(aes(fill = factor(Precursor.Charge, levels = 4:1)),
+           colour = "black") +
+  labs(title = "Peptide types per sample",
+       x = "Sample",
+       fill = "Charge state") +
+  theme_bw()
+```
+
+## Identifications per sample 
+
+```{r}
+qf[,,"precursors_norm"] |> 
+  longForm(colvars = colnames(colData(qf)), 
+           rowvars= c("Precursor.Id", 
+                      "Protein.Group", 
+                      "Stripped.Sequence",
+                      "Precursor.Charge")) |>
+  data.frame() |>
+  filter(!is.na(value)) |>
+  mutate(cond_rep = paste0("ratio", condition, "_", rep)) |>
+  group_by(condition, cond_rep) |>
+  summarise(Precursors = length(unique(Precursor.Id)),
+            `Protein Groups` = length(unique(Protein.Group))) |> 
+  pivot_longer(-(1:2),
+               names_to = "Feature",
+               values_to = "IDs") |> 
+  ggplot(aes(x = cond_rep, y = IDs, fill = condition)) +
+  geom_col() +
+  #scale_fill_observable() +
+  facet_wrap(~Feature,
+             scales = "free_y") +
+  labs(title = "Precursor and protein group identificiations per sample",
+       x = "Sample",
+       y = "Identifications") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+# Data Modeling (Robust Regression){#sec-modelling}
+```
+
+## Dimensionality reduction plot 
 
 A common approach for data exploration is to
 perform dimension reduction, such as Multi Dimensional Scaling (MDS).
@@ -807,6 +919,7 @@ We will first extract the set to explore along the sample annotations
 ```{r}
 se <- getWithColData(qf, "proteins")
 ```
+
 
 We then use the `scater` package to compute and plot the PCA. For
 technical reasons, it requires `SingleCellExperiment` class object,
@@ -828,17 +941,31 @@ This plot reveals interesting information. First, we see that the
 samples are nicely separated according to their spike-in condition.
 Interestingly, the conditions are sorted by the concentration.
 
-The plot also reveals one outlying sample for spike-in condition 4. 
+## Correlation matrix
+
+```{r}
+corMat <- qf[["proteins"]] |> 
+  assay() |>
+  cor(method = "spearman", use = "pairwise.complete.obs") 
+
+colnames(corMat) <- qf$sampleId
+rownames(corMat) <- qf$sampleId
+corMat |> 
+  ggcorrplot::ggcorrplot() +
+  scale_fill_viridis_c() +
+  labs(title = "Correlation matrix",
+       fill = "Correlation") +
+  theme(axis.text.x = element_text(angle = 90))
+```
 
 
-# Data Modeling (Robust Regression){#sec-modelling}
-
+# Data Modeling (Robust Regression) 
 
 We model the preprocessed data to answer biologically relevant
 questions. As described above, each sample has been synthetically
 created to contain a constant human background where E. coli lysates
 were spiked in at five different concentration. Each sample
-preparation has been replicated four times. 
+preparation has been replicated three times. 
 So, the key question is "can our
 model retrieve the proteins that have been spiked in across the
 conditions?" Moreover, since we know the expected protein abundance in

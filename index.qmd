@@ -57,6 +57,7 @@ This parts introduces the user to the key concepts for data processing in differ
 -  [Basic concepts](01-dataprocessing.html)
 -  [Tutorial data processing](01-tutorial-data-processing.html)
 -  [Wrap-up: Workflow optimisation](02-workflow-optimisation.html) 
+-  [Spectronaut - Raw MS2](01-dataprocessing-spectronaut.qmd), [Spectronaut - Processed MS2](01-dataprocessing-spectronaut-pn.qmd)
 
 # Statistical Inference & Design concepts
 
@@ -108,7 +109,8 @@ BiocManager::install(c(
    "QFeatures",
    "msqrob2",
    "kableExtra",
-   "data.table"
+   "data.table",
+   "ggcorrplot"
 ))
 ```
 

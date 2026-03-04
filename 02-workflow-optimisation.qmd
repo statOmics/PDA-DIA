@@ -249,16 +249,14 @@ We will store the result in the assay with name: `precursors`.
 
 ### Filtering: Remove highly missing precursors
 
-We keep peptides that were observed at last 5 times out of the $n
+We keep peptides that were observed at last 4 times out of the $n
 = 9$ samples, so that we can estimate the peptide characteristics. 
 We tolerate the following proportion of NAs:
-$\text{pNA} = \frac{(n - 5)}{n} = 0.45$, so we keep peptides that
-are observed in at least 55% of the samples. This is an arbitrary
-value that may need to be adjusted depending on the experiment and the
-data set.
+$\text{pNA} = \frac{(n - 4)}{n} = 0.556$, so we keep peptides that
+are observed in at least 44.4% of the samples, which corresponds to one treatment condition. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.
 
 ```{r}
-nObs <- 5
+nObs <- 4
 n <- ncol(qf[["precursors"]])
 
 (qf <- filterNA(qf, i = "precursors", pNA = (n - nObs) / n))
@@ -269,7 +267,7 @@ n <- ncol(qf[["precursors"]])
 
 Here, we remove proteins that can only be found by one peptide, as such proteins may not be trustworthy.
 
-1. We first calculate how many distinct peptides map to each protein (`Protein.id`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
+1. We first calculate how many distinct peptides map to each protein (`Protein.Group`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
 
 2. We store this information in the row data of the precursors assay
 
@@ -280,8 +278,8 @@ Here, we remove proteins that can only be found by one peptide, as such proteins
 pepsPerProtDf <- qf[["precursors"]] |> 
     rowData() |> 
     data.frame() |>
-    dplyr::select("Stripped.Sequence", "Protein.Ids") |>
-    group_by(Protein.Ids) |>
+    dplyr::select("Stripped.Sequence", "Protein.Group") |>
+    group_by(Protein.Group) |>
     mutate(pepsPerProt = Stripped.Sequence |>
                unique() |> length()
            ) #1.
@@ -896,8 +894,6 @@ print(
 - If retention times are comparable, additional retention time normalisation seems to work well. 
 
 ## Summarisation 
-
-
 
 ```{r}
 protName <- "UPS|P01008ups|ANT3_HUMAN_UPS"

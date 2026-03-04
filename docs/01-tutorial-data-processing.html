@@ -255,36 +255,11 @@ div.csl-indent {
 </section>
 <section id="staes-spike-in-study---spectronaut-output" class="level1" data-number="3">
 <h1 data-number="3"><span class="header-section-number">3</span> Staes spike-in study - Spectronaut output</h1>
-<p>Redo the data analysis for the spectronaut output file. Modify <a href="./staes-median-maxLFQ.html">Rmarkdown script</a>. Keep the same processing steps. Below you can see the mappings of the DIA-NN variables to their spectronaut counterparts.</p>
-<p>Link to spectronaut file:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">&lt;-</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein248-staesetal2024-spectronaut.parquet"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> precursors <span class="sc">|&gt;</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>         R.FileName, <span class="co">#Run, </span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>         EG.PrecursorId, <span class="co">#Precursor.Id, </span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>         EG.ModifiedSequence, <span class="co">#Modified.Sequence, </span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>         PEP.StrippedSequence, <span class="co">#Stripped.Sequence, </span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>         FG.Charge, <span class="co">#Precursor.Charge, </span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>         PG.ProteinGroups, <span class="co">#Protein.Group, </span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>         PG.ProteinNames, <span class="co">#Protein.Names,</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>         PG.ProteinAccessions, <span class="co">#Protein.Ids,</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>         PG.Genes, <span class="co">#Genes,</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>         FG.MS2RawQuantity, <span class="co">#Precursor.Quantity,</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>         FG.MS2Quantity, <span class="co">#No DIA-NN counterpart </span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>         FG.Quantity, <span class="co">#Precursor.Normalised, </span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>         FG.MS1RawQuantity, <span class="co">#Ms1.Area,</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>         FG.MS1Quantity, <span class="co">#Ms1.Normalised #No real DIA-NN counterpart </span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>         EG.Qvalue, <span class="co">#Q.Value, </span></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>         <span class="co">#No spectronaut counterpart #Lib.Q.Value,</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>         PG.Qvalue, <span class="co"># PG.Q.Value,</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>         <span class="co">#No spectronaut counterpart #Lib.PG.Q.Value</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>         PEP.IsProteotypic, <span class="co">#Proteotypic,</span></span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>         EG.IsDecoy, <span class="co">#Decoy,</span></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>         EG.ApexRT) <span class="co">#RT)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+<p>Redo the data analysis for the spectronaut output file.</p>
+<ul>
+<li><a href="./01-dataprocessing-spectronaut.html">Spectronaut - Raw MS2</a></li>
+<li><a href="./01-dataprocessing-spectronaut-pn.html">Spectronaut - Processed MS2</a></li>
+</ul>
 </section>
 <section id="references" class="level1" data-number="4">
 
