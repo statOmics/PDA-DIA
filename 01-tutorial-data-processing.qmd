@@ -32,6 +32,34 @@ Examples of different quantities are:
 
 [1.d] Repeat the analysis, again use the basis script wiht median normalisation factors (`nf_log_med` function). First change the summarisation with the `aggregateFeatures` function by replacing maxLFQ with median polish (`fun = MsCoreUtils::medianPolish`), then use simple median summarisation (`fun = matrixStats::colMedians`).  (Note, that you also have to add an additional argument for median polish and median summarisation to handle missing values, i.e. add an additional argument `na.rm = TRUE`, i.e. replace `fun = function(X) iq::maxLFQ(X)$estimate` with `fun = MsCoreUtils::medianPolish, na.rm = TRUE`). What do you observe and try to explain this. 
 
+# Staes spike-in study - Spectronaut output
+
+Redo the data analysis for the spectronaut output file. 
+
+- [Spectronaut - Raw MS2](01-dataprocessing-spectronaut.qmd)
+- [Spectronaut - Processed MS2](01-dataprocessing-spectronaut-pn.qmd)
+
+# Van Leene et al. study. 
+
+This data is a subset of the data from [@VanLeeneEtal2026], where a limited Limited Proteolysis (LiP) Treatment was conducted with rapamicin. 
+The treatment consists of either 10 μM rapamycin (Sigma-Aldrich) in 0.1% dimethyl sulfoxide (DMSO; Sigma-Aldrich) or 0.1% DMSO as vehicle control. 
+
+Analyse the data to prioritise proteins that are DA between rapamicin and control. 
+Use either the DIA-NN or spectronaut output. 
+
+DIA-NN parquet file can be found online:
+
+```{r eval=FALSE} 
+precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-diann.parquet"
+```
+
+
+Spectronaut parquet file can be found online:
+
+```{r eval=FALSE} 
+precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-spectronaut.parquet"
+```
+
 # Breast cancer example
 
 Eighteen Estrogen Receptor Positive Breast cancer tissues from from patients treated with tamoxifen upon recurrence have been assessed in a proteomics study. Nine patients had a good outcome (or) and the other nine had a poor outcome (pd).
@@ -49,12 +77,7 @@ Three QFeatures objects are available (you can simply modify the url above repla
 2. For a 6 vs 6 comparison: cancer6x6.rds
 3. For a 9 vs 9 comparison: cancer9x9.rds
 
-# Staes spike-in study - Spectronaut output
 
-Redo the data analysis for the spectronaut output file. 
-
-- [Spectronaut - Raw MS2](01-dataprocessing-spectronaut.qmd)
-- [Spectronaut - Processed MS2](01-dataprocessing-spectronaut-pn.qmd)
 
 
 # References

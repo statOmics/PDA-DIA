@@ -203,9 +203,10 @@ div.csl-indent {
   <ul>
   <li><a href="#tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs" id="toc-tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs" class="nav-link active" data-scroll-target="#tutorial-on-data-processing-and-msqrob2-analysis-of-experiments-with-simple-designs">Tutorial on data processing and msqrob2 analysis of experiments with simple designs</a></li>
   <li><a href="#staes-spike-in-study-dia-nn-output" id="toc-staes-spike-in-study-dia-nn-output" class="nav-link" data-scroll-target="#staes-spike-in-study-dia-nn-output"><span class="header-section-number">1</span> Staes spike-in study (DIA-NN output)</a></li>
-  <li><a href="#breast-cancer-example" id="toc-breast-cancer-example" class="nav-link" data-scroll-target="#breast-cancer-example"><span class="header-section-number">2</span> Breast cancer example</a></li>
-  <li><a href="#staes-spike-in-study---spectronaut-output" id="toc-staes-spike-in-study---spectronaut-output" class="nav-link" data-scroll-target="#staes-spike-in-study---spectronaut-output"><span class="header-section-number">3</span> Staes spike-in study - Spectronaut output</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">4</span> References</a></li>
+  <li><a href="#staes-spike-in-study---spectronaut-output" id="toc-staes-spike-in-study---spectronaut-output" class="nav-link" data-scroll-target="#staes-spike-in-study---spectronaut-output"><span class="header-section-number">2</span> Staes spike-in study - Spectronaut output</a></li>
+  <li><a href="#van-leene-et-al.-study." id="toc-van-leene-et-al.-study." class="nav-link" data-scroll-target="#van-leene-et-al.-study."><span class="header-section-number">3</span> Van Leene et al.&nbsp;study.</a></li>
+  <li><a href="#breast-cancer-example" id="toc-breast-cancer-example" class="nav-link" data-scroll-target="#breast-cancer-example"><span class="header-section-number">4</span> Breast cancer example</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
   </ul>
 </nav>
 </nav>
@@ -239,12 +240,33 @@ div.csl-indent {
 <p>[1.c] Repeat the analysis starting from the <code>Precursor.Normalised</code> column. What do you observe? Are all data processing steps needed?</p>
 <p>[1.d] Repeat the analysis, again use the basis script wiht median normalisation factors (<code>nf_log_med</code> function). First change the summarisation with the <code>aggregateFeatures</code> function by replacing maxLFQ with median polish (<code>fun = MsCoreUtils::medianPolish</code>), then use simple median summarisation (<code>fun = matrixStats::colMedians</code>). (Note, that you also have to add an additional argument for median polish and median summarisation to handle missing values, i.e.&nbsp;add an additional argument <code>na.rm = TRUE</code>, i.e.&nbsp;replace <code>fun = function(X) iq::maxLFQ(X)$estimate</code> with <code>fun = MsCoreUtils::medianPolish, na.rm = TRUE</code>). What do you observe and try to explain this.</p>
 </section>
-<section id="breast-cancer-example" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Breast cancer example</h1>
+<section id="staes-spike-in-study---spectronaut-output" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Staes spike-in study - Spectronaut output</h1>
+<p>Redo the data analysis for the spectronaut output file.</p>
+<ul>
+<li><a href="./01-dataprocessing-spectronaut.html">Spectronaut - Raw MS2</a></li>
+<li><a href="./01-dataprocessing-spectronaut-pn.html">Spectronaut - Processed MS2</a></li>
+</ul>
+</section>
+<section id="van-leene-et-al.-study." class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Van Leene et al.&nbsp;study.</h1>
+<p>This data is a subset of the data from <span class="citation" data-cites="VanLeeneEtal2026">(<a href="#ref-VanLeeneEtal2026" role="doc-biblioref">Van Leene et al. 2026</a>)</span>, where a limited Limited Proteolysis (LiP) Treatment was conducted with rapamicin. The treatment consists of either 10 μM rapamycin (Sigma-Aldrich) in 0.1% dimethyl sulfoxide (DMSO; Sigma-Aldrich) or 0.1% DMSO as vehicle control.</p>
+<p>Analyse the data to prioritise proteins that are DA between rapamicin and control. Use either the DIA-NN or spectronaut output.</p>
+<p>DIA-NN parquet file can be found online:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">=</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-diann.parquet"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Spectronaut parquet file can be found online:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">=</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-spectronaut.parquet"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="breast-cancer-example" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Breast cancer example</h1>
 <p>Eighteen Estrogen Receptor Positive Breast cancer tissues from from patients treated with tamoxifen upon recurrence have been assessed in a proteomics study. Nine patients had a good outcome (or) and the other nine had a poor outcome (pd). The proteomes have been assessed using an LTQ-Orbitrap in data dependent acquisition (DDA) mode and the thermo output .RAW files were searched with MaxQuant (version 1.4.1.2) against the human proteome database (FASTA version 2012-09, human canonical proteome).</p>
 <p>The data are already processed and stored as QFeatures objects. They can be loaded in R using readRDS so you can immediately start at the data modeling. So you only have to read the data and you can start with section 5 Data exploration in the basic script.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/cancer3x3.rds"</span>,<span class="st">"rb"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/cancer3x3.rds"</span>,<span class="st">"rb"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Three QFeatures objects are available (you can simply modify the url above replacing the filename):</p>
 <ol type="1">
@@ -253,24 +275,19 @@ div.csl-indent {
 <li>For a 9 vs 9 comparison: cancer9x9.rds</li>
 </ol>
 </section>
-<section id="staes-spike-in-study---spectronaut-output" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> Staes spike-in study - Spectronaut output</h1>
-<p>Redo the data analysis for the spectronaut output file.</p>
-<ul>
-<li><a href="./01-dataprocessing-spectronaut.html">Spectronaut - Raw MS2</a></li>
-<li><a href="./01-dataprocessing-spectronaut-pn.html">Spectronaut - Processed MS2</a></li>
-</ul>
-</section>
-<section id="references" class="level1" data-number="4">
+<section id="references" class="level1" data-number="5">
 
 
 
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">4 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">5 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Staes2024" class="csl-entry" role="listitem">
 Staes, An, Teresa Mendes Maia, Sara Dufour, Robbin Bouwmeester, Ralf Gabriels, Lennart Martens, Kris Gevaert, Francis Impens, and Simon Devos. 2024. <span>“Benefit of in Silico Predicted Spectral Libraries in Data‑independent Acquisition Data Analysis Workflows.”</span> <em>Journal of Proteome Research</em> 23 (6): 2078–89. <a href="https://doi.org/10.1021/acs.jproteome.4c00048">https://doi.org/10.1021/acs.jproteome.4c00048</a>.
+</div>
+<div id="ref-VanLeeneEtal2026" class="csl-entry" role="listitem">
+Van Leene, Chloé, Emin Araftpoor, An Staes, Andrea Argentini, Marcel Bühler, Lieven Clement, and Kris Gevaert. 2026. <span>“Advancing <span>DIA</span>-Based Limited Proteolysis Workflows: Introducing <span>DIA</span>-<span>LiPA</span>.”</span> <em>Analytical Chemistry</em> 98 (7): 5499–5512. <a href="https://doi.org/10.1021/acs.analchem.5c07014">https://doi.org/10.1021/acs.analchem.5c07014</a>.
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
