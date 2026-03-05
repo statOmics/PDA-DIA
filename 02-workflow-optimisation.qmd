@@ -977,30 +977,4 @@ p_maxLFQ <- p1 +
      filter(Protein.Ids == protName)) + labs(subtitle = "maxLFQ")
 gridExtra::grid.arrange(p_median, p_medpolish, p_maxLFQ, nrow=1)
 ```
-### Median polish
 
-```{r}
-protDat <- qf[protName,,"precursors_norm_med"]
-y <- assay(protDat)
-iq::maxLFQ(y)
-fit <- stats::medpolish(y, na.rm = TRUE)
-fit
-```
-
-
-```{r}
-protFit <- protDat
-assay(protFit[["precursors_norm_med"]]) <- y - fit$residuals 
-protFitLong <-   protFit[,,"precursors_norm_med"] |>   longForm(colvars = colnames(colData(protFit)), rowvars = "Protein.Ids") |> data.frame()
-```
-
-
-```{r}
-gridExtra::grid.arrange(p1 + 
-    geom_line(
-    data = protFitLong,
-    mapping = aes(x=rowname, y=value, color=condition, group=runCol)) + labs(subtitle = "fit: ~ sample + precursor"), 
-    p_medpolish + labs(subtitle = "Summarization: sample effect"), 
-    nrow = 1
-)
-```

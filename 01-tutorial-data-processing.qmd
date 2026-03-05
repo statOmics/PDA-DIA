@@ -26,11 +26,12 @@ Examples of different quantities are:
 
 [1.a] Participants can perform an analysis using the [Rmarkdown script](./staes-median-maxLFQ.html). Here, we will use the `Precursor.Quantity` column. Follow the steps in the script and try to understand each of the analysis steps. We know the real FC for the spike in proteins and the yeast proteins (see description of the data). What do you observe?
 
-[1.b] Repeat the analysis and change the normalisation by using normalisation factors calculated based on the total intensity, i.e. by using the `nf_log_tot` function with arguments `nf_log_tot(qf, "precursors_log")`. What do you observe and try to explain this.
+[1.b] Repeat the analysis and change the normalisation by using normalisation factors calculated based on (i) the total intensity (`nf_log_tot` function with arguments `nf_log_tot(qf, "precursors_log")`) and (ii) median of ratio's method (`nf_log_medrat` function with arguments `nf_log_medrat(qf, "precursors_log")`). What do you observe and try to explain this.
 
 [1.c] Repeat the analysis starting from the `Precursor.Normalised` column. What do you observe? Are all data processing steps needed?
 
-[1.d] Repeat the analysis, again use the basis script wiht median normalisation factors (`nf_log_med` function). First change the summarisation with the `aggregateFeatures` function by replacing maxLFQ with median polish (`fun = MsCoreUtils::medianPolish`), then use simple median summarisation (`fun = matrixStats::colMedians`).  (Note, that you also have to add an additional argument for median polish and median summarisation to handle missing values, i.e. add an additional argument `na.rm = TRUE`, i.e. replace `fun = function(X) iq::maxLFQ(X)$estimate` with `fun = MsCoreUtils::medianPolish, na.rm = TRUE`). What do you observe and try to explain this. 
+[1.d] Repeat the analysis, again use the basis script with median normalisation factors (`nf_log_med` function). First change the summarisation with the `aggregateFeatures` function by replacing maxLFQ with median polish (`fun = MsCoreUtils::medianPolish`), then use simple median summarisation (`fun = matrixStats::colMedians`).  (Note, that you also have to add an additional argument for median polish and median summarisation to handle missing values, i.e. add an additional argument `na.rm = TRUE`, i.e. replace `fun = function(X) iq::maxLFQ(X)$estimate` with `fun = MsCoreUtils::medianPolish, na.rm = TRUE`). What do you observe and try to explain this. 
+
 
 # Staes spike-in study - Spectronaut output
 
@@ -38,6 +39,28 @@ Redo the data analysis for the spectronaut output file.
 
 - [Spectronaut - Raw MS2](01-dataprocessing-spectronaut.qmd)
 - [Spectronaut - Processed MS2](01-dataprocessing-spectronaut-pn.qmd)
+
+
+# Mouse Diet study (Spectronaut)
+
+With the PXD059421 data deposited on ProteomeXchange researchers study the molecular effects of dietary DINCH exposure, on the proteome, phosphoproteome and acetylome profiles of visceral (VIS) and subcutaneous (SC) adipose tissue in a model of diet-induced obesity in male and female C57BL/6N mice. This study includes data on visceral and subcutaneous adipose tissue of female and male mice that were either fed a standard plant-based diet (chow), a standard high-fat diet (HFD) or two HFD diets including doses of DINCH (4,500 ppm and 15,000 ppm). Three female and three male mice were used for each diet [@AldehoffEtAl2025].
+
+The data were downloaded from Pride and reprocessed using spectronaut. 
+Here, we will focus on the data from the proteome MS runs. 
+The spectronaut file can be imported using following parquet file: 
+
+```{r eval = FALSE}
+precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseDiet-spectronaut.parquet"
+```
+
+Note, that there is no EG_PrecursorId variable exported in the output. The PrecursorId, however, can be easily constructed using EG_ModifiedSequence and FG_Charge.
+
+```{r eval = FALSE}
+precursors <- precursors |> 
+  mutate(EG_PrecursorId = paste0(EG_ModifiedSequence, FG_Charge))
+```
+
+You only have to do the data processing (up to section 5.5 in the [basic script](./staes-median-maxLFQ.html)). We will continue with the modeling in the [tutorial Data modeling](03-tutorial-Design.html). 
 
 # Van Leene et al. study. 
 
@@ -57,33 +80,11 @@ DIA-NN parquet file can be found online:
 precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-diann.parquet"
 ```
 
-
 Spectronaut parquet file can be found online. **Parquet file only includes a limited number of variables**):
 
 ```{r eval=FALSE} 
 precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/rapamicin-spectronaut.parquet"
 ```
-
-
-
-# Breast cancer example
-
-Eighteen Estrogen Receptor Positive Breast cancer tissues from from patients treated with tamoxifen upon recurrence have been assessed in a proteomics study. Nine patients had a good outcome (or) and the other nine had a poor outcome (pd).
-The proteomes have been assessed using an LTQ-Orbitrap in data dependent acquisition (DDA) mode and the thermo output .RAW files were searched with MaxQuant (version 1.4.1.2) against the human proteome database (FASTA version 2012-09, human canonical proteome). 
-
-The data are already processed and stored as QFeatures objects. They can be loaded in R using readRDS so you can immediately start at the data modeling. So you only have to read the data and you can start with section 5 Data exploration in the basic script. 
-
-```{r eval=FALSE}
-qf <- readRDS(url("https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/cancer3x3.rds","rb"))
-```
-
-Three QFeatures objects are available (you can simply modify the url above replacing the filename):
-
-1. For a 3 vs 3 comparison: cancer3x3.rds
-2. For a 6 vs 6 comparison: cancer6x6.rds
-3. For a 9 vs 9 comparison: cancer9x9.rds
-
-
 
 
 # References

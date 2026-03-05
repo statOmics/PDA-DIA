@@ -56,7 +56,7 @@ This parts introduces the user to the key concepts for data processing in differ
 
 -  [Basic concepts](01-dataprocessing.html)
 -  [Tutorial data processing](01-tutorial-data-processing.html)
--  [Wrap-up: Workflow optimisation](02-workflow-optimisation.html) 
+-  [Wrap-up: Workflow optimisation](02-workflow-optimisation.html), [Wrap-up normalisation](02-normalisation-wrapup.html)
 -  [Spectronaut - Raw MS2](01-dataprocessing-spectronaut.html), [Spectronaut - Processed MS2](01-dataprocessing-spectronaut-pn.html), [Spectronaut - Workflow Optimisation](02-workflow-optimisation-spectronaut.html)
 
 # Statistical Inference & Design concepts
@@ -111,7 +111,8 @@ BiocManager::install(c(
    "msqrob2",
    "kableExtra",
    "data.table",
-   "ggcorrplot"
+   "ggcorrplot",
+   "ggpubr"
 ))
 ```
 

@@ -1,0 +1,675 @@
+# Normalisation wrapup: Mouse Diet {-}
+
+```{r, echo = FALSE}
+source("R/knitr_setup.R")
+```
+
+# Background 
+
+With the PXD059421 data deposited on ProteomeXchange researchers study the molecular effects of dietary DINCH exposure, on the proteome, phosphoproteome and acetylome profiles of visceral (VIS) and subcutaneous (SC) adipose tissue in a model of diet-induced obesity in male and female C57BL/6N mice. This study includes data on visceral and subcutaneous adipose tissue of female and male mice that were either fed a standard plant-based diet (chow), a standard high-fat diet (HFD) or two HFD diets including doses of DINCH (4,500 ppm and 15,000 ppm). Three female and three male mice were used for each diet [@AldehoffEtAl2025].
+
+The data were downloaded from Pride and reprocessed using spectronaut. 
+Here, we will focus on the data from the proteome MS runs. 
+
+# Load packages
+
+We load the `msqrob2` package, along with additional packages for
+data manipulation and visualisation.
+
+```{r load_libraries}
+library("QFeatures")  
+library("dplyr") 
+library("tidyr")
+library("ggplot2")
+library("msqrob2")    
+library("stringr")
+library("ExploreModelMatrix")
+library("MsCoreUtils") 
+library("matrixStats")
+library("patchwork")
+library("kableExtra")
+library("ComplexHeatmap")
+library("purrr")
+library("tibble")
+library("scater")
+```
+
+# Data
+
+## Precursor table
+
+We load the output from Spectronaut parquet file. Can be file path to local file or url to file that lives on the web.
+
+```{r import_data}
+precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseDiet-spectronaut.parquet"
+```
+
+
+We can import the report.parquet file using the `read_parquet` function from the `arrow` package. 
+
+```{r}
+precursors <- arrow::read_parquet(precursorFile) # function from the arrow package
+#precursors <- data.table::fread(precursorFile) # For older versions the results are stored as tsv files. 
+```
+
+Note, that by default the spectronaut output is stored as a tsv file. In that case a `.` occurs in the column variables instead of a "_" upon importing with fread. 
+
+Each row in the precursor data table is in "long format" and contains information about one precursor in a specific run (the table below shows the first 6 rows). 
+The columns contains various descriptors about the precursor, such as its sequence, its charge, run, etc. 
+
+
+```{r, echo=FALSE}
+knitr::kable(head(precursors))
+```
+
+
+(Note, that by default the spectronaut output is stored as a tsv file. In that case a `.` occurs in the column variables instead of a "_" upon importing with fread.) 
+
+
+No precursor Id is present in the file. We can make that using the EG_ModifiedSequence and FG_Charge.
+
+```{r}
+precursors <- precursors |> 
+  mutate(EG_PrecursorId = paste0(EG_ModifiedSequence, FG_Charge))
+```
+
+
+```{r eval = FALSE}
+precursors <- precursors |> 
+  select(
+         R_FileName, #Run,
+         EG_PrecursorId,
+         EG_ModifiedSequence, #Modified.Sequence, 
+         PEP_StrippedSequence, #Stripped.Sequence, 
+         FG_Charge, #PrecursoR_Charge, 
+         PG_ProteinGroups, #Protein.Group, 
+         PG_Genes, #Genes,
+         FG_MS2RawQuantity, #PrecursoR_Quantity,
+         EG_Qvalue, #Q.Value, 
+         #No spectronaut counterpart #Lib.Q.Value,
+         PG_Qvalue, # PG_Q.Value,
+         #No spectronaut counterpart #Lib.PG_Q.Value
+         PEP_IsProteotypic, #Proteotypic,
+         EG_IsDecoy, #Decoy,
+         EG_ApexRT,#RT
+         EG_IsImputed)
+```
+
+Quick check on distribution of precursors MS2 intensities.
+
+```{r}
+precursors |> 
+  ggplot(aes(x = log2(FG_MS2RawQuantity))) +
+  geom_density() +
+  theme_minimal()
+```
+
+Seems no imputation has been done. 
+
+## Sample annotation table
+
+The [sample annotation table](#sec-annotation_table)) is not available
+and can be generated from the run labels, as the researchers included information on the design in the filenames.
+
+```{r create_metadata}
+annot <- precursors |> 
+  dplyr::distinct(R_FileName) |> 
+  separate(R_FileName, into = c('f1','tissue','f2','diet','rep'), sep = '_', remove=FALSE) |>
+    mutate(runCol=R_FileName,
+           sex = stringr::str_sub(diet,1,1),
+           diet = stringr::str_sub(diet,2),
+           rep = paste(diet, sex, rep, sep='_'),
+           sampleGroup = paste(tissue,diet,sex,sep='_'),
+           sampleId = paste(tissue,rep, sep="_")) |>
+    dplyr::select(-c(R_FileName,f1,f2)) |> 
+  relocate("runCol")
+annot
+```
+
+## Convert to QFeatures
+First, recall that the precursor table is file in long format. 
+Every quantitative column in the precursor table contains
+information for multiple runs. Therefore, the function split the table
+based on the run identifier, given by the `runCol` argument (for
+Spectronaut, that identifier is contained in `run`). 
+So, the
+`QFeatures` object after import will contain as many sets as there are
+runs. 
+Next, the function links the annotation table with the PSM data.
+To achieve this, the annotation table must contain a `runCol` column
+that provides the run identifier in which each sample has been
+acquired, and this information will be used to match the identifiers
+in the `Run` column of the precursor table. 
+
+Here, we will use the `FG_MS2Quantity` column as quantification input. 
+
+Note, that we filter a number of variables to reduce the footprint of the QFeatures object. 
+
+```{r}
+(qf <- readQFeatures(assayData = precursors,  
+                              colData = annot,
+                              quantCols = "FG_MS2RawQuantity",
+                              runCol = "R_FileName",
+                              fnames = "EG_PrecursorId"))
+```
+
+
+# Data preprocessing{#sec-basic_preprocess}
+
+The data preprocessing workflow for DIA data is similar to the workflow for DDA-LFQ data, but there are suble differences as we start from precursor level data and have additional columns. 
+
+## Encoding missing values
+
+We first replace any zero in the quantitative data
+with an `NA`. 
+
+```{r}
+qf <- zeroIsNA(qf, names(qf))
+```
+
+Note that `msqrob2` can handle missing data without having to rely on
+hard-to-verify imputation assumptions, which is our general recommendation. However, `msqrob2` does not
+prevent users from using imputation, which can be performed with
+`impute()` from the `QFeatures` package. 
+
+## Precursor Filtering 
+
+Filtering removes low-quality and unreliable precursors that would otherwise introduce noise and artefacts in the data. 
+
+### Remove questionable identifications
+
+
+We apply standard filtering: 
+
+1. q-value threshold of 0.01 for the identification of precursors (`EG_Qvalue`) and protein groups (`PG_Qvalue`). 
+
+2. Remove precursors that could not be mapped, i.e. when `EG_PrecursorId` column is an empty string.  
+
+3. Filter decoys, i.e. only keep precursors for which the `EG_IsDecoy` column equals 0. 
+
+4. Keeping only proteotypic peptides, which map uniquely to a specific protein.
+
+5. Only keep non-imputed intensities: `EG_IsImputed` equals 0.
+
+
+```{r}
+qf <-  qf |>
+  filterFeatures(~ EG_Qvalue <= 0.01 & #1.
+                     PG_Qvalue <= 0.01 &  #1.
+#                     Lib.Q.Value <= 0.01 & #1.
+#                     Lib.PG_Q.Value <= 0.01 & #1.
+                     EG_PrecursorId != "" & #2.
+                     EG_IsDecoy == 0 & #3.
+                     PEP_IsProteotypic == 1 & #4
+                     EG_IsImputed == 0) #5 
+```
+
+
+Note, that it is important that the filtering criteria are not distorting the distribution of the test statistics in the downstream analysis for features that are non-DA. 
+It can be shown that filtering will not induce bias results when the filtering criterion is independent of test statistic. The criteria that we proposed above are all based on the results of the identification step, hence, they are independent of the downstream test statistics that will be used to prioritize DA proteins. 
+
+### Assay joining
+
+Up to now, the data from different runs were kept in separate assays. We can now join the normalised sets into an precursor set using joinAssays(). Sets are joined by stacking the columns (samples) in a matrix and rows (features) are matched according to a row identifier, here the `EG_PrecursorId`.
+We will store the result in the assay with name: `precursor`.
+
+```{r}
+(qf <- joinAssays(
+  x = qf,
+  i = names(qf),
+  fcol = "EG_PrecursorId",
+  name = "precursors"
+  ))
+```
+
+### Filtering: Remove highly missing precursors
+
+We keep peptides that were observed at last 6 times out of the $n
+= 48$ samples, so that we can estimate the peptide characteristics. 
+
+```{r}
+nObs <- 6
+n <- ncol(qf[["precursors"]])
+
+(qf <- filterNA(qf, i = "precursors", pNA = (n - nObs) / n))
+```
+
+
+### Filter one-hit wonders
+
+Here, we remove proteins that can only be found by one peptide, as such proteins may not be trustworthy.
+
+1. We first calculate how many distinct peptides map to each protein group (`PG_ProteinGroups`). We use the stripped precursor sequence, i.e. sequence of the base peptide for this purpose. 
+
+2. We store this information in the row data of the precursors assay
+
+3. We filter precursors of one-hit wonder proteins.  
+
+```{r}
+# Filter for peptides per protein
+pepsPerProtDf <- qf[["precursors"]] |> 
+    rowData() |> 
+    data.frame() |>
+    dplyr::select("PEP_StrippedSequence", "PG_ProteinGroups") |>
+    group_by(PG_ProteinGroups) |>
+    mutate(pepsPerProt = PEP_StrippedSequence |>
+               unique() |> length()
+           ) #1.
+
+rowData(qf[["precursors"]])$pepsPerProt <- pepsPerProtDf$pepsPerProt #2. 
+
+qf <- filterFeatures(qf, 
+                              ~ pepsPerProt > 1, 
+                              keep = TRUE) #3.
+```
+
+## Log-transformation 
+
+
+We perform log2-transformation with `logTransform()` from the
+`QFeatures` package. We use `base = 2` and store the result in a new summarized experiment named `precursors_log`
+
+```{r}
+qf <- logTransform(qf, 
+                            base = 2, 
+                            i = "precursors", 
+                            name = "precursors_log")
+```
+
+## Normalisation {#sec-norm}
+
+The most common objective of MS-based proteomics experiments is to
+understand the biological changes in protein abundance between
+experimental conditions. However, changes in measurements between
+groups can be caused due to technical factors. For instance, there are
+systematic fluctuations from run-to-run that shift the measured
+intensity distribution. We can this explore as follows:
+
+1. We extract the sets containing the log transformed data. This is 
+performed using `QFeatures`' 3-way subsetting.
+2. We use `longForm()` to convert the `QFeatures` object into a long
+table, including `condition` and `concentration` for filtering and
+colouring.
+3. We visualise the density of the quantitative values within each
+sample. We colour each sample based on its spike-in condition.
+
+```{r}
+qf[, , "precursors_log"] |> #1.
+  longForm(colvars = colnames(colData(qf))) |>  #2. 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + #3.
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal()
+```
+
+Conventional median normalisation 
+
+```{r}
+qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
+  qf,
+  MARGIN = 2,
+  STATS = nf_log_med(qf,"precursors_log"),
+  i = "precursors_log",
+  name = "precursors_norm"
+)
+```
+
+
+We explore the effect of the global normalisation in the subsequent plot. 
+
+Formally, the function applies the following operation on each sample
+$i$ across all precursors $p$:
+
+$$
+y_{ip}^{\text{norm}} = y_{ip} - \log_2(nf_i)
+$$
+
+with $y_ip$ the log2-transformed intensities and $nf_i$ the log2-transformed norm factor. Upon normalisation, we can see
+that the distribution of the $y_{ip}^{\text{norm}}$ nicely overlap (using the same code as above)
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  labs(subtitle = "Median normalisation") +
+  theme_minimal()
+```
+
+## Summarisation
+
+Here, we summarise the precursor-level data into protein intensities using maxLFQ. 
+maxLFQ first calculates all pairwise log ratio's between samples only using their shared precursors.
+Particularly, it uses the median of the log ratio's between the shared precursors s, i.e. 
+$$r_{ij} = median(y_{sj}-y_{si})$$.  
+Hence, it first eliminates peptide effects. 
+It then estimates the summaries by solving 
+
+$$
+\sum_i\sum_j(y^{prot}_j - y^{prot}_i - r_ij)^2
+$$
+It is implemented in the `maxLFQ` function of the `iq` package. 
+
+`aggregateFeatures()` streamlines summarisation. It requires the name
+of a `rowData` column to group the precursors into proteins (or
+protein groups), here `PG_ProteinGroups`. We provide the summarisation
+approach through the `fun` argument. Other summarisation methods
+are available from the `MsCoreUtils` package, see `?aggregateFeatures`
+for a comprehensive list. The function will return a `QFeatures`
+object with a new set that we called `proteins`.
+
+```{r, warning=FALSE}
+(qf <- aggregateFeatures(
+  qf, i = "precursors_norm", 
+  name = "proteins",
+  fcol = "PG_ProteinGroups", 
+  fun = function(X) iq::maxLFQ(X)$estimate
+))
+```
+
+
+# Data exploration and QC
+
+Data exploration aims to highlight the main sources of variation in
+the data prior to data modelling and can pinpoint to outlying or
+off-behaving samples. 
+
+## Marginal distribution at precursor and protein level 
+
+
+```{r}
+precursorDens <- qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Median normalised log2 precursor intensities")
+precursorDens
+```
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = sampleGroup,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "Median normalised log2 precursor intensities")
+```
+
+
+```{r}
+qf[, , "proteins"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = sampleGroup,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (median normalised precursors)")
+```
+
+```{r}
+protDens <- qf[, , "proteins"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (median normalised precursors)")
+protDens
+```
+
+## Charge state 
+
+```{r}
+qf[, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf)), rowvars = "FG_Charge") |>
+  as.data.frame() |>
+  filter(!is.na(value)) |>
+  filter(FG_Charge<=4) |> 
+ggplot(aes(x = sampleId)) +
+  geom_bar(aes(fill = factor(FG_Charge, levels = 4:1)),
+           colour = "black") +
+  labs(title = "Peptide types per sample",
+       x = "Sample",
+       fill = "Charge state") +
+  theme_bw()
+```
+
+## Identifications per sample 
+
+```{r}
+qf[,,"precursors_norm"] |> 
+  longForm(colvars = colnames(colData(qf)), 
+           rowvars= c("EG_PrecursorId", 
+                      "PG_ProteinGroups")) |>
+  data.frame() |>
+  filter(!is.na(value)) |>
+  group_by(sampleGroup, sampleId) |>
+  summarise(Precursors = length(unique(EG_PrecursorId)),
+            `Protein Groups` = length(unique(PG_ProteinGroups))) |> 
+  pivot_longer(-(1:2),
+               names_to = "Feature",
+               values_to = "IDs") |> 
+  ggplot(aes(x = sampleId, y = IDs, fill = sampleGroup)) +
+  geom_col() +
+  #scale_fill_observable() +
+  facet_wrap(~Feature,
+             scales = "free_y") +
+  labs(title = "Precursor and protein group identificiations per sample",
+       x = "Sample",
+       y = "Identifications") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90))
+# Data Modeling (Robust Regression){#sec-modelling}
+```
+
+## Dimensionality reduction plot 
+
+A common approach for data exploration is to
+perform dimension reduction, such as Multi Dimensional Scaling (MDS).
+We will first extract the set to explore along the sample annotations
+(used for plot colouring).
+
+```{r}
+protMDS <- getWithColData(qf, "proteins") |> 
+  as("SingleCellExperiment") |> 
+  runMDS(exprs_values = 1) |> 
+  plotMDS(colour_by = "sampleGroup") + 
+  labs(title = "Median normalisation")
+protMDS
+```
+
+## Correlation matrix
+
+```{r}
+corMat <- qf[["proteins"]] |> 
+  assay() |>
+  cor(method = "spearman", use = "pairwise.complete.obs") 
+
+colnames(corMat) <- qf$sampleId
+rownames(corMat) <- qf$sampleId
+corMat |> 
+  ggcorrplot::ggcorrplot() +
+  scale_fill_viridis_c() +
+  labs(title = "Correlation matrix (median normalised)",
+       fill = "Correlation") +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+## Issues 
+
+```{r}
+gridExtra::grid.arrange(precursorDens + theme(legend.position = "none"), protDens + theme(legend.position = "none"), nrow = 2)
+```
+
+Marginal distribution of the precursors seems to be fine. But at the protein level the data does not seem to be normalised. 
+
+However, there were large differences in number of identifications across samples (see QC plots above). So there might be large differences between the samples w.r.t. the proteome composition. This seems to have a major impact on the protein summaries. 
+
+If we look to the marginal distribution of the common precursors we see similar differences as upon summarisation.
+
+```{r}
+precursorsCommon <- assay(qf[, , "precursors_log"]) |> na.exclude() |> rownames()
+precursorCommonDens <- qf[precursorsCommon, , "precursors_norm"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Median normalised log2 precursor intensities (common)")
+precursorCommonDens
+```
+
+### Median of ratio's normalisation 
+
+We will try to migitate this using median of ratio's normalisation.  
+This normalisation method 
+
+1. First calculates a reference sample by calculating the geometric mean of the observed intensities for each precursor (rowwise)
+2. It then calculates the log2 fold change for each precursor in a sample w.r.t. the reference sample
+3. A sample based normalisation factor is then obtained by using the median log2 fold change per sample (column median)
+
+This accounts for differences in composition between libraries. 
+
+```{r}
+qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
+  qf,
+  MARGIN = 2,
+  STATS = nf_log_medrat(qf,"precursors_log"),
+  i = "precursors_log",
+  name = "precursors_norm_mr"
+)
+```
+
+
+```{r}
+ (qf <- aggregateFeatures(
+     qf, i = "precursors_norm_mr", 
+     name = "proteins_mr",
+     fcol = "PG_ProteinGroups", 
+     fun = function(X) iq::maxLFQ(X)$estimate
+ ))
+```
+
+We will no assess the impact of the normalisation. 
+
+```{r}
+precursorDensMr <- qf[, , "precursors_norm_mr"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Median of Ratio's normalised log2 precursor intensities")
+precursorDensMr
+```
+
+Precursors do not seem to be normalised. Perhaps this is also due to the composition. Lets take a look at the marginal distribution of the intensities for the common precursors.  
+
+```{r}
+precursorCommonDensMr <- qf[precursorsCommon, , "precursors_norm_mr"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Median of Ratio's normalised log2 precursor intensities (common)")
+precursorCommonDensMr
+```
+
+If we consider the common precursors, the normalisation is fine. 
+So the differences we see between the marginal distribution of the intensities between the different runs is due to differences in the identified precursors. 
+
+We now look to the marginal distribution of the protein summaries upon median of ratio normalisation. 
+
+```{r}
+protDensMr <- qf[, , "proteins_mr"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (median of ratio's normalised precursors)")
+protDensMr
+```
+
+### Overview 
+
+```{r}
+gridExtra::grid.arrange(precursorDens + theme(legend.position = "none") + labs(title = "Median", subtitle ="precursors"), 
+                        precursorDensMr + theme(legend.position = "none") + labs(title = "Median of Ratio's", subtitle ="precursors"),
+                        precursorCommonDens + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
+                        precursorCommonDensMr + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
+                        protDens + theme(legend.position = "none") + labs(subtitle ="proteins"), 
+                        protDensMr + theme(legend.position = "none") + labs(subtitle ="proteins"), ncol = 2) 
+```
+
+
+
+
+```{r}
+protMDSMr <- getWithColData(qf, "proteins_mr") |> 
+  as("SingleCellExperiment") |> 
+  runMDS(exprs_values = 1) |> 
+  plotMDS(colour_by = "sampleGroup") + 
+  labs(title = "Median of ratio's normalisation")
+```
+
+```{r}
+ggpubr::ggarrange(protMDS, protMDSMr, common.legend = TRUE, legend="bottom")
+```
+
+This plot reveals interesting information. 
+It shows that upon median of ratio's summarisation the main sources of variability between samples is much more driven by the biology! 
+
+
+
+
+
