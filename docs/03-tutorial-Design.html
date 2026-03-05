@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -182,7 +202,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#analysis-of-more-complex-designs-with-msqrob" id="toc-analysis-of-more-complex-designs-with-msqrob" class="nav-link active" data-scroll-target="#analysis-of-more-complex-designs-with-msqrob">Analysis of more complex designs with MSqRob</a></li>
-  <li><a href="#blocking-mouse-t-cell-example" id="toc-blocking-mouse-t-cell-example" class="nav-link" data-scroll-target="#blocking-mouse-t-cell-example"><span class="header-section-number">1</span> Blocking: Mouse T-cell example</a></li>
+  <li><a href="#breast-cancer-example" id="toc-breast-cancer-example" class="nav-link" data-scroll-target="#breast-cancer-example"><span class="header-section-number">1</span> Breast cancer example</a></li>
+  <li><a href="#blocking-mouse-t-cell-example" id="toc-blocking-mouse-t-cell-example" class="nav-link" data-scroll-target="#blocking-mouse-t-cell-example"><span class="header-section-number">2</span> Blocking: Mouse T-cell example</a></li>
+  <li><a href="#mouse-diet---two-factorial-design" id="toc-mouse-diet---two-factorial-design" class="nav-link" data-scroll-target="#mouse-diet---two-factorial-design"><span class="header-section-number">3</span> Mouse diet - Two factorial design</a></li>
   </ul>
 </nav>
 </nav>
@@ -198,31 +220,86 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="analysis-of-more-complex-designs-with-msqrob" class="level1 unnumbered">
 <h1 class="unnumbered">Analysis of more complex designs with MSqRob</h1>
-<p>The result of a quantitative analysis is a list of peptide and/or protein abundances for every protein in different samples, or abundance ratios between the samples. In this chapter we will extend our generic workflow for differential analysis of quantitative datasets with more complex experimental designs. In order to extract relevant information from these massive datasets, we will use the MSqRob Shiny GUI, a graphical interface that allows for straightforward data inspection and robust relative protein quantification [1]. The material in this tutorial is partially based on our paper Experimental design and data-analysis in label-free quantitative LC/MS proteomics: A tutorial with MSqRob [2].</p>
+<p>The result of a quantitative analysis is a list of peptide and/or protein abundances for every protein in different samples, or abundance ratios between the samples. In this chapter we will extend our generic workflow for differential analysis of quantitative datasets with more complex experimental designs.</p>
+<p>We will start with assessing the impact of sample size. Then we will introduce the concept of blocking and we will continue with the analysis of a subset of the mouse diet data.</p>
 </section>
-<section id="blocking-mouse-t-cell-example" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Blocking: Mouse T-cell example</h1>
-<p>Duguet et al.&nbsp;2017 compared the proteomes of mouse regulatory T cells (Treg) and conventional T cells (Tconv) in order to discover differentially regulated proteins between these two cell populations. For each biological repeat the proteomes were extracted for both Treg and Tconv cell pools, which were purified by flow cytometry. The data in data/quantification/mouseTcell on the <a href="https://github.com/statOmics/PDA25EBI/archive/refs/heads/data.zip">PDA-data repository</a> are a subset of the data <a href="https://www.ebi.ac.uk/pride/archive/projects/PXD004436">PXD004436</a> on PRIDE.</p>
+<section id="breast-cancer-example" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Breast cancer example</h1>
+<p>Eighteen Estrogen Receptor Positive Breast cancer tissues from from patients treated with tamoxifen upon recurrence have been assessed in a proteomics study. Nine patients had a good outcome (or) and the other nine had a poor outcome (pd). The proteomes have been assessed using an LTQ-Orbitrap in data dependent acquisition (DDA) mode and the thermo output .RAW files were searched with MaxQuant (version 1.4.1.2) against the human proteome database (FASTA version 2012-09, human canonical proteome).</p>
+<p>The data are already processed and stored as QFeatures objects. They can be loaded in R using readRDS so you can immediately start at the data modeling. So you only have to read the data and you can start with section 5 Data exploration in the basic script.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/cancer3x3.rds"</span>,<span class="st">"rb"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Three QFeatures objects are available (you can simply modify the url above replacing the filename):</p>
+<ol type="1">
+<li>For a 3 vs 3 comparison: cancer3x3.rds</li>
+<li>For a 6 vs 6 comparison: cancer6x6.rds</li>
+<li>For a 9 vs 9 comparison: cancer9x9.rds</li>
+</ol>
+</section>
+<section id="blocking-mouse-t-cell-example" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Blocking: Mouse T-cell example</h1>
+<p><span class="citation" data-cites="DuguetEtAl2017">(<a href="#ref-DuguetEtAl2017" role="doc-biblioref">Duguet et al. 2017</a>)</span> compared the proteomes of mouse regulatory T cells (Treg) and conventional T cells (Tconv) in order to discover differentially regulated proteins between these two cell populations. For each biological repeat the proteomes were extracted for both Treg and Tconv cell pools, which were purified by flow cytometry. The data in data/quantification/mouseTcell on the <a href="https://github.com/statOmics/PDA25EBI/archive/refs/heads/data.zip">PDA-data repository</a> are a subset of the data <a href="https://www.ebi.ac.uk/pride/archive/projects/PXD004436">PXD004436</a> on PRIDE.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="./figures/mouseTcell_RCB_design.png" class="img-fluid figure-img"></p>
+<p><img src="./figs/mouseTcell_RCB_design.png" class="img-fluid figure-img"></p>
 <figcaption>Figure 2. Design Mouse Study</figcaption>
 </figure>
 </div>
 <p>The proteomes have been assessed using data dependent acquisition (DDA) mode. The data are already processed and stored as QFeatures objects. They can be loaded in R using readRDS so you can immediately start at the data modeling. So you only have to read the data and you can start with section 5 Data exploration in the basic script.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseT_CRD.rds"</span>,<span class="st">"rb"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>qf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">url</span>(<span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseT_CRD.rds"</span>,<span class="st">"rb"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Three QFeatures objects are available (you can simply modify the url above replacing the filename):</p>
 <ol type="1">
 <li>For a completely randomiced design with 4 mice for which regulatory T-cells and 4 mice for which ordinary T-cells are profiled: “mouseT_CRD.rds”</li>
 <li>For a randomised complete block design with 4 mice for which both regulatory T-cells and ordinary T-cells are processed.</li>
 </ol>
+</section>
+<section id="mouse-diet---two-factorial-design" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Mouse diet - Two factorial design</h1>
+<p>With the PXD059421 data deposited on ProteomeXchange researchers study the molecular effects of dietary DINCH exposure, on the proteome, phosphoproteome and acetylome profiles of visceral (VIS) and subcutaneous (SC) adipose tissue in a model of diet-induced obesity in male and female C57BL/6N mice. This study includes data on visceral and subcutaneous adipose tissue of female and male mice that were either fed a standard plant-based diet (chow), a standard high-fat diet (HFD) or two HFD diets including doses of DINCH (4,500 ppm and 15,000 ppm). Three female and three male mice were used for each diet <span class="citation" data-cites="AldehoffEtAl2025">(<a href="#ref-AldehoffEtAl2025" role="doc-biblioref">Aldehoff et al. 2025</a>)</span>.</p>
+<p>The data were downloaded from Pride and reprocessed using spectronaut. Here, we will focus on the proteomics data from the visceral tissue of mice subjected to the low and high DINCH diet.</p>
+<p>Assess the following research questions:</p>
+<ul>
+<li>Prioritise proteins that are differentially abundant (DA) between low and high DINCH diet in female mice.</li>
+<li>Prioritise proteins that are DA between low and high DINCH diet in male mice.</li>
+<li>Prioritise proteins for which the effect of diet (low vs high) is different between male and female mice.</li>
+<li>Prioritise proteins that are differentially abundant (DA) between low and high DINCH diet over male and female mice (useful when there is no diet x sex interaction).</li>
+</ul>
+<p>You can use this code to setup the subset of the study:</p>
+<ol type="1">
+<li>Specify path to parquet file</li>
+<li>Read parquet file</li>
+<li>Make EG_PrecursorId from modified sequence and charge</li>
+<li>Subset the data by selecting the visceral samples (VIS), and low or high diet</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">=</span> <span class="st">"https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseDiet-spectronaut.parquet"</span> <span class="co">#1.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> arrow<span class="sc">::</span><span class="fu">read_parquet</span>(precursorFile)  <span class="co">#2.</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> precursors <span class="sc">|&gt;</span>  <span class="co">#3.</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">EG_PrecursorId =</span> <span class="fu">paste0</span>(EG_ModifiedSequence, FG_Charge)) <span class="co">#3.</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> precursors <span class="sc">|&gt;</span> <span class="co">#4.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">grepl</span>(<span class="st">"VIS"</span>, R_FileName) <span class="sc">&amp;</span> <span class="co">#4. </span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>           (<span class="fu">grepl</span>(<span class="st">"low"</span>,R_FileName) <span class="sc">|</span> <span class="fu">grepl</span>(<span class="st">"high"</span>,R_FileName)) <span class="fl">4.</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
 
 
 </section>
 
-</main> <!-- /main -->
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-AldehoffEtAl2025" class="csl-entry" role="listitem">
+Aldehoff, Alix Sarah, Isabel Karkossa, Hannes Broghammer, Sandra Krupka, Jan Weiner, Charlotte Goerdeler, Rasha Nuwayhid, et al. 2025. <span>“Advanced Proteomics Approaches Hold Potential for the Risk Assessment of Metabolism-Disrupting Chemicals as Omics-Based NAM: A Case Study Using the Phthalate Substitute DINCH.”</span> <em>Environmental Science &amp; Technology</em> 59 (31): 16193–216. <a href="https://doi.org/10.1021/acs.est.5c01206">https://doi.org/10.1021/acs.est.5c01206</a>.
+</div>
+<div id="ref-DuguetEtAl2017" class="csl-entry" role="listitem">
+Duguet, Fanny, Marie Locard-Paulet, Marlène Marcellin, Karima Chaoui, Isabelle Bernard, Olivier Andreoletti, Renaud Lesourne, Odile Burlet-Schiltz, Anne Gonzalez de Peredo, and Abdelhadi Saoudi. 2017. <span>“Proteomic Analysis of Regulatory t Cells Reveals the Importance of Themis1 in the Control of Their Suppressive Function.”</span> <em>Molecular &amp; Cellular Proteomics</em> 16 (8): 1416–32. <a href="https://doi.org/10.1074/mcp.M116.062745">https://doi.org/10.1074/mcp.M116.062745</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
