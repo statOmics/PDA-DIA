@@ -1091,17 +1091,31 @@ dietlow:sexm                          0.5</code></pre>
 </div>
 <section id="median" class="level4">
 <h4 class="anchored" data-anchor-id="median">median</h4>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">colnames</span>(L)) <span class="co">#3. </span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="fu">colnames</span>(L)) {</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  inference <span class="ot">&lt;-</span> inferences <span class="sc">|&gt;</span> </span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>                <span class="fu">filter</span>(adjPval <span class="sc">&lt;</span> alpha <span class="sc">&amp;</span> contrast <span class="sc">==</span> j)</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Median - Contrast:**"</span>, j, <span class="st">"= 0 ("</span>, <span class="fu">nrow</span>(inference <span class="sc">|&gt;</span> <span class="fu">filter</span>(adjPval <span class="sc">&lt;</span> alpha)), <span class="st">"significant proteins)</span><span class="sc">\n\n</span><span class="st">"</span>) <span class="co">#8.</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="fu">kable</span>(inference <span class="sc">|&gt;</span> </span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>                <span class="fu">arrange</span>(pval) <span class="sc">|&gt;</span> </span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>                <span class="fu">relocate</span>(<span class="st">"feature"</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>)) <span class="co">#9.</span></span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n\n\n</span><span class="st">---</span><span class="sc">\n\n</span><span class="st">"</span>) <span class="co">#10.</span></span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(adjPval <span class="sc">&lt;</span> alpha <span class="sc">&amp;</span> contrast <span class="sc">==</span> j)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"**Median - Contrast:**"</span>, j, <span class="st">"= 0 ("</span>, <span class="fu">nrow</span>(inference),</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"significant proteins)</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">'&lt;div style="max-height:300px; overflow-y:auto;"&gt;'</span>)</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>      inference <span class="sc">|&gt;</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">arrange</span>(pval) <span class="sc">|&gt;</span></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>        dplyr<span class="sc">::</span><span class="fu">relocate</span>(feature),</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">row.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">'&lt;/div&gt;'</span>)</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n\n\n</span><span class="st">---</span><span class="sc">\n\n</span><span class="st">"</span>)</span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Median - Contrast:</strong> dietlow = 0 ( 329 significant proteins)</p>
+<div style="max-height:300px; overflow-y:auto;">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
@@ -4418,8 +4432,10 @@ dietlow:sexm                          0.5</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
 <hr>
 <p><strong>Median - Contrast:</strong> dietlow + dietlow:sexm = 0 ( 554 significant proteins)</p>
+<div style="max-height:300px; overflow-y:auto;">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
@@ -9986,8 +10002,10 @@ dietlow:sexm                          0.5</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
 <hr>
 <p><strong>Median - Contrast:</strong> dietlow:sexm = 0 ( 574 significant proteins)</p>
+<div style="max-height:300px; overflow-y:auto;">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
@@ -15754,8 +15772,10 @@ dietlow:sexm                          0.5</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
 <hr>
 <p><strong>Median - Contrast:</strong> dietlow + 0.5 * dietlow:sexm = 0 ( 421 significant proteins)</p>
+<div style="max-height:300px; overflow-y:auto;">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
@@ -19992,6 +20012,7 @@ dietlow:sexm                          0.5</code></pre>
 </tr>
 </tbody>
 </table>
+</div>
 <hr>
 </section>
 </section>

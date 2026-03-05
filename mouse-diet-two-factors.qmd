@@ -633,15 +633,28 @@ alpha <- 0.05
 
 ```{r}
 #| results: asis
-for (j in colnames(L)) #3. 
-{
+for (j in colnames(L)) {
+
   inference <- inferences |> 
-                filter(adjPval < alpha & contrast == j)
-  cat("**Median - Contrast:**", j, "= 0 (", nrow(inference |> filter(adjPval < alpha)), "significant proteins)\n\n") #8.
-  print(kable(inference |> 
-                arrange(pval) |> 
-                relocate("feature"), row.names = FALSE)) #9.
-  cat("\n\n\n---\n\n") #10.
+    dplyr::filter(adjPval < alpha & contrast == j)
+
+  cat("**Median - Contrast:**", j, "= 0 (", nrow(inference),
+      "significant proteins)\n\n")
+
+  cat('<div style="max-height:300px; overflow-y:auto;">')
+
+  print(
+    kable(
+      inference |>
+        dplyr::arrange(pval) |>
+        dplyr::relocate(feature),
+      row.names = FALSE
+    )
+  )
+
+  cat('</div>')
+
+  cat("\n\n\n---\n\n")
 }
 ```
 
