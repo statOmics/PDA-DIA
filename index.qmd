@@ -85,8 +85,8 @@ of the R for mass spectrometry book.
 
 # Setup
 
-To install all the necessary package, please use the latest release of
-R and execute:
+To install all the necessary package, please use
+**R 4.5 or higher** and execute:
 
 ```{r, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
