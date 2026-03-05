@@ -41,7 +41,8 @@ library("scater")
 We load the output from Spectronaut parquet file. Can be file path to local file or url to file that lives on the web.
 
 ```{r import_data}
-precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseDiet-spectronaut.parquet"
+#precursorFile = "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/mouseDiet-spectronaut.parquet"
+precursorFile = "data/mouseDiet-spectronaut.parquet"
 ```
 
 
@@ -66,11 +67,14 @@ knitr::kable(head(precursors))
 (Note, that by default the spectronaut output is stored as a tsv file. In that case a `.` occurs in the column variables instead of a "_" upon importing with fread.) 
 
 
-No precursor Id is present in the file. We can make that using the EG_ModifiedSequence and FG_Charge.
+No precursor Id and norm factors are present in the file. 
+We can make the former using the EG_ModifiedSequence and FG_Charge, and the latter using FG_MS2RawQuantity and FG_Quantity.
 
 ```{r}
 precursors <- precursors |> 
-  mutate(EG_PrecursorId = paste0(EG_ModifiedSequence, FG_Charge))
+  mutate(EG_PrecursorId = paste0(EG_ModifiedSequence, FG_Charge),
+         EG_NormalizationFactor = FG_Quantity/FG_MS2RawQuantity, #Normalisation.Factor
+)
 ```
 
 
@@ -85,6 +89,8 @@ precursors <- precursors |>
          PG_ProteinGroups, #Protein.Group, 
          PG_Genes, #Genes,
          FG_MS2RawQuantity, #PrecursoR_Quantity,
+         FG_Quantity,
+         EG_NormalizationFactor,
          EG_Qvalue, #Q.Value, 
          #No spectronaut counterpart #Lib.Q.Value,
          PG_Qvalue, # PG_Q.Value,
@@ -417,23 +423,6 @@ qf[, , "precursors_norm"] |>
    labs(subtitle = "Median normalised log2 precursor intensities")
 ```
 
-
-```{r}
-qf[, , "proteins"] |>
-  longForm(colvars = colnames(colData(qf))) |> 
-  data.frame() |> 
-  filter(!is.na(value)) |>
-  ggplot() + 
-  aes(x = sampleId,
-      y = value,
-      colour = sampleGroup,
-      group = colname) +
-  xlab("sample") +
-  geom_boxplot() +
-  theme_minimal() +
-   labs(subtitle = "log2 protein intensities (median normalised precursors)")
-```
-
 ```{r}
 protDens <- qf[, , "proteins"] |>
   longForm(colvars = colnames(colData(qf))) |> 
@@ -447,6 +436,23 @@ protDens <- qf[, , "proteins"] |>
   theme_minimal() +
    labs(subtitle = "log2 protein intensities (median normalised precursors)")
 protDens
+```
+
+```{r}
+protBox <- qf[, , "proteins"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = sampleId,
+      y = value,
+      colour = sampleGroup,
+      group = colname) +
+  xlab("sample") +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (median normalised precursors)")
+protBox
 ```
 
 ## Charge state 
@@ -586,7 +592,7 @@ qf <- sweep( #4. Subtract log2 norm factor column-by-column (MARGIN = 2)
  ))
 ```
 
-We will no assess the impact of the normalisation. 
+We will now assess the impact of the normalisation. 
 
 ```{r}
 precursorDensMr <- qf[, , "precursors_norm_mr"] |>
@@ -640,19 +646,21 @@ protDensMr <- qf[, , "proteins_mr"] |>
 protDensMr
 ```
 
-### Overview 
-
 ```{r}
-gridExtra::grid.arrange(precursorDens + theme(legend.position = "none") + labs(title = "Median", subtitle ="precursors"), 
-                        precursorDensMr + theme(legend.position = "none") + labs(title = "Median of Ratio's", subtitle ="precursors"),
-                        precursorCommonDens + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
-                        precursorCommonDensMr + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
-                        protDens + theme(legend.position = "none") + labs(subtitle ="proteins"), 
-                        protDensMr + theme(legend.position = "none") + labs(subtitle ="proteins"), ncol = 2) 
+protBoxMr <- qf[, , "proteins_mr"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x=sampleId, 
+      y = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (median of ratio's normalised precursors)")
+protBoxMr
 ```
-
-
-
 
 ```{r}
 protMDSMr <- getWithColData(qf, "proteins_mr") |> 
@@ -660,15 +668,146 @@ protMDSMr <- getWithColData(qf, "proteins_mr") |>
   runMDS(exprs_values = 1) |> 
   plotMDS(colour_by = "sampleGroup") + 
   labs(title = "Median of ratio's normalisation")
+protMDSMr
+```
+
+### Internal normalisation Spectronaut
+
+```{r}
+qf <- sweep( 
+  qf,
+  MARGIN = 1:2,
+  STATS = get_searchengine_nf(qf, "precursors_log", "EG_NormalizationFactor"),
+  i = "precursors_log",
+  name = "precursors_norm_sn"
+)
+```
+
+
+```{r}
+ (qf <- aggregateFeatures(
+     qf, i = "precursors_norm_sn", 
+     name = "proteins_sn",
+     fcol = "PG_ProteinGroups", 
+     fun = function(X) iq::maxLFQ(X)$estimate
+ ))
+```
+
+We will now assess the impact of the normalisation. 
+
+```{r}
+precursorDensSn <- qf[, , "precursors_norm_sn"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Spectronaut normalised log2 precursor intensities")
+precursorDensSn
+```
+
+Precursors do not seem to be normalised. Perhaps this is also due to the composition. Lets take a look at the marginal distribution of the intensities for the common precursors.  
+
+```{r}
+precursorCommonDensSn <- qf[precursorsCommon, , "precursors_norm_sn"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "Spectronaut normalised log2 precursor intensities (common)")
+precursorCommonDensSn
+```
+
+If we consider the common precursors, the normalisation seems fine. 
+So the differences we see between the marginal distribution of the intensities between the different runs is due to differences in the identified precursors. 
+
+We now look to the marginal distribution of the protein summaries upon Spectronaut normalisation. 
+
+```{r}
+protDensSn <- qf[, , "proteins_sn"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_density() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (Spectronaut normalised precursors)")
+protDensSn
 ```
 
 ```{r}
-ggpubr::ggarrange(protMDS, protMDSMr, common.legend = TRUE, legend="bottom")
+protBoxSn <- qf[, , "proteins_sn"] |>
+  longForm(colvars = colnames(colData(qf))) |> 
+  data.frame() |> 
+  filter(!is.na(value)) |>
+  ggplot() + 
+  aes(x=sampleId, 
+      y = value,
+      colour = sampleGroup,
+      group = colname) +
+  geom_boxplot() +
+  theme_minimal() +
+   labs(subtitle = "log2 protein intensities (Spectronaut normalised precursors)")
+protBoxSn
 ```
 
-This plot reveals interesting information. 
-It shows that upon median of ratio's summarisation the main sources of variability between samples is much more driven by the biology! 
+Normalisation is better than conventional median normalisation, however, median of ratio seems preferable. 
 
+```{r}
+protMDSSn <- getWithColData(qf, "proteins_sn") |> 
+  as("SingleCellExperiment") |> 
+  runMDS(exprs_values = 1) |> 
+  plotMDS(colour_by = "sampleGroup") + 
+  labs(title = "Spectronaut normalisation")
+protMDSSn
+```
+
+### Overview 
+
+```{r}
+gridExtra::grid.arrange(precursorDens + theme(legend.position = "none") + labs(title = "Median", subtitle ="precursors"), 
+                        precursorDensMr + theme(legend.position = "none") + labs(title = "Median of Ratio's", subtitle ="precursors"),
+                        precursorDensSn + theme(legend.position = "none") + labs(title = "Spectronaut", subtitle ="precursors"),
+                        precursorCommonDens + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
+                        precursorCommonDensMr + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
+                        precursorCommonDensSn + theme(legend.position = "none") + labs(subtitle ="common precursors"), 
+                        protDens + theme(legend.position = "none") + labs(subtitle ="proteins"), 
+                        protDensMr + theme(legend.position = "none") + labs(subtitle ="proteins"), 
+                        protDensSn + theme(legend.position = "none") + labs(subtitle ="proteins"),
+                        ncol = 3) 
+```
+
+```{r}
+gridExtra::grid.arrange(protBox + theme(legend.position = "none") + labs(title = "Median", subtitle ="proteins"),
+                        protBoxMr + theme(legend.position = "none") + labs(title = "Median of Ratio's", subtitle ="precursors"),
+                        protBoxSn + theme(legend.position = "none") + labs(title = "Spectronaut", subtitle ="precursors"), 
+                        ncol = 3
+)
+```
+
+
+Median of Ratio's seems to result in protein summaries for which the marginal protein intensity distributions are most comparable. 
+
+
+```{r}
+ggpubr::ggarrange(protMDS, protMDSMr, protMDSSn, common.legend = TRUE, legend="bottom", ncol  = 3)
+```
+
+It shows the main sources of variability between samples upon summarisation following median of ratio's or Spectronaut normalisation are much more driven by the biology! 
+
+It also shows that normalisation for large experiments is challenging. 
 
 
 

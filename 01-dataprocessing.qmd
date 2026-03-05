@@ -14,6 +14,50 @@ The main search output for this DIA-NN version was stored in the report.parquet 
 
 # Background
 
+## MS-based workflow
+
+```{r echo=FALSE}
+knitr::include_graphics("./figs/ProteomicsWorkflow.png")
+```
+  
+
+
+- Peptide Characteristics
+  
+  - Modifications
+  - Ionisation Efficiency: huge variability
+  - Identification
+    - Misidentification $\rightarrow$ outliers
+    - MS$^2$ selection on peptide abundance
+    - Context depending missingness
+    - Non-random missingness
+
+$\rightarrow$ Unbalanced pepide identifications across samples and messy data
+
+## DDA vs DIA 
+
+DDA vs DIA 
+
+![](https://www.creative-proteomics.com/blog/wp-content/uploads/2024/01/principles-applications-and-comparative-workflow-of-dia-and-dda.jpg)
+
+- Deconvolution of the MS2 signal 
+- With dedicated software such as Spectronaut or DIA-NN
+
+## Level of quantification
+
+- MS-based proteomics returns peptides: pieces of proteins
+
+```{r echo=FALSE}
+knitr::include_graphics("./figs/challenges_peptides.png")
+```
+
+- Quantification commonly required on the protein level
+
+```{r echo=FALSE}
+knitr::include_graphics("./figs/challenges_proteins.png")
+```
+
+
 ## Challenges{#sec-dia_challenges}
 
 Behind this workflow lies several challenges that will affect the data
@@ -77,6 +121,12 @@ connected to a Q Exactive HF BioPharma mass spectrometer
 (Thermo). 
 
 Here, we will only use the data of the samples from the middle 3 spike-in ratio's (2,4 and 8) that were searched using DIA-NN 2.2.0. The main search output for this DIA-NN version is stored in the report.parquet file in the DIA-NN output directory.
+
+
+```{r echo=FALSE, out.width="50%"}
+knitr::include_graphics("./figs/cptacLayoutLudger.png")
+```
+
 
 # Load packages
 
@@ -455,11 +505,21 @@ assay(qf [["precursors"]])[1:5, 1:5]
 
 ### Filtering: Remove highly missing precursors
 
+```{r}
+qf[,,"precursors"] |> 
+  longForm(colvars = colnames(colData(qf))) |> 
+  ggplot(aes(x = sampleId)) +
+  geom_bar(aes(fill = factor(!is.na(value))),
+           colour = "black") +
+  theme_minimal()
+```
+
 We keep peptides that were observed at last 4 times out of the $n
 = 9$ samples, so that we can estimate the peptide characteristics. 
 We tolerate the following proportion of NAs:
 $\text{pNA} = \frac{(n - 4)}{n} = 0.556$, so we keep peptides that
 are observed in at least 44.4% of the samples, which corresponds to one treatment condition. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.
+
 
 ```{r}
 nObs <- 4

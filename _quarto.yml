@@ -13,17 +13,24 @@ website:
         menu:
         - text: 1. Basic concepts
           href: 01-dataprocessing.html
-        - text: 2. Workflow optimisation 
+        - text: 1.1 Workflow optimisation 
           href: 02-workflow-optimisation.html
-        - text: 3.1. Inference
+        - text: 1.2 Wrapup Normalisation 
+          href: 02-normalisation-wrapup.html
+        - text: 2.1. Inference
           href: 03-inference.html
-        - text: 3.2. Wrapup Blocking
+        - text: 2.2. Wrapup Blocking
           href: 03-blocking-wrapup.html
+        - text: 2.3. Wrapup Design2 
+          href: mouse-diet-two-factors.html
+          
       - text: "Tutorials"
         icon: fa-chalkboard-teacher
         menu:
         - text: 1. Tutorial Data Processing
           href: 01-tutorial-data-processing.html
+        - text: 2. Tutorial Differential Analysis and Design
+          href: 03-tutorial-Design.html
 
           
 bibliography: references.bib

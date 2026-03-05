@@ -1,4 +1,4 @@
-# Tutorial: Mouse Diet - Subset - factorial design with two factors {-}
+# Wrapup: Factorial design with two factors {-}
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

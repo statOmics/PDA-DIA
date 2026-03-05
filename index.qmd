@@ -62,7 +62,7 @@ This parts introduces the user to the key concepts for data processing in differ
 # Statistical Inference & Design concepts
 
 - [Basics of Statistical Inference](03-inference.html)
-- [Tutorial Design](03-tutorial-Design.html)
+- [Tutorial Differential Analysis and Design Aspects](03-tutorial-Design.html)
 - [Wrapup Design1](03-blocking-wrapup.html), [Wrapup Design2](mouse-diet-two-factors.html)
 
 # Targeted audience and assumed background
