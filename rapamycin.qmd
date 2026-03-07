@@ -1,4 +1,6 @@
-# Tutorial: Rapamycin {-}
+---
+title: Tutorial - Rapamycin 
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

@@ -1,4 +1,6 @@
-# Normalisation wrapup: Mouse Diet {-}
+---
+title: Normalisation wrapup - Mouse Diet
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

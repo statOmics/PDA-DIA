@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Lieven Clement">
 
-<title>tutorial-design</title>
+<title>Analysis of more complex designs with msqrob2</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -161,15 +162,23 @@ div.csl-indent {
   </li>  
         <li>
     <a class="dropdown-item" href="./02-workflow-optimisation.html">
- <span class="dropdown-text">2. Workflow optimisation</span></a>
+ <span class="dropdown-text">1.1 Workflow optimisation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-normalisation-wrapup.html">
+ <span class="dropdown-text">1.2 Wrapup Normalisation</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03-inference.html">
- <span class="dropdown-text">3.1. Inference</span></a>
+ <span class="dropdown-text">2.1. Inference</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03-blocking-wrapup.html">
- <span class="dropdown-text">3.2. Wrapup Blocking</span></a>
+ <span class="dropdown-text">2.2. Wrapup Blocking</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mouse-diet-two-factors.html">
+ <span class="dropdown-text">2.3. Wrapup Design2</span></a>
   </li>  
     </ul>
   </li>
@@ -183,6 +192,10 @@ div.csl-indent {
         <li>
     <a class="dropdown-item" href="./01-tutorial-data-processing.html">
  <span class="dropdown-text">1. Tutorial Data Processing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-tutorial-Design.html">
+ <span class="dropdown-text">2. Tutorial Differential Analysis and Design</span></a>
   </li>  
     </ul>
   </li>
@@ -201,8 +214,7 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#analysis-of-more-complex-designs-with-msqrob" id="toc-analysis-of-more-complex-designs-with-msqrob" class="nav-link active" data-scroll-target="#analysis-of-more-complex-designs-with-msqrob">Analysis of more complex designs with MSqRob</a></li>
-  <li><a href="#breast-cancer-example" id="toc-breast-cancer-example" class="nav-link" data-scroll-target="#breast-cancer-example"><span class="header-section-number">1</span> Breast cancer example</a></li>
+  <li><a href="#breast-cancer-example" id="toc-breast-cancer-example" class="nav-link active" data-scroll-target="#breast-cancer-example"><span class="header-section-number">1</span> Breast cancer example</a></li>
   <li><a href="#blocking-mouse-t-cell-example" id="toc-blocking-mouse-t-cell-example" class="nav-link" data-scroll-target="#blocking-mouse-t-cell-example"><span class="header-section-number">2</span> Blocking: Mouse T-cell example</a></li>
   <li><a href="#mouse-diet---two-factorial-design" id="toc-mouse-diet---two-factorial-design" class="nav-link" data-scroll-target="#mouse-diet---two-factorial-design"><span class="header-section-number">3</span> Mouse diet - Two factorial design</a></li>
   </ul>
@@ -213,16 +225,42 @@ div.csl-indent {
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Analysis of more complex designs with msqrob2</h1>
+</div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Lieven Clement <a href="https://orcid.org/0000-0002-9050-4370" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Ghent University
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
 
 
-<section id="analysis-of-more-complex-designs-with-msqrob" class="level1 unnumbered">
-<h1 class="unnumbered">Analysis of more complex designs with MSqRob</h1>
+</header>
+
+
 <p>The result of a quantitative analysis is a list of peptide and/or protein abundances for every protein in different samples, or abundance ratios between the samples. In this chapter we will extend our generic workflow for differential analysis of quantitative datasets with more complex experimental designs.</p>
 <p>We will start with assessing the impact of sample size. Then we will introduce the concept of blocking and we will continue with the analysis of a subset of the mouse diet data.</p>
-</section>
 <section id="breast-cancer-example" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Breast cancer example</h1>
 <p>Eighteen Estrogen Receptor Positive Breast cancer tissues from from patients treated with tamoxifen upon recurrence have been assessed in a proteomics study. Nine patients had a good outcome (or) and the other nine had a poor outcome (pd). The proteomes have been assessed using an LTQ-Orbitrap in data dependent acquisition (DDA) mode and the thermo output .RAW files were searched with MaxQuant (version 1.4.1.2) against the human proteome database (FASTA version 2012-09, human canonical proteome).</p>

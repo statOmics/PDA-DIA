@@ -49,3 +49,10 @@ format:
     number-sections: true
     number-depth: 3
     code-copy: true
+
+author:
+  - name: Lieven Clement
+    orcid: 0000-0002-9050-4370
+    affiliation: 
+      - name: Ghent University
+

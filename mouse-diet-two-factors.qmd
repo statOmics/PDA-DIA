@@ -1,4 +1,6 @@
-# Wrapup: Factorial design with two factors {-}
+---
+title: "Wrapup - Factorial design with two factors"
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

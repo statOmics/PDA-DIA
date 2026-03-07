@@ -1,7 +1,15 @@
-# Differential abundance analysis with Spectronaut - starting from FG_MS2RawQuantity {-}
+---
+title: Differential abundance analysis with Spectronaut - starting from FG_MS2RawQuantity 
+code-tools: true
+author:
+  - name: Lieven Clement
+    orcid: 0000-0002-9050-4370
+    affiliation: 
+      - name: Ghent University
+---
 
 ```{r, echo = FALSE}
-source("R/knitr_setup.R")
+source("https://raw.githubusercontent.com/statOmics/PDA-DIA/master/R/utils.R")
 ```
 
 This chapter explains the main concepts for data-processing and statistical analysis of
@@ -53,7 +61,7 @@ library("scater")
 We load the output from Spectronaut parquet file.
 
 ```{r import_data}
-precursorFile <- "data/spikein248-staesetal2024-spectronaut.parquet" 
+precursorFile <- "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein248-staesetal2024-spectronaut.parquet" 
 ```
 
 

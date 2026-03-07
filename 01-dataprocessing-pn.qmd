@@ -1,4 +1,6 @@
-# Differential abundance analysis with DIA-NN - starting from Precursor.Normalised {-}
+---
+title: Differential abundance analysis with DIA-NN - starting from Precursor.Normalised 
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

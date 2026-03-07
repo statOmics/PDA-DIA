@@ -1,4 +1,6 @@
-# Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN {-}
+---
+title: Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN {-}
+---
 
 ```{r echo = FALSE}
 source("R/knitr_setup.R")
@@ -307,7 +309,7 @@ qf <- logTransform(qf,
 
 ```{r}
 qf[, , "precursors_log"] |> #1.
-  longForm(colvars = c( "rep", "condition")) |>  #2. 
+  longForm(colvars = colnames(colData(qf))) |>  #2. 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + #3.
@@ -320,7 +322,7 @@ qf[, , "precursors_log"] |> #1.
 
 ```{r}
 qf[, , "precursors_log"] |> #1.
-  longForm(colvars = c( "rep", "condition"), rowvars = "species") |>  #2. 
+  longForm(colvars = colnames(colData(qf)), rowvars = "species") |>  #2. 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + #3.
@@ -429,7 +431,7 @@ Next, we explore the effect of all normalisation methods in the subsequent plot.
 ```{r}
 precursors_norm_sets <- grep("precursors_norm", names(qf), value = TRUE)
 qf[, , precursors_norm_sets] |>
-  longForm(colvars = c( "rep", "condition")) |> 
+  longForm(colvars = colnames(colData(qf))) |> 
   data.frame() |> 
   mutate(assay = gsub(assay, pattern = "precursors_norm_", replacement = "")) |>
   filter(!is.na(value)) |>
@@ -525,7 +527,7 @@ qf <- aggregateFeatures(
 ```{r}
 proteins_sets <- grep("proteins", names(qf), value = TRUE)
 qf[, , proteins_sets] |>
-    longForm(colvars = c( "rep", "condition")) |> 
+    longForm(colvars = colnames(colData(qf))) |> 
   data.frame() |> 
   mutate(assay = gsub(assay, pattern = "proteins_", replacement = ""),
          norm = strsplit(assay, split = "_") |> 
@@ -546,7 +548,7 @@ qf[, , proteins_sets] |>
 ```{r}
 proteins_sets <- grep("proteins", names(qf), value = TRUE)
 qf[, , proteins_sets] |>
-    longForm(colvars = c( "rep", "condition"), rowvars = "species") |> 
+    longForm(colvars = colnames(colData(qf)), rowvars = "species") |> 
   data.frame() |> 
   filter(species =="yeast")|>
   mutate(assay = gsub(assay, pattern = "proteins_", replacement = ""),
@@ -656,7 +658,7 @@ We plot the marginal intensity distributions to inspect if further normalisation
 
 ```{r}
 qf_pg[, , "proteins_log"] |> #1.
-  longForm(colvars = c( "rep", "condition")) |>  #2. 
+  longForm(colvars = colnames(colData(qf_pg))) |>  #2. 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + #3.
@@ -669,7 +671,7 @@ qf_pg[, , "proteins_log"] |> #1.
 
 ```{r}
 qf_pg[, , "proteins_log"] |> #1.
-  longForm(colvars = c( "rep", "condition"), rowvars = "species") |>  #2. 
+  longForm(colvars = colnames(colData(qf_pg)), rowvars = "species") |>  #2. 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + #3.

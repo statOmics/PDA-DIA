@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Lieven Clement">
 
-<title>workflow-optimisation</title>
+<title>Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN {-}</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -190,15 +191,23 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="./02-workflow-optimisation.html">
- <span class="dropdown-text">2. Workflow optimisation</span></a>
+ <span class="dropdown-text">1.1 Workflow optimisation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-normalisation-wrapup.html">
+ <span class="dropdown-text">1.2 Wrapup Normalisation</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03-inference.html">
- <span class="dropdown-text">3.1. Inference</span></a>
+ <span class="dropdown-text">2.1. Inference</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03-blocking-wrapup.html">
- <span class="dropdown-text">3.2. Wrapup Blocking</span></a>
+ <span class="dropdown-text">2.2. Wrapup Blocking</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mouse-diet-two-factors.html">
+ <span class="dropdown-text">2.3. Wrapup Design2</span></a>
   </li>  
     </ul>
   </li>
@@ -212,6 +221,10 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="./01-tutorial-data-processing.html">
  <span class="dropdown-text">1. Tutorial Data Processing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-tutorial-Design.html">
+ <span class="dropdown-text">2. Tutorial Differential Analysis and Design</span></a>
   </li>  
     </ul>
   </li>
@@ -230,8 +243,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#workflow-optimisation-using-a-data-independent-acquisition-spike-in-study-searched-with-dia-nn" id="toc-workflow-optimisation-using-a-data-independent-acquisition-spike-in-study-searched-with-dia-nn" class="nav-link active" data-scroll-target="#workflow-optimisation-using-a-data-independent-acquisition-spike-in-study-searched-with-dia-nn">Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN</a></li>
-  <li><a href="#experimental-context" id="toc-experimental-context" class="nav-link" data-scroll-target="#experimental-context"><span class="header-section-number">1</span> Experimental context</a></li>
+  <li><a href="#experimental-context" id="toc-experimental-context" class="nav-link active" data-scroll-target="#experimental-context"><span class="header-section-number">1</span> Experimental context</a></li>
   <li><a href="#load-packages" id="toc-load-packages" class="nav-link" data-scroll-target="#load-packages"><span class="header-section-number">2</span> Load packages</a></li>
   <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">3</span> Data</a>
   <ul class="collapse">
@@ -268,10 +280,7 @@ window.Quarto = {
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">8</span> Discussion</a>
   <ul class="collapse">
   <li><a href="#normalisation" id="toc-normalisation" class="nav-link" data-scroll-target="#normalisation"><span class="header-section-number">8.1</span> Normalisation</a></li>
-  <li><a href="#summarisation-1" id="toc-summarisation-1" class="nav-link" data-scroll-target="#summarisation-1"><span class="header-section-number">8.2</span> Summarisation</a>
-  <ul class="collapse">
-  <li><a href="#median-polish" id="toc-median-polish" class="nav-link" data-scroll-target="#median-polish"><span class="header-section-number">8.2.1</span> Median polish</a></li>
-  </ul></li>
+  <li><a href="#summarisation-1" id="toc-summarisation-1" class="nav-link" data-scroll-target="#summarisation-1"><span class="header-section-number">8.2</span> Summarisation</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -281,13 +290,40 @@ window.Quarto = {
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN {-}</h1>
+</div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Lieven Clement <a href="https://orcid.org/0000-0002-9050-4370" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Ghent University
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
 
 
-<section id="workflow-optimisation-using-a-data-independent-acquisition-spike-in-study-searched-with-dia-nn" class="level1 unnumbered">
-<h1 class="unnumbered">Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN</h1>
+</header>
+
+
 <p>DIA-NN provides multiple quantifications, e.g.&nbsp;derived from the MS1 or MS2 spectra, and at precursor or protein (protein group) level. The term ‘precursor’ refers to a charged peptide species and is the basic unit of identification and quantification in DIA. Hence, in the context of DIA we refer to a precursor table, instead of to a PSM table in DDA.</p>
 <p>Examples of different quantities are:</p>
 <ul>
@@ -295,7 +331,6 @@ window.Quarto = {
 <li>MS2 based summary at the protein (protein group)-level: PG.MaxLFQ</li>
 </ul>
 <p>Here, we will use the <code>Precursor.Quantity</code>, <code>Precursor.Normalised</code> and <code>PG.MaxLFQ</code> column.</p>
-</section>
 <section id="experimental-context" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Experimental context</h1>
 <p>The DIA case-study is a subset of Staes et al. <span class="citation" data-cites="Staes2024">(<a href="#ref-Staes2024" role="doc-biblioref">Staes et al. 2024</a>)</span>. They spiked digested UPS proteins in yeast at the following ratio’s (yeast:ups ratio 10:1, 10:2, 10:4, 10:8, 10:10) in a yeast digest background.</p>
@@ -577,7 +612,7 @@ window.Quarto = {
 <h2 data-number="4.4" class="anchored" data-anchor-id="sec-norm"><span class="header-section-number">4.4</span> Normalisation</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>qf[, , <span class="st">"precursors_log"</span>] <span class="sc">|&gt;</span> <span class="co">#1.</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>)) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf))) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co">#3.</span></span>
@@ -596,7 +631,7 @@ window.Quarto = {
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>qf[, , <span class="st">"precursors_log"</span>] <span class="sc">|&gt;</span> <span class="co">#1.</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>), <span class="at">rowvars =</span> <span class="st">"species"</span>) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf)), <span class="at">rowvars =</span> <span class="st">"species"</span>) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co">#3.</span></span>
@@ -715,7 +750,7 @@ window.Quarto = {
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>precursors_norm_sets <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"precursors_norm"</span>, <span class="fu">names</span>(qf), <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>qf[, , precursors_norm_sets] <span class="sc">|&gt;</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf))) <span class="sc">|&gt;</span> </span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">assay =</span> <span class="fu">gsub</span>(assay, <span class="at">pattern =</span> <span class="st">"precursors_norm_"</span>, <span class="at">replacement =</span> <span class="st">""</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
@@ -798,7 +833,7 @@ y_{ip} = \beta_p^\text{pre} + \beta_i^\text{samp} + \epsilon_{ip}
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>proteins_sets <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"proteins"</span>, <span class="fu">names</span>(qf), <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>qf[, , proteins_sets] <span class="sc">|&gt;</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf))) <span class="sc">|&gt;</span> </span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">assay =</span> <span class="fu">gsub</span>(assay, <span class="at">pattern =</span> <span class="st">"proteins_"</span>, <span class="at">replacement =</span> <span class="st">""</span>),</span>
 <span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">norm =</span> <span class="fu">strsplit</span>(assay, <span class="at">split =</span> <span class="st">"_"</span>) <span class="sc">|&gt;</span> </span>
@@ -825,7 +860,7 @@ y_{ip} = \beta_p^\text{pre} + \beta_i^\text{samp} + \epsilon_{ip}
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>proteins_sets <span class="ot">&lt;-</span> <span class="fu">grep</span>(<span class="st">"proteins"</span>, <span class="fu">names</span>(qf), <span class="at">value =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>qf[, , proteins_sets] <span class="sc">|&gt;</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>), <span class="at">rowvars =</span> <span class="st">"species"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf)), <span class="at">rowvars =</span> <span class="st">"species"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(species <span class="sc">==</span><span class="st">"yeast"</span>)<span class="sc">|&gt;</span></span>
 <span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">assay =</span> <span class="fu">gsub</span>(assay, <span class="at">pattern =</span> <span class="st">"proteins_"</span>, <span class="at">replacement =</span> <span class="st">""</span>),</span>
@@ -979,7 +1014,7 @@ yeast   ups
 <p>We plot the marginal intensity distributions to inspect if further normalisation is required.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>qf_pg[, , <span class="st">"proteins_log"</span>] <span class="sc">|&gt;</span> <span class="co">#1.</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>)) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf_pg))) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
 <span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co">#3.</span></span>
@@ -998,7 +1033,7 @@ yeast   ups
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>qf_pg[, , <span class="st">"proteins_log"</span>] <span class="sc">|&gt;</span> <span class="co">#1.</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">c</span>( <span class="st">"rep"</span>, <span class="st">"condition"</span>), <span class="at">rowvars =</span> <span class="st">"species"</span>) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf_pg)), <span class="at">rowvars =</span> <span class="st">"species"</span>) <span class="sc">|&gt;</span>  <span class="co">#2. </span></span>
 <span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(value)) <span class="sc">|&gt;</span></span>
 <span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> <span class="co">#3.</span></span>
@@ -1375,209 +1410,9 @@ condition8                        1          0          1</code></pre>
 </div>
 </div>
 </div>
-<section id="median-polish" class="level3" data-number="8.2.1">
-<h3 data-number="8.2.1" class="anchored" data-anchor-id="median-polish"><span class="header-section-number">8.2.1</span> Median polish</h3>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>protDat <span class="ot">&lt;-</span> qf[protName,,<span class="st">"precursors_norm_med"</span>]</span>
-<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">assay</span>(protDat)</span>
-<span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>iq<span class="sc">::</span><span class="fu">maxLFQ</span>(y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>$estimate
-[1] 20.53323 21.52162 22.58807 20.63971 21.48595 22.65723 20.61512 21.49817
-[9] 22.74086
-
-$annotation
-[1] ""</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">medpolish</span>(y, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>1: 27.03885
-2: 21.51699
-3: 20.60512
-Final: 20.51207</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>fit</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Median Polish Results (Dataset: "y")
-
-Overall: 21.49856
-
-Row Effects:
-             ANRPFLVFIR3            EVPLNTIIFMGR2          LQPLDFKENAEQSR2 
-              1.45949968               0.80865066              -4.15512862 
-            TSDQIHFFFAK3                 FSPENTR2             TSDQIHFFFAK2 
-              1.15429948              -1.80192690              -0.03968189 
-             FRIEDGFSLK3                FSPENTRK2          LQPLDFKENAEQSR3 
-             -0.57284565              -1.43798653               0.20792709 
-                LQPLDFK2 EVPLNTIIFM(UniMod:35)GR2       ATEDEGSEQKIPEATNR3 
-              0.03968189               0.90031966              -0.35676250 
-
-Column Effects:
-  B000254_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA 
-                                        -0.944476047 
-  B000258_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA 
-                                         0.131622701 
-  B000262_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA 
-                                         1.085461577 
-B000278_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_2 
-                                        -0.635781205 
-B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2 
-                                        -0.001896752 
-B000286_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_2 
-                                         1.199301101 
-B000302_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_3 
-                                        -1.060247490 
-B000306_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_3 
-                                        -0.126469561 
-B000310_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_3 
-                                         1.299805343 
-
-Residuals:
-                         B000254_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA
-ANRPFLVFIR3                                                       -0.038487
-EVPLNTIIFMGR2                                                      0.000000
-LQPLDFKENAEQSR2                                                    0.509919
-TSDQIHFFFAK3                                                             NA
-FSPENTR2                                                                 NA
-TSDQIHFFFAK2                                                             NA
-FRIEDGFSLK3                                                       -0.253588
-FSPENTRK2                                                                NA
-LQPLDFKENAEQSR3                                                          NA
-LQPLDFK2                                                           0.464550
-EVPLNTIIFM(UniMod:35)GR2                                                 NA
-ATEDEGSEQKIPEATNR3                                                       NA
-                         B000258_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA
-ANRPFLVFIR3                                                      -0.3590779
-EVPLNTIIFMGR2                                                     0.0000000
-LQPLDFKENAEQSR2                                                   0.6404990
-TSDQIHFFFAK3                                                     -0.3150982
-FSPENTR2                                                                 NA
-TSDQIHFFFAK2                                                     -0.8909601
-FRIEDGFSLK3                                                              NA
-FSPENTRK2                                                         0.0000000
-LQPLDFKENAEQSR3                                                   0.0018968
-LQPLDFK2                                                          0.0000000
-EVPLNTIIFM(UniMod:35)GR2                                                 NA
-ATEDEGSEQKIPEATNR3                                                0.2753182
-                         B000262_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA
-ANRPFLVFIR3                                                        0.307713
-EVPLNTIIFMGR2                                                     -0.024830
-LQPLDFKENAEQSR2                                                    0.370896
-TSDQIHFFFAK3                                                       0.010285
-FSPENTR2                                                          -0.304741
-TSDQIHFFFAK2                                                      -0.010285
-FRIEDGFSLK3                                                              NA
-FSPENTRK2                                                          0.187154
-LQPLDFKENAEQSR3                                                   -0.030521
-LQPLDFK2                                                          -0.099312
-EVPLNTIIFM(UniMod:35)GR2                                           0.329396
-ATEDEGSEQKIPEATNR3                                                       NA
-                         B000278_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_2
-ANRPFLVFIR3                                                         -0.339116
-EVPLNTIIFMGR2                                                        0.000000
-LQPLDFKENAEQSR2                                                            NA
-TSDQIHFFFAK3                                                               NA
-FSPENTR2                                                                   NA
-TSDQIHFFFAK2                                                               NA
-FRIEDGFSLK3                                                                NA
-FSPENTRK2                                                            0.085637
-LQPLDFKENAEQSR3                                                            NA
-LQPLDFK2                                                                   NA
-EVPLNTIIFM(UniMod:35)GR2                                                   NA
-ATEDEGSEQKIPEATNR3                                                         NA
-                         B000282_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_2
-ANRPFLVFIR3                                                         -0.026198
-EVPLNTIIFMGR2                                                        0.455402
-LQPLDFKENAEQSR2                                                     -0.453475
-TSDQIHFFFAK3                                                               NA
-FSPENTR2                                                                   NA
-TSDQIHFFFAK2                                                               NA
-FRIEDGFSLK3                                                                NA
-FSPENTRK2                                                            0.302861
-LQPLDFKENAEQSR3                                                      0.000000
-LQPLDFK2                                                            -0.111611
-EVPLNTIIFM(UniMod:35)GR2                                             0.121074
-ATEDEGSEQKIPEATNR3                                                         NA
-                         B000286_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_2
-ANRPFLVFIR3                                                          0.297085
-EVPLNTIIFMGR2                                                        0.102035
-LQPLDFKENAEQSR2                                                     -1.191258
-TSDQIHFFFAK3                                                        -0.585590
-FSPENTR2                                                            -0.308477
-TSDQIHFFFAK2                                                         0.021687
-FRIEDGFSLK3                                                          0.095383
-FSPENTRK2                                                           -0.021687
-LQPLDFKENAEQSR3                                                      0.143042
-LQPLDFK2                                                            -0.152884
-EVPLNTIIFM(UniMod:35)GR2                                            -0.114765
-ATEDEGSEQKIPEATNR3                                                   0.399466
-                         B000302_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_3
-ANRPFLVFIR3                                                           0.24601
-EVPLNTIIFMGR2                                                         0.78992
-LQPLDFKENAEQSR2                                                      -0.36100
-TSDQIHFFFAK3                                                               NA
-FSPENTR2                                                                   NA
-TSDQIHFFFAK2                                                               NA
-FRIEDGFSLK3                                                                NA
-FSPENTRK2                                                                  NA
-LQPLDFKENAEQSR3                                                            NA
-LQPLDFK2                                                                   NA
-EVPLNTIIFM(UniMod:35)GR2                                                   NA
-ATEDEGSEQKIPEATNR3                                                   -0.24601
-                         B000306_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA_3
-ANRPFLVFIR3                                                         0.8969377
-EVPLNTIIFMGR2                                                       0.7300775
-LQPLDFKENAEQSR2                                                    -1.2830435
-TSDQIHFFFAK3                                                       -0.0069988
-FSPENTR2                                                            0.4386879
-TSDQIHFFFAK2                                                       -0.0069988
-FRIEDGFSLK3                                                         0.0170767
-FSPENTRK2                                                          -0.3566108
-LQPLDFKENAEQSR3                                                    -0.0454679
-LQPLDFK2                                                            0.0069988
-EVPLNTIIFM(UniMod:35)GR2                                                   NA
-ATEDEGSEQKIPEATNR3                                                         NA
-                         B000310_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_3
-ANRPFLVFIR3                                                          0.012038
-EVPLNTIIFMGR2                                                       -0.211180
-LQPLDFKENAEQSR2                                                      0.749800
-TSDQIHFFFAK3                                                         0.380540
-FSPENTR2                                                             0.297365
-TSDQIHFFFAK2                                                        -0.797488
-FRIEDGFSLK3                                                         -0.012038
-FSPENTRK2                                                           -0.930924
-LQPLDFKENAEQSR3                                                      0.181371
-LQPLDFK2                                                             0.179677
-EVPLNTIIFM(UniMod:35)GR2                                            -0.276490
-ATEDEGSEQKIPEATNR3                                                  -0.298075</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>protFit <span class="ot">&lt;-</span> protDat</span>
-<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a><span class="fu">assay</span>(protFit[[<span class="st">"precursors_norm_med"</span>]]) <span class="ot">&lt;-</span> y <span class="sc">-</span> fit<span class="sc">$</span>residuals </span>
-<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>protFitLong <span class="ot">&lt;-</span>   protFit[,,<span class="st">"precursors_norm_med"</span>] <span class="sc">|&gt;</span>   <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(protFit)), <span class="at">rowvars =</span> <span class="st">"Protein.Ids"</span>) <span class="sc">|&gt;</span> <span class="fu">data.frame</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>gridExtra<span class="sc">::</span><span class="fu">grid.arrange</span>(p1 <span class="sc">+</span> </span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(</span>
-<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> protFitLong,</span>
-<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x=</span>rowname, <span class="at">y=</span>value, <span class="at">color=</span>condition, <span class="at">group=</span>runCol)) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"fit: ~ sample + precursor"</span>), </span>
-<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>    p_medpolish <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="st">"Summarization: sample effect"</span>), </span>
-<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">1</span></span>
-<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="02-workflow-optimisation_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
 
 
 
-</section>
 </section>
 </section>
 

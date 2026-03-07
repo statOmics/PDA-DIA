@@ -1,4 +1,6 @@
-# Analysis of more complex designs with MSqRob {-}
+---
+title: Analysis of more complex designs with msqrob2
+---
 
 The result of a quantitative analysis is a list of peptide and/or protein abundances for every protein in different samples, or abundance ratios between the samples. In this chapter we will extend our generic workflow for differential analysis of quantitative datasets with more complex experimental designs.
 

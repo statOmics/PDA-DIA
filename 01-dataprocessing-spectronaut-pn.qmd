@@ -1,7 +1,15 @@
-# Differential abundance analysis with Spectronaut - starting from FG_MS2Quantity {-}
+---
+title: Differential abundance analysis with Spectronaut - starting from FG_MS2Quantity or FG_Quantity
+code-tools: true
+author:
+  - name: Lieven Clement
+    orcid: 0000-0002-9050-4370
+    affiliation: 
+      - name: Ghent University
+---
 
 ```{r, echo = FALSE}
-source("R/knitr_setup.R")
+source("https://raw.githubusercontent.com/statOmics/PDA-DIA/master/R/utils.R")
 ```
 
 This chapter explains the main concepts for data-processing and statistical analysis of
@@ -53,7 +61,7 @@ library("scater")
 We load the output from Spectronaut parquet file.
 
 ```{r import_data}
-precursorFile <- "data/spikein248-staesetal2024-spectronaut.parquet" 
+precursorFile <- "https://github.com/statOmics/PDA-DIA/raw/refs/heads/main/data/spikein248-staesetal2024-spectronaut.parquet" 
 ```
 
 
@@ -227,6 +235,9 @@ acquired, and this information will be used to match the identifiers
 in the `Run` column of the precursor table. 
 
 Here, we will use the `FG_MS2Quantity` column as quantification input. 
+Note, that this is often also stored as FG_Quantity. 
+Depending on the choice of the user either FG_MS1Quantity or FG_MS2Quantity are stored as FG_Quantity. 
+These are already interference corrected and normalised precursor quantities.
 
 Note, that we filter a number of variables to reduce the footprint of the QFeatures object. 
 

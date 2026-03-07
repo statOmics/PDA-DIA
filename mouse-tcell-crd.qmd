@@ -1,4 +1,6 @@
-# Tutorial 2: Mouse T-cell Completely Randomised design  {-}
+---
+title: Tutorial 2 - Mouse T-cell Completely Randomised design
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Lieven Clement">
 
-<title>dataprocessing-pg</title>
+<title>Differential abundance analysis with DIA-NN - starting from proteins groups table</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -170,15 +171,23 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="./02-workflow-optimisation.html">
- <span class="dropdown-text">2. Workflow optimisation</span></a>
+ <span class="dropdown-text">1.1 Workflow optimisation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-normalisation-wrapup.html">
+ <span class="dropdown-text">1.2 Wrapup Normalisation</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03-inference.html">
- <span class="dropdown-text">3.1. Inference</span></a>
+ <span class="dropdown-text">2.1. Inference</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./03-blocking-wrapup.html">
- <span class="dropdown-text">3.2. Wrapup Blocking</span></a>
+ <span class="dropdown-text">2.2. Wrapup Blocking</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mouse-diet-two-factors.html">
+ <span class="dropdown-text">2.3. Wrapup Design2</span></a>
   </li>  
     </ul>
   </li>
@@ -192,6 +201,10 @@ window.Quarto = {
         <li>
     <a class="dropdown-item" href="./01-tutorial-data-processing.html">
  <span class="dropdown-text">1. Tutorial Data Processing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-tutorial-Design.html">
+ <span class="dropdown-text">2. Tutorial Differential Analysis and Design</span></a>
   </li>  
     </ul>
   </li>
@@ -210,17 +223,17 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#differential-abundance-analysis-with-dia-nn---starting-from-proteins-groups-table" id="toc-differential-abundance-analysis-with-dia-nn---starting-from-proteins-groups-table" class="nav-link active" data-scroll-target="#differential-abundance-analysis-with-dia-nn---starting-from-proteins-groups-table">Differential abundance analysis with DIA-NN - starting from proteins groups table</a>
+  <li><a href="#data-processing" id="toc-data-processing" class="nav-link active" data-scroll-target="#data-processing"><span class="header-section-number">1</span> Data processing</a>
   <ul class="collapse">
-  <li><a href="#log-transformation" id="toc-log-transformation" class="nav-link" data-scroll-target="#log-transformation"><span class="header-section-number">0.1</span> log-transformation</a></li>
+  <li><a href="#log-transformation" id="toc-log-transformation" class="nav-link" data-scroll-target="#log-transformation"><span class="header-section-number">1.1</span> log-transformation</a></li>
   </ul></li>
-  <li><a href="#data-modeling-and-inference" id="toc-data-modeling-and-inference" class="nav-link" data-scroll-target="#data-modeling-and-inference"><span class="header-section-number">1</span> Data Modeling and Inference</a></li>
-  <li><a href="#assess-performance" id="toc-assess-performance" class="nav-link" data-scroll-target="#assess-performance"><span class="header-section-number">2</span> Assess performance</a>
+  <li><a href="#data-modeling-and-inference" id="toc-data-modeling-and-inference" class="nav-link" data-scroll-target="#data-modeling-and-inference"><span class="header-section-number">2</span> Data Modeling and Inference</a></li>
+  <li><a href="#assess-performance" id="toc-assess-performance" class="nav-link" data-scroll-target="#assess-performance"><span class="header-section-number">3</span> Assess performance</a>
   <ul class="collapse">
-  <li><a href="#real-fold-changes" id="toc-real-fold-changes" class="nav-link" data-scroll-target="#real-fold-changes"><span class="header-section-number">2.1</span> Real Fold changes</a></li>
-  <li><a href="#true-and-false-positives" id="toc-true-and-false-positives" class="nav-link" data-scroll-target="#true-and-false-positives"><span class="header-section-number">2.2</span> True and false positives</a></li>
-  <li><a href="#tpr---fdp-curves" id="toc-tpr---fdp-curves" class="nav-link" data-scroll-target="#tpr---fdp-curves"><span class="header-section-number">2.3</span> TPR - FDP curves</a></li>
-  <li><a href="#volcano-plots" id="toc-volcano-plots" class="nav-link" data-scroll-target="#volcano-plots"><span class="header-section-number">2.4</span> volcano-plots</a></li>
+  <li><a href="#real-fold-changes" id="toc-real-fold-changes" class="nav-link" data-scroll-target="#real-fold-changes"><span class="header-section-number">3.1</span> Real Fold changes</a></li>
+  <li><a href="#true-and-false-positives" id="toc-true-and-false-positives" class="nav-link" data-scroll-target="#true-and-false-positives"><span class="header-section-number">3.2</span> True and false positives</a></li>
+  <li><a href="#tpr---fdp-curves" id="toc-tpr---fdp-curves" class="nav-link" data-scroll-target="#tpr---fdp-curves"><span class="header-section-number">3.3</span> TPR - FDP curves</a></li>
+  <li><a href="#volcano-plots" id="toc-volcano-plots" class="nav-link" data-scroll-target="#volcano-plots"><span class="header-section-number">3.4</span> volcano-plots</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -230,13 +243,40 @@ window.Quarto = {
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Differential abundance analysis with DIA-NN - starting from proteins groups table</h1>
+</div>
 
 
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Lieven Clement <a href="https://orcid.org/0000-0002-9050-4370" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Ghent University
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
 
 
-<section id="differential-abundance-analysis-with-dia-nn---starting-from-proteins-groups-table" class="level1 unnumbered">
-<h1 class="unnumbered">Differential abundance analysis with DIA-NN - starting from proteins groups table</h1>
+</header>
+
+
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"QFeatures"</span>)  </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"dplyr"</span>) </span>
@@ -254,6 +294,8 @@ window.Quarto = {
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"tibble"</span>)</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"scater"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<section id="data-processing" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Data processing</h1>
 <p>We will now make a QFeatures object starting from the protein level summaries from DIA-NN. Normally we would start from the protein groups file that is provided by DIA-NN, i.e.&nbsp;the pg_matrix.tsv.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>proteinGroupFile <span class="ot">&lt;-</span> <span class="st">"data/spikein248-staesetal2024.pg_matrix.tsv"</span></span>
@@ -350,8 +392,8 @@ yeast   ups
  [1] proteins_raw: SummarizedExperiment with 3694 rows and 9 columns </code></pre>
 </div>
 </div>
-<section id="log-transformation" class="level2" data-number="0.1">
-<h2 data-number="0.1" class="anchored" data-anchor-id="log-transformation"><span class="header-section-number">0.1</span> log-transformation</h2>
+<section id="log-transformation" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="log-transformation"><span class="header-section-number">1.1</span> log-transformation</h2>
 <p>We first convert zero’s to NA and then we perform the log transformation.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>qf_pg <span class="ot">&lt;-</span> <span class="fu">zeroIsNA</span>(qf_pg, <span class="at">i =</span> <span class="fu">names</span>(qf_pg))</span>
@@ -421,8 +463,8 @@ yeast   ups
 </div>
 </section>
 </section>
-<section id="data-modeling-and-inference" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Data Modeling and Inference</h1>
+<section id="data-modeling-and-inference" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Data Modeling and Inference</h1>
 <p>Setup model and contrasts of interest.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="er">~</span> condition</span>
@@ -478,15 +520,15 @@ condition8                        1          0          1</code></pre>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">species =</span>  <span class="fu">rep</span>(<span class="fu">rowData</span>(qf_pg[[<span class="st">"proteins"</span>]])<span class="sc">$</span>species, <span class="fu">ncol</span>(L)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="assess-performance" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Assess performance</h1>
+<section id="assess-performance" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Assess performance</h1>
 <p>Note, that the evaluations in this section are typically not possible on real experimental data. Indeed, we are using a spike-in dataset so we know the ground truth: all human UPS proteins are differentially abundant (DA) between the conditions and the yeast proteins are non-DA.</p>
 <p>We use a nominal FDR level of 0.05</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">&lt;-</span> <span class="fl">0.05</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="real-fold-changes" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="real-fold-changes"><span class="header-section-number">2.1</span> Real Fold changes</h2>
+<section id="real-fold-changes" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="real-fold-changes"><span class="header-section-number">3.1</span> Real Fold changes</h2>
 <p>As this is a spike-in study with known ground truth, we can also plot the log2 fold change distributions against the expected values, in this case 0 for the yeast proteins and the difference of the log concentration for the spiked-in UPS standards. We first create a small table with the real values.</p>
 <p>As this is a spike-in study with known ground truth, we can also plot the log2 fold change distributions against the expected values, in this case 0 for the yeast proteins and the difference of the log concentration for the spiked-in UPS standards. We first create a small table with the real values.</p>
 <ol type="1">
@@ -550,8 +592,8 @@ condition8                        1          0          1</code></pre>
 </div>
 </div>
 </section>
-<section id="true-and-false-positives" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="true-and-false-positives"><span class="header-section-number">2.2</span> True and false positives</h2>
+<section id="true-and-false-positives" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="true-and-false-positives"><span class="header-section-number">3.2</span> True and false positives</h2>
 <p>All human UPS proteins are differentially abundant (DA) between the conditions and the yeast proteins are non-DA. We make a new variable spikein in the inference_list.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>tpFpTable <span class="ot">&lt;-</span> <span class="fu">group_by</span>(inferences_pg, contrast) <span class="sc">|&gt;</span></span>
@@ -570,8 +612,8 @@ condition8                        1          0          1</code></pre>
 </div>
 </div>
 </section>
-<section id="tpr---fdp-curves" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="tpr---fdp-curves"><span class="header-section-number">2.3</span> TPR - FDP curves</h2>
+<section id="tpr---fdp-curves" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="tpr---fdp-curves"><span class="header-section-number">3.3</span> TPR - FDP curves</h2>
 <p>We generate the TPR-FDP curves to assess the performance of the different workflows to prioritise differentially abundant proteins. Again, these curves are built using the ground truth information about which proteins are differentially abundant (spiked in) and which proteins are constant across samples. We create two functions to compute the TPR and the FDP.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>computeFDP <span class="ot">&lt;-</span> <span class="cf">function</span>(pval, tp) {</span>
@@ -622,8 +664,8 @@ condition8                        1          0          1</code></pre>
 </div>
 </div>
 </section>
-<section id="volcano-plots" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="volcano-plots"><span class="header-section-number">2.4</span> volcano-plots</h2>
+<section id="volcano-plots" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="volcano-plots"><span class="header-section-number">3.4</span> volcano-plots</h2>
 <p>We make a separate plot per contrast and compare the volcano plots for all normalisation x summarisation combinations.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>  inferences_pg <span class="sc">|&gt;</span> </span>

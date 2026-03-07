@@ -1,4 +1,6 @@
-# Differential abundance analysis with DIA-NN - starting from proteins groups table {-}
+---
+title: Differential abundance analysis with DIA-NN - starting from proteins groups table
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")
@@ -21,6 +23,8 @@ library("purrr")
 library("tibble")
 library("scater")
 ```
+
+# Data processing 
 
 We will now make a QFeatures object starting from the protein level summaries from DIA-NN.
 Normally we would start from the protein groups file that is provided by DIA-NN, i.e. the pg_matrix.tsv. 

@@ -1,7 +1,15 @@
-# Tutorial: median normalisation + median summarisation {-}
+---
+title: "Tutorial: Staes - median normalisation - median summarisation"
+code-tools: true
+author:
+  - name: Lieven Clement
+    orcid: 0000-0002-9050-4370
+    affiliation: 
+      - name: Ghent University
+---
 
 ```{r, echo = FALSE}
-source("R/knitr_setup.R")
+source("https://raw.githubusercontent.com/statOmics/PDA-DIA/master/R/utils.R")
 ```
 
 # Background 

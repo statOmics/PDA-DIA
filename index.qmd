@@ -1,6 +1,7 @@
-
-
-# Proteomics Data Analysis for Data-independent acquisition (PDA-DIA) {-}
+---
+title: Proteomics Data Analysis for Data-independent acquisition (PDA-DIA) 
+code-tools: false
+---
 
 This course provides comprehensive hands-on tutorials on how to apply the
 `msqrob2` software for the statistical analysis of mass spectrometry

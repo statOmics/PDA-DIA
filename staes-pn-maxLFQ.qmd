@@ -1,7 +1,15 @@
-# Tutorial: Precursor.Normalised + maxLFQ summarisation {-}
+---
+title: "Tutorial: Staes - total normalisation - MaxLFQ summarisation"
+code-tools: true
+author:
+  - name: Lieven Clement
+    orcid: 0000-0002-9050-4370
+    affiliation: 
+      - name: Ghent University
+---
 
 ```{r, echo = FALSE}
-source("R/knitr_setup.R")
+source("https://raw.githubusercontent.com/statOmics/PDA-DIA/master/R/utils.R")
 ```
 
 # Background 
@@ -395,6 +403,7 @@ precursors |>
 
 
 ## Summarisation
+
 
 Here, we summarise the precursor-level data into protein intensities using maxLFQ. 
 maxLFQ first calculates all pairwise log ratio's between samples only using their shared precursors.

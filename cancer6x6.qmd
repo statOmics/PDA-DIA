@@ -1,4 +1,6 @@
-# Tutorial 1: Cancer 6x6  {-}
+---
+title: Tutorial 1 - Cancer 6x6
+---
 
 ```{r, echo = FALSE}
 source("R/knitr_setup.R")

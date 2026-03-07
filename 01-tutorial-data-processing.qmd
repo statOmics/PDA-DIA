@@ -1,5 +1,6 @@
-
-#  Tutorial on data processing and msqrob2 analysis of experiments with simple designs {-}
+---
+title:  Tutorial on data processing and msqrob2 analysis of experiments with simple designs
+---
 
 
 The result of a quantitative analysis is a list of precursor, peptide and/or protein abundances for every protein in different samples. In this tutorial we introduce a generic workflow for differential analysis of quantitative datasets with simple experimental designs.
