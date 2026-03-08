@@ -16,8 +16,26 @@ The main search output for this DIA-NN version was stored in the report.parquet 
 
 # Background
 
-Why proteomics? 
-While genes provide the blueprint, proteins are the active functional molecules of life, driving cellular processes, signaling, structure, disease mechanisms, etc.
+## Christian de Duve (1917 - 2013)
+
+- Belgian Nobel price winner 
+- Pioneer in biochemistry and biotechnology
+- Amazing definition of life: 
+
+1. Life is one 
+2. Life is chemistry 
+3. Life is information
+
+## Why proteomics? 
+
+While genes provide the blueprint, 
+proteins are the active functional molecules of life, 
+
+ - driving cellular processes, 
+ - signaling, 
+ - structure, 
+ - disease mechanisms, 
+ - etc.
 
 ```{r echo=FALSE}
 #| layout-ncol: 2

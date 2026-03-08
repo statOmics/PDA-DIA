@@ -245,12 +245,14 @@ window.Quarto = {
   <ul>
   <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">1</span> Background</a>
   <ul class="collapse">
-  <li><a href="#conventional-ms-based-workflow" id="toc-conventional-ms-based-workflow" class="nav-link" data-scroll-target="#conventional-ms-based-workflow"><span class="header-section-number">1.1</span> Conventional MS-based workflow</a></li>
-  <li><a href="#data-dependent-acquisition" id="toc-data-dependent-acquisition" class="nav-link" data-scroll-target="#data-dependent-acquisition"><span class="header-section-number">1.2</span> Data Dependent Acquisition</a></li>
-  <li><a href="#level-of-quantification" id="toc-level-of-quantification" class="nav-link" data-scroll-target="#level-of-quantification"><span class="header-section-number">1.3</span> Level of quantification</a></li>
-  <li><a href="#sec-dia_challenges" id="toc-sec-dia_challenges" class="nav-link" data-scroll-target="#sec-dia_challenges"><span class="header-section-number">1.4</span> Challenges</a></li>
-  <li><a href="#dia-workflow" id="toc-dia-workflow" class="nav-link" data-scroll-target="#dia-workflow"><span class="header-section-number">1.5</span> DIA workflow</a></li>
-  <li><a href="#experimental-context" id="toc-experimental-context" class="nav-link" data-scroll-target="#experimental-context"><span class="header-section-number">1.6</span> Experimental context</a></li>
+  <li><a href="#christian-de-duve-1917---2013" id="toc-christian-de-duve-1917---2013" class="nav-link" data-scroll-target="#christian-de-duve-1917---2013"><span class="header-section-number">1.1</span> Christian de Duve (1917 - 2013)</a></li>
+  <li><a href="#why-proteomics" id="toc-why-proteomics" class="nav-link" data-scroll-target="#why-proteomics"><span class="header-section-number">1.2</span> Why proteomics?</a></li>
+  <li><a href="#conventional-ms-based-workflow" id="toc-conventional-ms-based-workflow" class="nav-link" data-scroll-target="#conventional-ms-based-workflow"><span class="header-section-number">1.3</span> Conventional MS-based workflow</a></li>
+  <li><a href="#data-dependent-acquisition" id="toc-data-dependent-acquisition" class="nav-link" data-scroll-target="#data-dependent-acquisition"><span class="header-section-number">1.4</span> Data Dependent Acquisition</a></li>
+  <li><a href="#level-of-quantification" id="toc-level-of-quantification" class="nav-link" data-scroll-target="#level-of-quantification"><span class="header-section-number">1.5</span> Level of quantification</a></li>
+  <li><a href="#sec-dia_challenges" id="toc-sec-dia_challenges" class="nav-link" data-scroll-target="#sec-dia_challenges"><span class="header-section-number">1.6</span> Challenges</a></li>
+  <li><a href="#dia-workflow" id="toc-dia-workflow" class="nav-link" data-scroll-target="#dia-workflow"><span class="header-section-number">1.7</span> DIA workflow</a></li>
+  <li><a href="#experimental-context" id="toc-experimental-context" class="nav-link" data-scroll-target="#experimental-context"><span class="header-section-number">1.8</span> Experimental context</a></li>
   </ul></li>
   <li><a href="#load-packages" id="toc-load-packages" class="nav-link" data-scroll-target="#load-packages"><span class="header-section-number">2</span> Load packages</a>
   <ul class="collapse">
@@ -353,7 +355,29 @@ window.Quarto = {
 <p>This chapter explains the main concepts for data-processing and statistical analysis of (DIA) proteomics data using <code>msqrob2</code>. To illustrate these concepts, we will use using a publicly available spike-in study published by Staes et al. <span class="citation" data-cites="Staes2024">(<a href="#ref-Staes2024" role="doc-biblioref">Staes et al. 2024</a>)</span>. They spiked digested UPS proteins in a yeast digested background at the following ratio’s (yeast:ups ratio 10:1, 10:2, 10:4, 10:8, 10:10). Here we will use a subset of the data, i.e.&nbsp;dilutions 10:2, 10:4 and 10:8. We will use output of the search engine DIA-NN 2.2.0. The main search output for this DIA-NN version was stored in the report.parquet file in the DIA-NN output directory, which can be found under data/spikein248-staesetal2024.parquet</p>
 <section id="background" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Background</h1>
-<p>Why proteomics? While genes provide the blueprint, proteins are the active functional molecules of life, driving cellular processes, signaling, structure, disease mechanisms, etc.</p>
+<section id="christian-de-duve-1917---2013" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="christian-de-duve-1917---2013"><span class="header-section-number">1.1</span> Christian de Duve (1917 - 2013)</h2>
+<ul>
+<li>Belgian Nobel price winner</li>
+<li>Pioneer in biochemistry and biotechnology</li>
+<li>Amazing definition of life:</li>
+</ul>
+<ol type="1">
+<li>Life is one</li>
+<li>Life is chemistry</li>
+<li>Life is information</li>
+</ol>
+</section>
+<section id="why-proteomics" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="why-proteomics"><span class="header-section-number">1.2</span> Why proteomics?</h2>
+<p>While genes provide the blueprint, proteins are the active functional molecules of life,</p>
+<ul>
+<li>driving cellular processes,</li>
+<li>signaling,</li>
+<li>structure,</li>
+<li>disease mechanisms,</li>
+<li>etc.</li>
+</ul>
 <div class="cell quarto-layout-panel" data-layout-ncol="2">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
@@ -364,8 +388,9 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="conventional-ms-based-workflow" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="conventional-ms-based-workflow"><span class="header-section-number">1.1</span> Conventional MS-based workflow</h2>
+</section>
+<section id="conventional-ms-based-workflow" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="conventional-ms-based-workflow"><span class="header-section-number">1.3</span> Conventional MS-based workflow</h2>
 <p>In a nutshell, the wetlab workflow starts with sample preparation where the samples are collected, and the protein content is extracted and digested into peptides. To reduce the sample complexity, the peptides are then separated based on physicochemical properties (mostly hydrophobicity) using liquid chromatography (LC). Peptides are then ionised by an electrospray as they elute from the chromatographic column. The signal over time generated by the eluting ions is called the total ion chromatogram. The ions are then sent for a first round of MS to record their m/z distribution for the intact ions. This provides an overview of the ions that elute from the column and allows for further separation of the ions in the m/z space. The second round of MS (MS2) records the fragmented ions for a selection of ions, generally the most intense MS1 peaks<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. This process is repeated for every sample so that every sample is acquired in one MS run. This provides the ion’s mass fingerprint. For LFQ workflows, the accumulated MS1 intensity over time, also known as the area under the curve, around the target mass is used as a quantification measure. On the other hand, the ion mass fingerprint, called the MS2 spectrum, enables computational identification of the corresponding peptide using search engines (e.g.&nbsp;Andromeda has been used for this data set) that will provide peptide-to-spectrum matches (PSM). The quantified PSM are further processed by the software (MaxQuant) to obtain a peptide table<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>, where every row corresponds to an identified peptide and every column contains information about the peptide and its quantification in one of the samples.</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -393,8 +418,8 @@ window.Quarto = {
 </ul>
 <p><span class="math inline">\(\rightarrow\)</span> Unbalanced pepide identifications across samples and messy data</p>
 </section>
-<section id="data-dependent-acquisition" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="data-dependent-acquisition"><span class="header-section-number">1.2</span> Data Dependent Acquisition</h2>
+<section id="data-dependent-acquisition" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="data-dependent-acquisition"><span class="header-section-number">1.4</span> Data Dependent Acquisition</h2>
 <p>With data independent acquisition, however, the second round of MS (MS2) does not record fragmented ions for selected ions. Instead the instrument divides the m/z range into sequential windows (e.g., 400–425, 425–450 m/z) and all ions within each window are fragmented together. This continues across the full mass range resulting in a systematic fragmentation of all peptides. Hence, the MS2 spectra are complex as many peptides mixed. So search engines and quantification software, such as DIA-NN and Spectronaut, have to deconvolute the complex MS2 spectra so as to identify and quantify individual precursors (MS1) in the m/z window using their MS2 fragments. Hence, the quantification can be done using either MS1 or MS2.</p>
 <p><img src="https://www.creative-proteomics.com/blog/wp-content/uploads/2024/01/principles-applications-and-comparative-workflow-of-dia-and-dda.jpg" class="img-fluid"></p>
 <ul>
@@ -405,8 +430,8 @@ window.Quarto = {
 <li>Quantification using MS1 or MS2 peaks</li>
 </ul>
 </section>
-<section id="level-of-quantification" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="level-of-quantification"><span class="header-section-number">1.3</span> Level of quantification</h2>
+<section id="level-of-quantification" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="level-of-quantification"><span class="header-section-number">1.5</span> Level of quantification</h2>
 <ul>
 <li>MS-based proteomics returns peptides or precursors: pieces of proteins</li>
 </ul>
@@ -432,8 +457,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-dia_challenges" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="sec-dia_challenges"><span class="header-section-number">1.4</span> Challenges</h2>
+<section id="sec-dia_challenges" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="sec-dia_challenges"><span class="header-section-number">1.6</span> Challenges</h2>
 <p>Behind this workflow lies several challenges that will affect the data modelling:</p>
 <ul>
 <li>MS-based proteomics does not measure proteins directly, but their constituting <strong>peptide ions</strong>. The protein-level information needs to be reconstructed from the ion data. In this tutorial, we will start from the precursor-level data, which has been constructed from the ion data by DIA-NN.</li>
@@ -444,8 +469,8 @@ window.Quarto = {
 <li>Technical variations during the experiment can lead to systematic fluctuations across samples. The most obvious reason is when different sample amounts are injected into the instruments, due to small pipetting inconsistencies for instance. However, these differences lead to unwanted variation that should be discarded when answering biological questions.</li>
 </ul>
 </section>
-<section id="dia-workflow" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="dia-workflow"><span class="header-section-number">1.5</span> DIA workflow</h2>
+<section id="dia-workflow" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="dia-workflow"><span class="header-section-number">1.7</span> DIA workflow</h2>
 <p>DIA-NN provides multiple quantifications, e.g.&nbsp;derived from the MS1 or MS2 spectra, and at precursor or protein (protein group) level. The term ‘precursor’ refers to a charged peptide species and is the basic unit of identification and quantification in DIA. Hence, in the context of DIA we refer to a precursor table, instead of to a PSM table in DDA.</p>
 <p>Examples of different quantities are:</p>
 <ul>
@@ -454,8 +479,8 @@ window.Quarto = {
 </ul>
 <p>Here, we will use the <code>Precursor.Quantity</code> column.</p>
 </section>
-<section id="experimental-context" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="experimental-context"><span class="header-section-number">1.6</span> Experimental context</h2>
+<section id="experimental-context" class="level2" data-number="1.8">
+<h2 data-number="1.8" class="anchored" data-anchor-id="experimental-context"><span class="header-section-number">1.8</span> Experimental context</h2>
 <p>This chapter explains how to analyse a proteomics data set that has been generated using data independent acquisition (DIA). We will again use an in-house spike-in study to illustrate the analysis. The DIA case-study is a subset of Staes et al. <span class="citation" data-cites="Staes2024">(<a href="#ref-Staes2024" role="doc-biblioref">Staes et al. 2024</a>)</span>. They spiked digested UPS proteins in yeast at the following ratio’s (yeast:ups ratio 10:1, 10:2, 10:4, 10:8, 10:10) in a yeast digest background.</p>
 <p>Each sample was analyzed in triplicate using an Ultimate 3000 RSLC ProFlow nano-LC system in-line connected to a Q Exactive HF BioPharma mass spectrometer (Thermo).</p>
 <p>Here, we will only use the data of the samples from the middle 3 spike-in ratio’s (2,4 and 8) that were searched using DIA-NN 2.2.0. The main search output for this DIA-NN version is stored in the report.parquet file in the DIA-NN output directory.</p>
