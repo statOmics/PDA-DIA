@@ -108,7 +108,12 @@ Hence, the quantification can be done using either MS1 or MS2.
 - MS2 spectra are complex as many peptides mixed
 - Deconvolution of the MS2 signal 
 - With dedicated software such as Spectronaut or DIA-NN
-- Quantification using MS1 or MS2 peaks
+
+    - Identification based on spectral libraries
+    - Library free: FASTA database to predict in silico spectra, retention times, and ion mobilities, which are then used to search the DIA data
+    - Use of decoys sequences to estimate false discovery rate of ID 
+    
+- Quantification using MS2 and/or MS1 peaks
 
 ## Level of quantification
 
@@ -345,7 +350,8 @@ We will make a new data frame with the annotation.
     d. converting it into a factor
     
 ```{r create_metadata}
-annot <- data.frame(runCol = precursors |> 
+(
+  annot <- data.frame(runCol = precursors |> 
                        pull(Run) |> 
                        unique() # 1. 
                    ) |>
@@ -368,6 +374,7 @@ annot <- data.frame(runCol = precursors |>
              as.character() |> 
              as.double()
            )
+)
 ```
 
 ## Convert to QFeatures
@@ -718,7 +725,7 @@ sample. We colour each sample based on its spike-in condition.
 
 ```{r}
 qf[, , "precursors_log"] |> #1.
-  longForm(colvars = c( "rep", "condition")) |>  #2. 
+  longForm(colvars = colnames(colData(qf))) |>  #2. 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + #3.
@@ -768,7 +775,7 @@ that the distribution of the $y_{ip}^{\text{norm}}$ nicely overlap (using the sa
 
 ```{r}
 qf[, , "precursors_norm"] |>
-  longForm(colvars = c( "rep", "condition")) |> 
+  longForm(colvars = colnames(colData(qf))) |> 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + 
@@ -811,7 +818,7 @@ qf[,,"precursors_norm"] |>
         legend.position = "top") + 
   labs(
        subtitle = protName,
-       x = "Peptide", 
+       x = "Precursor", 
        y = "log2(norm Intensity)") +
   theme_minimal()+
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
@@ -853,7 +860,7 @@ Hence, it first eliminates peptide effects.
 It then estimates the summaries by solving 
 
 $$
-\sum_i\sum_j(y^{prot}_j - y^{prot}_i - r_ij)^2
+\sum_i\sum_j(y^{prot}_j - y^{prot}_i - r_{ij})^2
 $$
 It is implemented in the `maxLFQ` function of the `iq` package. 
 
@@ -901,7 +908,7 @@ We finally evaluate the marginal distribution of the aggregated protein summarie
 
 ```{r}
 qf[, , "proteins"] |>
-  longForm(colvars = c( "rep", "condition")) |> 
+  longForm(colvars = colnames(colData(qf))) |> 
   data.frame() |> 
   filter(!is.na(value)) |>
   ggplot() + 
