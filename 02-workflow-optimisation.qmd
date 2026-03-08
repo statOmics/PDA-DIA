@@ -1,5 +1,5 @@
 ---
-title: Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN {-}
+title: Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN
 ---
 
 ```{r echo = FALSE}
