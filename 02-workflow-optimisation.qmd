@@ -2,6 +2,8 @@
 title: Workflow optimisation using a Data Independent Acquisition spike-in study searched with DIA-NN
 ---
 
+Adapted from chapter "Optimisation of a data analysis workflow" in msqrob2book ([https://statomics.github.io/msqrob2book/](https://statomics.github.io/msqrob2book/01-basics.html)) by Christophe Vanderaa, Stijn Vandenbulcke and Lieven Clement. 
+
 ```{r echo = FALSE}
 source("R/knitr_setup.R")
 ```

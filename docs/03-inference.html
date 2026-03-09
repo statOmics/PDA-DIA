@@ -782,12 +782,16 @@ mean in group WT mean in group D8
 <li>Defined by Benjamini and Hochberg in their seminal paper Benjamini, Y. and Hochberg, Y. (1995). “Controlling the false discovery rate: a practical and powerful approach to multiple testing”. Journal of the Royal Statistical Society Series B, 57 (1): 289–300.</li>
 </ul>
 <p>The <strong>False Discovery Proportion (FDP)</strong> is the fraction of false positives that are returned, i.e.&nbsp;</p>
-<p>[ FDP = ]</p>
+<p><span class="math display">\[
+FDP = \frac{FP}{R}
+\]</span></p>
 <ul>
 <li>However, this quantity cannot be observed because in practice we only know the number of proteins for which we rejected <span class="math inline">\(H_0\)</span>, <span class="math inline">\(R\)</span>.</li>
 <li>But, we do not know the number of false positives, <span class="math inline">\(FP\)</span>.</li>
 </ul>
-<p>Therefore, Benjamini and Hochberg, 1995, defined The <strong>False Discovery Rate (FDR)</strong> as [ = =] the expected FDP.</p>
+<p>Therefore, Benjamini and Hochberg, 1995, defined The <strong>False Discovery Rate (FDR)</strong> as <span class="math display">\[
+   \text{FDR} = \text{E}\left[\frac{FP}{R}\right] =\text{E}\left[\text{FDP}\right]
+\]</span> the expected FDP.</p>
 <ul>
 <li>Controlling the FDR allows for more discoveries (i.e.&nbsp;longer lists with significant results), while the fraction of false discoveries among the significant results in well controlled on average. As a consequence, more of the true positive hypotheses will be detected.</li>
 </ul>

@@ -1494,3 +1494,21 @@ print(outplot)
 }
 ```
 
+## Protein mapping
+
+Read fasta file 
+
+```{r}
+fastaFile <- "data/20240124_Uniprot_MusMusculus_Reviewed_AA_ensdb112.fasta"
+fasta <- seqinr::read.fasta(fastaFile, seqtype = "AA", as.string = T) #2.
+```
+
+1. Extract the proteins from the protein file. 
+2. Calculate the length of the protein
+
+```{r}
+# read in fasta file for protein sequence & length -> to calculate the coverage
+mapping <- data.frame(Accession = fasta |> names() |> stringr::str_split_i("\\|", 1),
+                      Protein.Sequence = unlist(fasta)) #1. 
+```
+

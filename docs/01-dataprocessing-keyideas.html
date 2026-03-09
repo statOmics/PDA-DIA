@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Lieven Clement">
+
+<title>Basic concepts for differential abundance analysis of proteomics data - key idea’s talk</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./figs/msqrob2.png" rel="icon" type="image/png">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-b75e86203b372fd5c1ec727c64c4f88a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="floating nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-topics" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-fa-chalkboard-teacher" role="img">
+</i> 
+ <span class="menu-text">Topics</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-topics">    
+        <li>
+    <a class="dropdown-item" href="./01-dataprocessing.html">
+ <span class="dropdown-text">1. Basic concepts</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-workflow-optimisation.html">
+ <span class="dropdown-text">1.1 Workflow optimisation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./02-normalisation-wrapup.html">
+ <span class="dropdown-text">1.2 Wrapup Normalisation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-inference.html">
+ <span class="dropdown-text">2.1. Inference</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-blocking-wrapup.html">
+ <span class="dropdown-text">2.2. Wrapup Blocking</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./mouse-diet-two-factors.html">
+ <span class="dropdown-text">2.3. Wrapup Design2</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-tutorials" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-fa-chalkboard-teacher" role="img">
+</i> 
+ <span class="menu-text">Tutorials</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-tutorials">    
+        <li>
+    <a class="dropdown-item" href="./01-tutorial-data-processing.html">
+ <span class="dropdown-text">1. Tutorial Data Processing</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./03-tutorial-Design.html">
+ <span class="dropdown-text">2. Tutorial Differential Analysis and Design</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background"><span class="header-section-number">1</span> Background</a>
+  <ul class="collapse">
+  <li><a href="#christian-de-duve-1917---2013" id="toc-christian-de-duve-1917---2013" class="nav-link" data-scroll-target="#christian-de-duve-1917---2013"><span class="header-section-number">1.1</span> Christian de Duve (1917 - 2013)</a></li>
+  <li><a href="#why-proteomics" id="toc-why-proteomics" class="nav-link" data-scroll-target="#why-proteomics"><span class="header-section-number">1.2</span> Why proteomics?</a></li>
+  <li><a href="#conventional-ms-based-workflow" id="toc-conventional-ms-based-workflow" class="nav-link" data-scroll-target="#conventional-ms-based-workflow"><span class="header-section-number">1.3</span> Conventional MS-based workflow</a></li>
+  <li><a href="#data-dependent-acquisition" id="toc-data-dependent-acquisition" class="nav-link" data-scroll-target="#data-dependent-acquisition"><span class="header-section-number">1.4</span> Data Dependent Acquisition</a></li>
+  <li><a href="#level-of-quantification" id="toc-level-of-quantification" class="nav-link" data-scroll-target="#level-of-quantification"><span class="header-section-number">1.5</span> Level of quantification</a></li>
+  <li><a href="#dia-workflow" id="toc-dia-workflow" class="nav-link" data-scroll-target="#dia-workflow"><span class="header-section-number">1.6</span> DIA workflow</a></li>
+  <li><a href="#experimental-context" id="toc-experimental-context" class="nav-link" data-scroll-target="#experimental-context"><span class="header-section-number">1.7</span> Experimental context</a></li>
+  </ul></li>
+  <li><a href="#load-packages" id="toc-load-packages" class="nav-link" data-scroll-target="#load-packages"><span class="header-section-number">2</span> Load packages</a>
+  <ul class="collapse">
+  <li><a href="#sec-parallel" id="toc-sec-parallel" class="nav-link" data-scroll-target="#sec-parallel"><span class="header-section-number">2.1</span> Parallelisation</a></li>
+  </ul></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data"><span class="header-section-number">3</span> Data</a>
+  <ul class="collapse">
+  <li><a href="#precursor-table" id="toc-precursor-table" class="nav-link" data-scroll-target="#precursor-table"><span class="header-section-number">3.1</span> Precursor table</a></li>
+  <li><a href="#sample-annotation-table" id="toc-sample-annotation-table" class="nav-link" data-scroll-target="#sample-annotation-table"><span class="header-section-number">3.2</span> Sample annotation table</a></li>
+  <li><a href="#convert-to-qfeatures" id="toc-convert-to-qfeatures" class="nav-link" data-scroll-target="#convert-to-qfeatures"><span class="header-section-number">3.3</span> Convert to QFeatures</a></li>
+  </ul></li>
+  <li><a href="#sec-basic_preprocess" id="toc-sec-basic_preprocess" class="nav-link" data-scroll-target="#sec-basic_preprocess"><span class="header-section-number">4</span> Data preprocessing</a>
+  <ul class="collapse">
+  <li><a href="#encoding-missing-values" id="toc-encoding-missing-values" class="nav-link" data-scroll-target="#encoding-missing-values"><span class="header-section-number">4.1</span> Encoding missing values</a></li>
+  <li><a href="#precursor-filtering" id="toc-precursor-filtering" class="nav-link" data-scroll-target="#precursor-filtering"><span class="header-section-number">4.2</span> Precursor Filtering</a>
+  <ul class="collapse">
+  <li><a href="#remove-questionable-identifications" id="toc-remove-questionable-identifications" class="nav-link" data-scroll-target="#remove-questionable-identifications"><span class="header-section-number">4.2.1</span> Remove questionable identifications</a></li>
+  <li><a href="#assay-joining" id="toc-assay-joining" class="nav-link" data-scroll-target="#assay-joining"><span class="header-section-number">4.2.2</span> Assay joining</a></li>
+  <li><a href="#filtering-remove-highly-missing-precursors" id="toc-filtering-remove-highly-missing-precursors" class="nav-link" data-scroll-target="#filtering-remove-highly-missing-precursors"><span class="header-section-number">4.2.3</span> Filtering: Remove highly missing precursors</a></li>
+  <li><a href="#filter-one-hit-wonders" id="toc-filter-one-hit-wonders" class="nav-link" data-scroll-target="#filter-one-hit-wonders"><span class="header-section-number">4.2.4</span> Filter one-hit wonders</a></li>
+  </ul></li>
+  <li><a href="#log-transformation" id="toc-log-transformation" class="nav-link" data-scroll-target="#log-transformation"><span class="header-section-number">4.3</span> Log-transformation</a></li>
+  <li><a href="#sec-norm" id="toc-sec-norm" class="nav-link" data-scroll-target="#sec-norm"><span class="header-section-number">4.4</span> Normalisation</a></li>
+  <li><a href="#summarisation" id="toc-summarisation" class="nav-link" data-scroll-target="#summarisation"><span class="header-section-number">4.5</span> Summarisation</a></li>
+  </ul></li>
+  <li><a href="#data-exploration-and-qc" id="toc-data-exploration-and-qc" class="nav-link" data-scroll-target="#data-exploration-and-qc"><span class="header-section-number">5</span> Data exploration and QC</a>
+  <ul class="collapse">
+  <li><a href="#marginal-distribution-at-precursor-and-protein-level" id="toc-marginal-distribution-at-precursor-and-protein-level" class="nav-link" data-scroll-target="#marginal-distribution-at-precursor-and-protein-level"><span class="header-section-number">5.1</span> Marginal distribution at precursor and protein level</a></li>
+  <li><a href="#charge-state" id="toc-charge-state" class="nav-link" data-scroll-target="#charge-state"><span class="header-section-number">5.2</span> Charge state</a></li>
+  <li><a href="#identifications-per-sample" id="toc-identifications-per-sample" class="nav-link" data-scroll-target="#identifications-per-sample"><span class="header-section-number">5.3</span> Identifications per sample</a></li>
+  <li><a href="#dimensionality-reduction-plot" id="toc-dimensionality-reduction-plot" class="nav-link" data-scroll-target="#dimensionality-reduction-plot"><span class="header-section-number">5.4</span> Dimensionality reduction plot</a></li>
+  </ul></li>
+  <li><a href="#data-modeling-robust-regression" id="toc-data-modeling-robust-regression" class="nav-link" data-scroll-target="#data-modeling-robust-regression"><span class="header-section-number">6</span> Data Modeling (Robust Regression)</a>
+  <ul class="collapse">
+  <li><a href="#sources-of-variation" id="toc-sources-of-variation" class="nav-link" data-scroll-target="#sources-of-variation"><span class="header-section-number">6.1</span> Sources of variation</a></li>
+  <li><a href="#sec-msqrob" id="toc-sec-msqrob" class="nav-link" data-scroll-target="#sec-msqrob"><span class="header-section-number">6.2</span> Model estimation</a></li>
+  <li><a href="#sec-inference" id="toc-sec-inference" class="nav-link" data-scroll-target="#sec-inference"><span class="header-section-number">6.3</span> Statistical inference</a>
+  <ul class="collapse">
+  <li><a href="#hypothesis-testing" id="toc-hypothesis-testing" class="nav-link" data-scroll-target="#hypothesis-testing"><span class="header-section-number">6.3.1</span> Hypothesis testing</a></li>
+  <li><a href="#volcano-plots" id="toc-volcano-plots" class="nav-link" data-scroll-target="#volcano-plots"><span class="header-section-number">6.3.2</span> Volcano plots</a></li>
+  <li><a href="#sec-heatmaps" id="toc-sec-heatmaps" class="nav-link" data-scroll-target="#sec-heatmaps"><span class="header-section-number">6.3.3</span> Heatmap</a></li>
+  </ul></li>
+  <li><a href="#all-contrasts" id="toc-all-contrasts" class="nav-link" data-scroll-target="#all-contrasts"><span class="header-section-number">6.4</span> All contrasts</a></li>
+  </ul></li>
+  <li><a href="#assess-performance" id="toc-assess-performance" class="nav-link" data-scroll-target="#assess-performance"><span class="header-section-number">7</span> Assess performance</a>
+  <ul class="collapse">
+  <li><a href="#true-and-false-positives" id="toc-true-and-false-positives" class="nav-link" data-scroll-target="#true-and-false-positives"><span class="header-section-number">7.1</span> True and false positives</a></li>
+  <li><a href="#log-fold-changes" id="toc-log-fold-changes" class="nav-link" data-scroll-target="#log-fold-changes"><span class="header-section-number">7.2</span> log-fold changes</a></li>
+  <li><a href="#volcano-plots-1" id="toc-volcano-plots-1" class="nav-link" data-scroll-target="#volcano-plots-1"><span class="header-section-number">7.3</span> volcano-plots</a></li>
+  <li><a href="#true-positive---false-discovery-proportion-plots" id="toc-true-positive---false-discovery-proportion-plots" class="nav-link" data-scroll-target="#true-positive---false-discovery-proportion-plots"><span class="header-section-number">7.4</span> True positive - False Discovery Proportion plots</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Basic concepts for differential abundance analysis of proteomics data - key idea’s talk</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Lieven Clement <a href="https://orcid.org/0000-0002-9050-4370" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Ghent University
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="background" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Background</h1>
+<section id="christian-de-duve-1917---2013" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="christian-de-duve-1917---2013"><span class="header-section-number">1.1</span> Christian de Duve (1917 - 2013)</h2>
+<ul>
+<li>Belgian Nobel price winner</li>
+<li>Pioneer in biochemistry and biotechnology</li>
+<li>Amazing definition of life:</li>
+</ul>
+<ol type="1">
+<li><p>Life is one. All composed of cells (we, animals, plants, ). Same building blocks (sugars, lipids, proteins, amino acids). Metabolically connected, share same metabolic memory of 3.8 billion years as all these cells divided uninterrupted from their last universal common ancestor. And as scientific rebel Lynn Margulis would state it more complex multicellular organisms such as fungi, plants and animals can be seen as a massive colony of differentiated, fusing and mutating symbiotic microorganisms.</p></li>
+<li><p>Life is chemistry. If we say metabollically connected, we get to chemistry. It is this unqie chemical network of reactions that gives our cells and life their unique properties to adapt and interact with their changing environment, to remain in homeostasis or to sometimes change to another attracter, e.g.&nbsp;fruiting body</p></li>
+<li><p>Life is information; Get to the third point of , which is pivotal for our work. No chemical necessity of order of DNA code, e.g.&nbsp;Goldman et al, Birney’s group 2013 stored all shakespeare’s sonnets, 26 second clip of I have a dream, pdf of Watson and Crick’s paper on structure of DNA, … https://doi.org/10.1038/nature11875</p></li>
+</ol>
+</section>
+<section id="why-proteomics" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="why-proteomics"><span class="header-section-number">1.2</span> Why proteomics?</h2>
+<p>While genes provide the blueprint, proteins are the active functional molecules of life,</p>
+<ul>
+<li>driving cellular processes,</li>
+<li>signaling,</li>
+<li>structure,</li>
+<li>disease mechanisms,</li>
+<li>etc.</li>
+</ul>
+<p>–&gt; 3 D structure! Changes due to PTM, key switches!</p>
+<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="./figs/Dogma_Euk.png" class="img-fluid" width="260"></p>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<p><img src="./figs/cellProteins.png" class="img-fluid" width="2000"></p>
+</div>
+</div>
+</div>
+</section>
+<section id="conventional-ms-based-workflow" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="conventional-ms-based-workflow"><span class="header-section-number">1.3</span> Conventional MS-based workflow</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figs/lfq_workflow.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>Overview of an LFQ-based proteomics workflow.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li><p>piptetting variability, extraction –&gt; normalisation</p></li>
+<li><p>LC –&gt; batch effects, e.g.&nbsp;single cell exp</p></li>
+<li><p>ionisation efficiencies, charge –&gt; how fly through MS</p></li>
+<li><p>MS1 quant, But unknown what species , MS2 fingerprint compare to theoretical spectra or known spectra (spectral lib search).</p></li>
+<li><p>Errors in ID, missingness, ….</p></li>
+<li><p>Peptide Characteristics</p>
+<ul>
+<li>Modifications</li>
+<li>Ionisation Efficiency: huge variability</li>
+<li>Identification
+<ul>
+<li>Misidentification <span class="math inline">\(\rightarrow\)</span> outliers</li>
+<li>MS<span class="math inline">\(^2\)</span> selection on peptide abundance</li>
+<li>Context depending missingness</li>
+<li>Non-random missingness</li>
+</ul></li>
+</ul></li>
+</ul>
+<p><span class="math inline">\(\rightarrow\)</span> Unbalanced pepide identifications across samples and messy data</p>
+</section>
+<section id="data-dependent-acquisition" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="data-dependent-acquisition"><span class="header-section-number">1.4</span> Data Dependent Acquisition</h2>
+<ul>
+<li><p>m/z range into sequential windows (e.g., 400–425, 425–450 m/z)</p></li>
+<li><p>MS2 spectra are complex as many peptides mixed</p></li>
+<li><p>Deconvolution of the MS2 signal</p></li>
+<li><p>With dedicated software such as Spectronaut or DIA-NN</p>
+<ul>
+<li>Identification based on spectral libraries</li>
+<li>Library free: FASTA database to predict in silico spectra, retention times, and ion mobilities, which are then used to search the DIA data</li>
+<li>Use of decoys sequences to estimate false discovery rate of ID</li>
+</ul></li>
+<li><p>Quantification using MS2 and/or MS1 peaks</p></li>
+</ul>
+</section>
+<section id="level-of-quantification" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="level-of-quantification"><span class="header-section-number">1.5</span> Level of quantification</h2>
+<ul>
+<li>MS-based proteomics returns peptides or precursors: pieces of proteins</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="./figs/challenges_peptides.png" class="img-fluid figure-img" width="256"></p>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>Quantification commonly required on the protein level</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="./figs/challenges_proteins.png" class="img-fluid figure-img" width="258"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>summarisation or aggregation either in model for inference or in data processing.</p>
+</section>
+<section id="dia-workflow" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="dia-workflow"><span class="header-section-number">1.6</span> DIA workflow</h2>
+<p>DIA-NN provides multiple quantifications, e.g.&nbsp;derived from the MS1 or MS2 spectra, and at precursor or protein (protein group) level. The term ‘precursor’ refers to a charged peptide species and is the basic unit of identification and quantification in DIA. Hence, in the context of DIA we refer to a precursor table, instead of to a PSM table in DDA.</p>
+<p>Examples of different quantities are:</p>
+<ul>
+<li>raw MS1 area: Ms1.Area, normalised MS1 Area: Ms1.Normalised, MS2 Precursor quantities: Precursor.Quantity, Normalised MS2 Precursor quantities: Precursor.Normalised, etc., which are all at the precursor level</li>
+<li>MS2 based summary at the protein (protein group)-level: PG.MaxLFQ</li>
+</ul>
+<p>Here, we will use the <code>Precursor.Quantity</code> column.</p>
+</section>
+<section id="experimental-context" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="experimental-context"><span class="header-section-number">1.7</span> Experimental context</h2>
+<p>This chapter explains how to analyse a proteomics data set that has been generated using data independent acquisition (DIA). We will again use an in-house spike-in study to illustrate the analysis. The DIA case-study is a subset of Staes et al. <span class="citation" data-cites="Staes2024">(<a href="#ref-Staes2024" role="doc-biblioref">Staes et al. 2024</a>)</span>. They spiked digested UPS proteins in yeast at the following ratio’s (yeast:ups ratio 10:1, 10:2, 10:4, 10:8, 10:10) in a yeast digest background.</p>
+<p>Each sample was analyzed in triplicate using an Ultimate 3000 RSLC ProFlow nano-LC system in-line connected to a Q Exactive HF BioPharma mass spectrometer (Thermo).</p>
+<p>Here, we will only use the data of the samples from the middle 3 spike-in ratio’s (2,4 and 8) that were searched using DIA-NN 2.2.0. The main search output for this DIA-NN version is stored in the report.parquet file in the DIA-NN output directory.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="./figs/cptacLayoutLudger.png" class="img-fluid figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="load-packages" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Load packages</h1>
+<section id="sec-parallel" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="sec-parallel"><span class="header-section-number">2.1</span> Parallelisation</h2>
+</section>
+</section>
+<section id="data" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Data</h1>
+<section id="precursor-table" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="precursor-table"><span class="header-section-number">3.1</span> Precursor table</h2>
+<p>We load the output from DIA-NN parquet file.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>precursorFile <span class="ot">&lt;-</span> <span class="st">"data/spikein248-staesetal2024.parquet"</span> </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>We can import the report.parquet file using the <code>read_parquet</code> function from the <code>arrow</code> package. Note, that older versions of DIA-NN store the output as report.tsv.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>precursors <span class="ot">&lt;-</span> arrow<span class="sc">::</span><span class="fu">read_parquet</span>(precursorFile) <span class="co"># function from the arrow package</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#precursors &lt;- data.table::fread(precursorFile) # For older versions of DIA-NN, where the results are stored as tsv files. Note that the precursorFile then would point to "report.tsv" </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Each row in the precursor data table is in “long format” and contains information about one precursor in a specific run (the table below shows the first 6 rows). The columns contains various descriptors about the precursor, such as its sequence, its charge, run, etc. Some of these columns contain the quantification values, e.g.&nbsp;Ms1.Area, Precursor.Quantity etc.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 0%">
+<col style="width: 4%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 1%">
+<col style="width: 2%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 0%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 0%">
+<col style="width: 1%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Run.Index</th>
+<th style="text-align: left;">Run</th>
+<th style="text-align: left;">Channel</th>
+<th style="text-align: left;">Precursor.Id</th>
+<th style="text-align: left;">Modified.Sequence</th>
+<th style="text-align: left;">Stripped.Sequence</th>
+<th style="text-align: right;">Precursor.Charge</th>
+<th style="text-align: right;">Precursor.Lib.Index</th>
+<th style="text-align: right;">Decoy</th>
+<th style="text-align: right;">Proteotypic</th>
+<th style="text-align: right;">Precursor.Mz</th>
+<th style="text-align: left;">Protein.Ids</th>
+<th style="text-align: left;">Protein.Group</th>
+<th style="text-align: left;">Protein.Names</th>
+<th style="text-align: left;">Genes</th>
+<th style="text-align: right;">RT</th>
+<th style="text-align: right;">iRT</th>
+<th style="text-align: right;">Predicted.RT</th>
+<th style="text-align: right;">Predicted.iRT</th>
+<th style="text-align: right;">IM</th>
+<th style="text-align: right;">iIM</th>
+<th style="text-align: right;">Predicted.IM</th>
+<th style="text-align: right;">Predicted.iIM</th>
+<th style="text-align: right;">Precursor.Quantity</th>
+<th style="text-align: right;">Precursor.Normalised</th>
+<th style="text-align: right;">Ms1.Area</th>
+<th style="text-align: right;">Ms1.Normalised</th>
+<th style="text-align: right;">Ms1.Apex.Area</th>
+<th style="text-align: right;">Ms1.Apex.Mz.Delta</th>
+<th style="text-align: right;">Normalisation.Factor</th>
+<th style="text-align: right;">Quantity.Quality</th>
+<th style="text-align: right;">Empirical.Quality</th>
+<th style="text-align: right;">Normalisation.Noise</th>
+<th style="text-align: right;">Ms1.Profile.Corr</th>
+<th style="text-align: right;">Evidence</th>
+<th style="text-align: right;">Mass.Evidence</th>
+<th style="text-align: right;">Channel.Evidence</th>
+<th style="text-align: right;">Ms1.Total.Signal.Before</th>
+<th style="text-align: right;">Ms1.Total.Signal.After</th>
+<th style="text-align: right;">RT.Start</th>
+<th style="text-align: right;">RT.Stop</th>
+<th style="text-align: right;">FWHM</th>
+<th style="text-align: right;">PG.TopN</th>
+<th style="text-align: right;">PG.MaxLFQ</th>
+<th style="text-align: right;">Genes.TopN</th>
+<th style="text-align: right;">Genes.MaxLFQ</th>
+<th style="text-align: right;">Genes.MaxLFQ.Unique</th>
+<th style="text-align: right;">PG.MaxLFQ.Quality</th>
+<th style="text-align: right;">Genes.MaxLFQ.Quality</th>
+<th style="text-align: right;">Genes.MaxLFQ.Unique.Quality</th>
+<th style="text-align: right;">Q.Value</th>
+<th style="text-align: right;">PEP</th>
+<th style="text-align: right;">Global.Q.Value</th>
+<th style="text-align: right;">Lib.Q.Value</th>
+<th style="text-align: right;">Peptidoform.Q.Value</th>
+<th style="text-align: right;">Global.Peptidoform.Q.Value</th>
+<th style="text-align: right;">Lib.Peptidoform.Q.Value</th>
+<th style="text-align: right;">PTM.Site.Confidence</th>
+<th style="text-align: left;">Site.Occupancy.Probabilities</th>
+<th style="text-align: left;">Protein.Sites</th>
+<th style="text-align: right;">Lib.PTM.Site.Confidence</th>
+<th style="text-align: right;">Translated.Q.Value</th>
+<th style="text-align: right;">Channel.Q.Value</th>
+<th style="text-align: right;">PG.Q.Value</th>
+<th style="text-align: right;">PG.PEP</th>
+<th style="text-align: right;">GG.Q.Value</th>
+<th style="text-align: right;">Protein.Q.Value</th>
+<th style="text-align: right;">Global.PG.Q.Value</th>
+<th style="text-align: right;">Lib.PG.Q.Value</th>
+<th style="text-align: right;">Best.Fr.Mz</th>
+<th style="text-align: right;">Best.Fr.Mz.Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">B000254_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR2</td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR</td>
+<td style="text-align: left;">AAVTLHLR</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">461.7771</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">LYS1_YEAST</td>
+<td style="text-align: left;">LYS1</td>
+<td style="text-align: right;">89.48647</td>
+<td style="text-align: right;">34.21962</td>
+<td style="text-align: right;">89.64584</td>
+<td style="text-align: right;">34.32372</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1027105.2</td>
+<td style="text-align: right;">1018664.5</td>
+<td style="text-align: right;">1664103</td>
+<td style="text-align: right;">1650427</td>
+<td style="text-align: right;">1235652.9</td>
+<td style="text-align: right;">-0.0019836</td>
+<td style="text-align: right;">0.9917820</td>
+<td style="text-align: right;">0.8068524</td>
+<td style="text-align: right;">0.9587077</td>
+<td style="text-align: right;">-0.0107658</td>
+<td style="text-align: right;">0.8455485</td>
+<td style="text-align: right;">2.328422</td>
+<td style="text-align: right;">0.6659890</td>
+<td style="text-align: right;">0.9694718</td>
+<td style="text-align: right;">1446081536</td>
+<td style="text-align: right;">1354918656</td>
+<td style="text-align: right;">89.27837</td>
+<td style="text-align: right;">89.83672</td>
+<td style="text-align: right;">0.1471047</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">60736892</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">60736892</td>
+<td style="text-align: right;">60736892</td>
+<td style="text-align: right;">0.9713600</td>
+<td style="text-align: right;">0.9713600</td>
+<td style="text-align: right;">0.9713600</td>
+<td style="text-align: right;">0.0037350</td>
+<td style="text-align: right;">0.0346908</td>
+<td style="text-align: right;">6e-07</td>
+<td style="text-align: right;">1.8e-06</td>
+<td style="text-align: right;">0.0058624</td>
+<td style="text-align: right;">0.0006297</td>
+<td style="text-align: right;">0.0004264</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">(UniMod:1){1.000000}AAVTLHLR2</td>
+<td style="text-align: left;">[P38998:nA2]</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0003065</td>
+<td style="text-align: right;">0.0006127</td>
+<td style="text-align: right;">0.0003067</td>
+<td style="text-align: right;">0.0003116</td>
+<td style="text-align: right;">0.0002956</td>
+<td style="text-align: right;">0.0002814</td>
+<td style="text-align: right;">639.3937</td>
+<td style="text-align: right;">-0.0043335</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">B000258_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio04_DIA</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR2</td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR</td>
+<td style="text-align: left;">AAVTLHLR</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">461.7771</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">LYS1_YEAST</td>
+<td style="text-align: left;">LYS1</td>
+<td style="text-align: right;">88.51812</td>
+<td style="text-align: right;">34.21962</td>
+<td style="text-align: right;">88.65327</td>
+<td style="text-align: right;">34.23263</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1686047.0</td>
+<td style="text-align: right;">1473639.0</td>
+<td style="text-align: right;">2225964</td>
+<td style="text-align: right;">1945538</td>
+<td style="text-align: right;">2138060.2</td>
+<td style="text-align: right;">-0.0012512</td>
+<td style="text-align: right;">0.8740202</td>
+<td style="text-align: right;">0.8539391</td>
+<td style="text-align: right;">0.7675559</td>
+<td style="text-align: right;">0.0606278</td>
+<td style="text-align: right;">0.9467068</td>
+<td style="text-align: right;">2.621551</td>
+<td style="text-align: right;">0.9197075</td>
+<td style="text-align: right;">0.7442634</td>
+<td style="text-align: right;">1707504896</td>
+<td style="text-align: right;">1714693888</td>
+<td style="text-align: right;">88.38112</td>
+<td style="text-align: right;">88.65714</td>
+<td style="text-align: right;">0.1049480</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">59386180</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">59386180</td>
+<td style="text-align: right;">59386180</td>
+<td style="text-align: right;">0.9682981</td>
+<td style="text-align: right;">0.9682981</td>
+<td style="text-align: right;">0.9682981</td>
+<td style="text-align: right;">0.0000006</td>
+<td style="text-align: right;">0.0000010</td>
+<td style="text-align: right;">6e-07</td>
+<td style="text-align: right;">1.8e-06</td>
+<td style="text-align: right;">0.0007060</td>
+<td style="text-align: right;">0.0006297</td>
+<td style="text-align: right;">0.0004264</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">(UniMod:1){1.000000}AAVTLHLR2</td>
+<td style="text-align: left;">[P38998:nA2]</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0003028</td>
+<td style="text-align: right;">0.0006007</td>
+<td style="text-align: right;">0.0003029</td>
+<td style="text-align: right;">0.0003108</td>
+<td style="text-align: right;">0.0002956</td>
+<td style="text-align: right;">0.0002814</td>
+<td style="text-align: right;">538.3460</td>
+<td style="text-align: right;">-0.0010986</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">B000262_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR2</td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR</td>
+<td style="text-align: left;">AAVTLHLR</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">461.7771</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">LYS1_YEAST</td>
+<td style="text-align: left;">LYS1</td>
+<td style="text-align: right;">88.19032</td>
+<td style="text-align: right;">34.21962</td>
+<td style="text-align: right;">88.42429</td>
+<td style="text-align: right;">33.99163</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1484137.0</td>
+<td style="text-align: right;">1497021.4</td>
+<td style="text-align: right;">2156443</td>
+<td style="text-align: right;">2175164</td>
+<td style="text-align: right;">1850866.0</td>
+<td style="text-align: right;">-0.0018616</td>
+<td style="text-align: right;">1.0086815</td>
+<td style="text-align: right;">0.8370125</td>
+<td style="text-align: right;">0.9024460</td>
+<td style="text-align: right;">0.0352767</td>
+<td style="text-align: right;">0.9391663</td>
+<td style="text-align: right;">1.963248</td>
+<td style="text-align: right;">0.6607722</td>
+<td style="text-align: right;">0.5847857</td>
+<td style="text-align: right;">1906061952</td>
+<td style="text-align: right;">2011915136</td>
+<td style="text-align: right;">87.98146</td>
+<td style="text-align: right;">88.39668</td>
+<td style="text-align: right;">0.1602550</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">61945576</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">61945576</td>
+<td style="text-align: right;">61945576</td>
+<td style="text-align: right;">0.9670781</td>
+<td style="text-align: right;">0.9670781</td>
+<td style="text-align: right;">0.9670781</td>
+<td style="text-align: right;">0.0022817</td>
+<td style="text-align: right;">0.0274225</td>
+<td style="text-align: right;">6e-07</td>
+<td style="text-align: right;">1.8e-06</td>
+<td style="text-align: right;">0.0059578</td>
+<td style="text-align: right;">0.0006297</td>
+<td style="text-align: right;">0.0004264</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">(UniMod:1){1.000000}AAVTLHLR2</td>
+<td style="text-align: left;">[P38998:nA2]</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0003133</td>
+<td style="text-align: right;">0.0006259</td>
+<td style="text-align: right;">0.0003135</td>
+<td style="text-align: right;">0.0003190</td>
+<td style="text-align: right;">0.0002956</td>
+<td style="text-align: right;">0.0002814</td>
+<td style="text-align: right;">639.3937</td>
+<td style="text-align: right;">0.0012817</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">B000278_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_2</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR2</td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR</td>
+<td style="text-align: left;">AAVTLHLR</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">461.7771</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">LYS1_YEAST</td>
+<td style="text-align: left;">LYS1</td>
+<td style="text-align: right;">88.94958</td>
+<td style="text-align: right;">34.21962</td>
+<td style="text-align: right;">89.25366</td>
+<td style="text-align: right;">33.75805</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1202390.5</td>
+<td style="text-align: right;">1186230.2</td>
+<td style="text-align: right;">1752379</td>
+<td style="text-align: right;">1728827</td>
+<td style="text-align: right;">1130526.8</td>
+<td style="text-align: right;">-0.0038757</td>
+<td style="text-align: right;">0.9865599</td>
+<td style="text-align: right;">0.7660662</td>
+<td style="text-align: right;">0.7737662</td>
+<td style="text-align: right;">0.0300994</td>
+<td style="text-align: right;">0.5843989</td>
+<td style="text-align: right;">2.661267</td>
+<td style="text-align: right;">0.6917942</td>
+<td style="text-align: right;">0.8114025</td>
+<td style="text-align: right;">2323055360</td>
+<td style="text-align: right;">2137220352</td>
+<td style="text-align: right;">88.61057</td>
+<td style="text-align: right;">89.15668</td>
+<td style="text-align: right;">0.2167290</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">61787356</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">61787356</td>
+<td style="text-align: right;">61787356</td>
+<td style="text-align: right;">0.9639115</td>
+<td style="text-align: right;">0.9639115</td>
+<td style="text-align: right;">0.9639115</td>
+<td style="text-align: right;">0.0026284</td>
+<td style="text-align: right;">0.0164647</td>
+<td style="text-align: right;">6e-07</td>
+<td style="text-align: right;">1.8e-06</td>
+<td style="text-align: right;">0.0061239</td>
+<td style="text-align: right;">0.0006297</td>
+<td style="text-align: right;">0.0004264</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">(UniMod:1){1.000000}AAVTLHLR2</td>
+<td style="text-align: left;">[P38998:nA2]</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0003246</td>
+<td style="text-align: right;">0.0006370</td>
+<td style="text-align: right;">0.0003248</td>
+<td style="text-align: right;">0.0003308</td>
+<td style="text-align: right;">0.0002956</td>
+<td style="text-align: right;">0.0002814</td>
+<td style="text-align: right;">425.2619</td>
+<td style="text-align: right;">0.0019226</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">B000286_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio08_DIA_2</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR2</td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR</td>
+<td style="text-align: left;">AAVTLHLR</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">461.7771</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">LYS1_YEAST</td>
+<td style="text-align: left;">LYS1</td>
+<td style="text-align: right;">88.49445</td>
+<td style="text-align: right;">34.21962</td>
+<td style="text-align: right;">88.61003</td>
+<td style="text-align: right;">34.13313</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">475073.6</td>
+<td style="text-align: right;">579242.2</td>
+<td style="text-align: right;">1481789</td>
+<td style="text-align: right;">1806699</td>
+<td style="text-align: right;">777120.9</td>
+<td style="text-align: right;">-0.0014648</td>
+<td style="text-align: right;">1.2192687</td>
+<td style="text-align: right;">0.6968042</td>
+<td style="text-align: right;">0.7491062</td>
+<td style="text-align: right;">0.1018161</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">1.700542</td>
+<td style="text-align: right;">0.3975840</td>
+<td style="text-align: right;">0.1695192</td>
+<td style="text-align: right;">1270731776</td>
+<td style="text-align: right;">1315600640</td>
+<td style="text-align: right;">88.28562</td>
+<td style="text-align: right;">88.63584</td>
+<td style="text-align: right;">0.1518549</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">63859400</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">63859400</td>
+<td style="text-align: right;">63859400</td>
+<td style="text-align: right;">0.9677207</td>
+<td style="text-align: right;">0.9677207</td>
+<td style="text-align: right;">0.9677207</td>
+<td style="text-align: right;">0.0040565</td>
+<td style="text-align: right;">0.0318976</td>
+<td style="text-align: right;">6e-07</td>
+<td style="text-align: right;">1.8e-06</td>
+<td style="text-align: right;">0.0077074</td>
+<td style="text-align: right;">0.0006297</td>
+<td style="text-align: right;">0.0004264</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">(UniMod:1){1.000000}AAVTLHLR2</td>
+<td style="text-align: left;">[P38998:nA2]</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0003152</td>
+<td style="text-align: right;">0.0006296</td>
+<td style="text-align: right;">0.0003154</td>
+<td style="text-align: right;">0.0003210</td>
+<td style="text-align: right;">0.0002956</td>
+<td style="text-align: right;">0.0002814</td>
+<td style="text-align: right;">639.3937</td>
+<td style="text-align: right;">0.0092773</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">B000302_Ap_6883_EXT-765_DIA_Yeast_UPS2_ratio02_DIA_3</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR2</td>
+<td style="text-align: left;">(UniMod:1)AAVTLHLR</td>
+<td style="text-align: left;">AAVTLHLR</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">461.7771</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">P38998</td>
+<td style="text-align: left;">LYS1_YEAST</td>
+<td style="text-align: left;">LYS1</td>
+<td style="text-align: right;">88.94778</td>
+<td style="text-align: right;">34.21962</td>
+<td style="text-align: right;">89.22704</td>
+<td style="text-align: right;">33.83727</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1211047.2</td>
+<td style="text-align: right;">1278841.4</td>
+<td style="text-align: right;">1902638</td>
+<td style="text-align: right;">2009148</td>
+<td style="text-align: right;">1505334.4</td>
+<td style="text-align: right;">-0.0023804</td>
+<td style="text-align: right;">1.0559797</td>
+<td style="text-align: right;">0.8122462</td>
+<td style="text-align: right;">0.9176636</td>
+<td style="text-align: right;">-0.0058500</td>
+<td style="text-align: right;">0.8568795</td>
+<td style="text-align: right;">2.149787</td>
+<td style="text-align: right;">0.2013753</td>
+<td style="text-align: right;">0.9174258</td>
+<td style="text-align: right;">1576011776</td>
+<td style="text-align: right;">1611237888</td>
+<td style="text-align: right;">88.80907</td>
+<td style="text-align: right;">89.22405</td>
+<td style="text-align: right;">0.1854964</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">57830312</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">57830312</td>
+<td style="text-align: right;">57830312</td>
+<td style="text-align: right;">0.9690518</td>
+<td style="text-align: right;">0.9690518</td>
+<td style="text-align: right;">0.9690518</td>
+<td style="text-align: right;">0.0038881</td>
+<td style="text-align: right;">0.0323859</td>
+<td style="text-align: right;">6e-07</td>
+<td style="text-align: right;">1.8e-06</td>
+<td style="text-align: right;">0.0095169</td>
+<td style="text-align: right;">0.0006297</td>
+<td style="text-align: right;">0.0004264</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">(UniMod:1){1.000000}AAVTLHLR2</td>
+<td style="text-align: left;">[P38998:nA2]</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0003108</td>
+<td style="text-align: right;">0.0006149</td>
+<td style="text-align: right;">0.0003110</td>
+<td style="text-align: right;">0.0003160</td>
+<td style="text-align: right;">0.0002956</td>
+<td style="text-align: right;">0.0002814</td>
+<td style="text-align: right;">639.3937</td>
+<td style="text-align: right;">-0.0004883</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="sample-annotation-table" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sample-annotation-table"><span class="header-section-number">3.2</span> Sample annotation table</h2>
+<p>In tutorial</p>
+</section>
+<section id="convert-to-qfeatures" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="convert-to-qfeatures"><span class="header-section-number">3.3</span> Convert to QFeatures</h2>
+<p>In tutorial</p>
+</section>
+</section>
+<section id="sec-basic_preprocess" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Data preprocessing</h1>
+<section id="encoding-missing-values" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="encoding-missing-values"><span class="header-section-number">4.1</span> Encoding missing values</h2>
+<p>Zero to NA. zero’s often missing, no quant available. issue if we log-normalise…</p>
+<p>Note that <code>msqrob2</code> can handle missing data without having to rely on hard-to-verify imputation assumptions, which is our general recommendation. However, <code>msqrob2</code> does not prevent users from using imputation, which can be performed with <code>impute()</code> from the <code>QFeatures</code> package.</p>
+</section>
+<section id="precursor-filtering" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="precursor-filtering"><span class="header-section-number">4.2</span> Precursor Filtering</h2>
+<p>Filtering removes low-quality and unreliable precursors that would otherwise introduce noise and artefacts in the data.</p>
+<section id="remove-questionable-identifications" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="remove-questionable-identifications"><span class="header-section-number">4.2.1</span> Remove questionable identifications</h3>
+<p>Filtering based on ID.</p>
+<p>Note, that it is important that the filtering criteria are not distorting the distribution of the test statistics in the downstream analysis for features that are non-DA.</p>
+<p>It can be shown that filtering will not induce bias results when the filtering criterion is independent of test statistic under the null.</p>
+<p>The criteria that we proposed above are all based on the results of the identification step, hence, they are independent of the downstream test statistics that will be used to prioritize DA proteins.</p>
+</section>
+<section id="assay-joining" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="assay-joining"><span class="header-section-number">4.2.2</span> Assay joining</h3>
+<p>In tutorial</p>
+</section>
+<section id="filtering-remove-highly-missing-precursors" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="filtering-remove-highly-missing-precursors"><span class="header-section-number">4.2.3</span> Filtering: Remove highly missing precursors</h3>
+<p>We keep peptides that were observed at last 4 times out of the <span class="math inline">\(n
+= 9\)</span> samples, so that we can estimate the peptide characteristics. We tolerate the following proportion of NAs: <span class="math inline">\(\text{pNA} = \frac{(n - 4)}{n} = 0.556\)</span>, so we keep peptides that are observed in at least 44.4% of the samples, which corresponds to one treatment condition. This is an arbitrary value that may need to be adjusted depending on the experiment and the data set.</p>
+</section>
+<section id="filter-one-hit-wonders" class="level3" data-number="4.2.4">
+<h3 data-number="4.2.4" class="anchored" data-anchor-id="filter-one-hit-wonders"><span class="header-section-number">4.2.4</span> Filter one-hit wonders</h3>
+<p>Here, we remove proteins that can only be found by one peptide, as such proteins may not be trustworthy.</p>
+</section>
+</section>
+<section id="log-transformation" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="log-transformation"><span class="header-section-number">4.3</span> Log-transformation</h2>
+<p>Explain in plot.</p>
+<ul>
+<li><p>mean variance</p></li>
+<li><p>log FC!</p></li>
+</ul>
+<p><span class="math display">\[log_2FC_{b-a} = log_2b - log_2a = log_2 \frac{b}{a}\]</span></p>
+<p>This simplifies the modelling since the effects are now additive and it provides a straightforward interpretation, i.e.&nbsp;a logFC of 1 means that the abundances are on average <span class="math inline">\(2\times\)</span> higher in <span class="math inline">\(b\)</span> than in <span class="math inline">\(a\)</span>, a logFC of 2 means an average increase of <span class="math inline">\(4\times\)</span>, for instance. Also, note that the averages calculated at the log2-scale have the interpretation of log2-transformed geometric means.</p>
+</section>
+<section id="sec-norm" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-norm"><span class="header-section-number">4.4</span> Normalisation</h2>
+<ul>
+<li>Need in plot</li>
+</ul>
+</section>
+<section id="summarisation" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="summarisation"><span class="header-section-number">4.5</span> Summarisation</h2>
+<ul>
+<li><p>Need in plot: different precursors different characteristics, missingness, …</p></li>
+<li><p>Median</p></li>
+<li><p>Model based</p></li>
+<li><p>LFQ</p></li>
+</ul>
+</section>
+</section>
+<section id="data-exploration-and-qc" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Data exploration and QC</h1>
+<p>Data exploration aims to highlight the main sources of variation in the data prior to data modelling and can pinpoint to outlying or off-behaving samples.</p>
+<section id="marginal-distribution-at-precursor-and-protein-level" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="marginal-distribution-at-precursor-and-protein-level"><span class="header-section-number">5.1</span> Marginal distribution at precursor and protein level</h2>
+<p>explain plots</p>
+</section>
+<section id="charge-state" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="charge-state"><span class="header-section-number">5.2</span> Charge state</h2>
+<p>explain plots</p>
+</section>
+<section id="identifications-per-sample" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="identifications-per-sample"><span class="header-section-number">5.3</span> Identifications per sample</h2>
+<p>explain plots</p>
+</section>
+<section id="dimensionality-reduction-plot" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="dimensionality-reduction-plot"><span class="header-section-number">5.4</span> Dimensionality reduction plot</h2>
+<p>A common approach for data exploration is to perform dimension reduction, such as Multi Dimensional Scaling (MDS). We will first extract the set to explore along the sample annotations (used for plot colouring).</p>
+<p>Explain MDS. Maintain distances in low dimensional space. euclidian same as PCA.<br>
+Missingness, calculate distances using common features in pairwise samples.</p>
+</section>
+</section>
+<section id="data-modeling-robust-regression" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Data Modeling (Robust Regression)</h1>
+<ul>
+<li><p>Sources of variability that we can model.</p></li>
+<li><p>linear models.</p></li>
+<li><p>Dummy variables</p></li>
+<li><p>Modeling mean on log-scale –&gt; log means/log geometric means. Differences log2 FC.</p></li>
+<li><p>Translate research question in parameter or combination of parameters/ contrasts</p></li>
+<li><p>Effect size - statistical significance (volcano plots)</p></li>
+</ul>
+<section id="sources-of-variation" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="sources-of-variation"><span class="header-section-number">6.1</span> Sources of variation</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="er">~</span> condition</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="sec-msqrob" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-msqrob"><span class="header-section-number">6.2</span> Model estimation</h2>
+</section>
+<section id="sec-inference" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-inference"><span class="header-section-number">6.3</span> Statistical inference</h2>
+<section id="hypothesis-testing" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="hypothesis-testing"><span class="header-section-number">6.3.1</span> Hypothesis testing</h3>
+</section>
+<section id="volcano-plots" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="volcano-plots"><span class="header-section-number">6.3.2</span> Volcano plots</h3>
+</section>
+<section id="sec-heatmaps" class="level3" data-number="6.3.3">
+<h3 data-number="6.3.3" class="anchored" data-anchor-id="sec-heatmaps"><span class="header-section-number">6.3.3</span> Heatmap</h3>
+</section>
+</section>
+<section id="all-contrasts" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="all-contrasts"><span class="header-section-number">6.4</span> All contrasts</h2>
+</section>
+</section>
+<section id="assess-performance" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Assess performance</h1>
+<p>Note, that the evaluations in this section are typically not possible on real experimental data. Indeed, we are using a spike-in dataset so we know the ground thruth: all human UPS proteins are differentially abundant (DA) between the conditions and the yeast proteins are non-DA.</p>
+<section id="true-and-false-positives" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="true-and-false-positives"><span class="header-section-number">7.1</span> True and false positives</h2>
+<p>All human UPS proteins are differentially abundant (DA) between the conditions and the yeast proteins are non-DA. For human UPS proteins the pattern “UPS” is in there protein name. We can now assess the number of false positives and true positives at the significance level <span class="math inline">\(\alpha = 0.05\)</span>.</p>
+</section>
+<section id="log-fold-changes" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="log-fold-changes"><span class="header-section-number">7.2</span> log-fold changes</h2>
+<p>As this is a spike-in study with known ground truth, we can also plot the log2 fold change distributions against the expected values, in this case 0 for the yeast proteins and the difference of the log concentration for the spiked-in UPS standards. We first create a small table with the real values.</p>
+</section>
+<section id="volcano-plots-1" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="volcano-plots-1"><span class="header-section-number">7.3</span> volcano-plots</h2>
+<p>With real</p>
+</section>
+<section id="true-positive---false-discovery-proportion-plots" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="true-positive---false-discovery-proportion-plots"><span class="header-section-number">7.4</span> True positive - False Discovery Proportion plots</h2>
+<p>We generate the TPR-FDP curves to assess the performance of the different workflows to prioritise differentially abundant proteins. Again, these curves are built using the ground truth information about which proteins are differentially abundant (spiked in) and which proteins are constant across samples. We create two functions to compute the TPR and the FDP.</p>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-Staes2024" class="csl-entry" role="listitem">
+Staes, An, Teresa Mendes Maia, Sara Dufour, Robbin Bouwmeester, Ralf Gabriels, Lennart Martens, Kris Gevaert, Francis Impens, and Simon Devos. 2024. <span>“Benefit of in Silico Predicted Spectral Libraries in Data‑independent Acquisition Data Analysis Workflows.”</span> <em>Journal of Proteome Research</em> 23 (6): 2078–89. <a href="https://doi.org/10.1021/acs.jproteome.4c00048">https://doi.org/10.1021/acs.jproteome.4c00048</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

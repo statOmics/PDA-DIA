@@ -379,17 +379,17 @@ $\rightarrow$ Hence, we are bound to call many false positive proteins each time
 
 The **False Discovery Proportion (FDP)** is the fraction of false positives that are returned, i.e. 
 
-\[
+$$
 FDP = \frac{FP}{R}
-\]
+$$
 
 - However, this quantity cannot be observed because in practice we only know the number of proteins for which we rejected $H_0$, $R$. 
 - But, we do not know the number of false positives, $FP$.
 
 Therefore, Benjamini and Hochberg, 1995, defined The **False Discovery Rate (FDR)** as
-\[
+$$
    \text{FDR} = \text{E}\left[\frac{FP}{R}\right] =\text{E}\left[\text{FDP}\right]
-\]
+$$
 the expected FDP. 
 
 - Controlling the FDR allows for more discoveries (i.e. longer lists with significant results), while the fraction of false discoveries among the significant results in well controlled on average. As a consequence, more of the true positive hypotheses will be detected.
