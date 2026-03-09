@@ -63,6 +63,8 @@ precursors <- precursors |>
 
 You only have to do the data processing (up to section 5.5 in the [basic script](./staes-median-maxLFQ.html)). We will continue with the modeling in the [tutorial Data modeling](03-tutorial-Design.html). 
 
+Intermediate: [mouse-diet-upto-filtering.html](./mouse-diet-upto-filtering.html)
+
 # Van Leene et al. study. 
 
 This data is a subset of the data from [@VanLeeneEtal2026], where a Limited Proteolysis (LiP) Treatment was conducted with rapamicin. 
