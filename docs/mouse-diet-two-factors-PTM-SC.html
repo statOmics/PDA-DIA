@@ -317,6 +317,7 @@ window.Quarto = {
   <li><a href="#heatmaps-2" id="toc-heatmaps-2" class="nav-link" data-scroll-target="#heatmaps-2"><span class="header-section-number">9.3.3</span> Heatmaps</a></li>
   <li><a href="#detail-plots-2" id="toc-detail-plots-2" class="nav-link" data-scroll-target="#detail-plots-2"><span class="header-section-number">9.3.4</span> Detail plots</a></li>
   </ul></li>
+  <li><a href="#protein-mapping" id="toc-protein-mapping" class="nav-link" data-scroll-target="#protein-mapping"><span class="header-section-number">9.4</span> Protein mapping</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -59935,10 +59936,105 @@ dietlow + 0.5 * dietlow:sexm._QQS[Phospho (STY)]PSPIR_2 _QQS[Phospho (STY)]PSPIR
 </div>
 </div>
 </div>
-
-
-
 </section>
+</section>
+<section id="protein-mapping" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="protein-mapping"><span class="header-section-number">9.4</span> Protein mapping</h2>
+<p>Read fasta file</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>fastaFile <span class="ot">&lt;-</span> <span class="st">"data/20240124_Uniprot_MusMusculus_Reviewed_AA_ensdb112.fasta"</span></span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>fasta <span class="ot">&lt;-</span> seqinr<span class="sc">::</span><span class="fu">read.fasta</span>(fastaFile, <span class="at">seqtype =</span> <span class="st">"AA"</span>, <span class="at">as.string =</span> T) <span class="co">#2.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ol type="1">
+<li>Extract the proteins from the protein file.</li>
+<li>Calculate the length of the protein</li>
+</ol>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb106"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb106-1"><a href="#cb106-1" aria-hidden="true" tabindex="-1"></a><span class="co"># read in fasta file for protein sequence &amp; length -&gt; to calculate the coverage</span></span>
+<span id="cb106-2"><a href="#cb106-2" aria-hidden="true" tabindex="-1"></a>mapping <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Accession =</span> fasta <span class="sc">|&gt;</span> <span class="fu">names</span>() <span class="sc">|&gt;</span> stringr<span class="sc">::</span><span class="fu">str_split_i</span>(<span class="st">"</span><span class="sc">\\</span><span class="st">|"</span>, <span class="dv">1</span>),</span>
+<span id="cb106-3"><a href="#cb106-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Protein.Sequence =</span> <span class="fu">unlist</span>(fasta)) <span class="co">#1. </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb107"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>target_feature <span class="ot">&lt;-</span> inferencesUsage <span class="sc">|&gt;</span> </span>
+<span id="cb107-2"><a href="#cb107-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(contrast <span class="sc">==</span> <span class="fu">colnames</span>(L)[<span class="dv">1</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb107-3"><a href="#cb107-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pval) <span class="sc">|&gt;</span> </span>
+<span id="cb107-4"><a href="#cb107-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(feature)</span>
+<span id="cb107-5"><a href="#cb107-5" aria-hidden="true" tabindex="-1"></a>target_feature <span class="ot">&lt;-</span> target_feature[i]</span>
+<span id="cb107-6"><a href="#cb107-6" aria-hidden="true" tabindex="-1"></a>prot <span class="ot">&lt;-</span> <span class="fu">rowData</span>(qf[[<span class="st">"usage"</span>]])[target_feature, <span class="st">"PG_ProteinGroups"</span>]</span>
+<span id="cb107-7"><a href="#cb107-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb107-8"><a href="#cb107-8" aria-hidden="true" tabindex="-1"></a>allFeatures <span class="ot">&lt;-</span> <span class="fu">rowData</span>(qf[[<span class="st">"usage"</span>]]) <span class="sc">|&gt;</span> <span class="fu">data.frame</span>() <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="st">"EG_PrecursorId"</span>, <span class="st">"PEP_StrippedSequence"</span>, <span class="st">"PG_ProteinGroups"</span> ) <span class="sc">|&gt;</span> <span class="fu">filter</span>( PG_ProteinGroups <span class="sc">==</span> prot)</span>
+<span id="cb107-9"><a href="#cb107-9" aria-hidden="true" tabindex="-1"></a>allFeatures<span class="sc">$</span>protein_sequences <span class="ot">&lt;-</span> mapping <span class="sc">|&gt;</span> <span class="fu">filter</span>(Accession<span class="sc">==</span>prot) <span class="sc">|&gt;</span> <span class="fu">pull</span>(Protein.Sequence)</span>
+<span id="cb107-10"><a href="#cb107-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb107-11"><a href="#cb107-11" aria-hidden="true" tabindex="-1"></a>allFeatures<span class="sc">$</span>sig <span class="ot">=</span>  (<span class="fu">rowData</span>(qf[[<span class="st">"usage"</span>]])[allFeatures<span class="sc">$</span>EG_PrecursorId, <span class="fu">colnames</span>(L)[<span class="dv">1</span>]])<span class="sc">$</span>adjPval <span class="sc">&lt;</span> <span class="fl">0.05</span></span>
+<span id="cb107-12"><a href="#cb107-12" aria-hidden="true" tabindex="-1"></a>allFeatures <span class="ot">&lt;-</span> allFeatures <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">tmp =</span> <span class="fu">str_locate_all</span>(protein_sequences, PEP_StrippedSequence), <span class="co">#3.</span></span>
+<span id="cb107-13"><a href="#cb107-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">start =</span> purrr<span class="sc">::</span><span class="fu">map</span>(tmp, <span class="sc">~</span> .x[, <span class="st">"start"</span>]),</span>
+<span id="cb107-14"><a href="#cb107-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">end =</span> purrr<span class="sc">::</span><span class="fu">map</span>(tmp, <span class="sc">~</span> .x[, <span class="st">"end"</span>])) <span class="sc">|&gt;</span> <span class="co">#4.</span></span>
+<span id="cb107-15"><a href="#cb107-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="fu">c</span>(start, end)) <span class="sc">|&gt;</span> </span>
+<span id="cb107-16"><a href="#cb107-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb107-17"><a href="#cb107-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">phospho =</span> <span class="fu">regexpr</span>(<span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">[Phos"</span>, allFeatures<span class="sc">$</span>EG_PrecursorId) <span class="sc">|&gt;</span> <span class="fu">c</span>() <span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> start, </span>
+<span id="cb107-18"><a href="#cb107-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">protein_length =</span> <span class="fu">nchar</span>(protein_sequences)</span>
+<span id="cb107-19"><a href="#cb107-19" aria-hidden="true" tabindex="-1"></a>         )</span>
+<span id="cb107-20"><a href="#cb107-20" aria-hidden="true" tabindex="-1"></a>allFeatures<span class="sc">$</span>seqOrder <span class="ot">&lt;-</span> <span class="fu">nrow</span>(allFeatures)<span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb107-21"><a href="#cb107-21" aria-hidden="true" tabindex="-1"></a>allFeatures <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y=</span>seqOrder)) <span class="sc">+</span></span>
+<span id="cb107-22"><a href="#cb107-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> start, <span class="at">xend =</span> end, <span class="at">yend =</span> seqOrder, <span class="at">color =</span> sig),</span>
+<span id="cb107-23"><a href="#cb107-23" aria-hidden="true" tabindex="-1"></a>                  <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb107-24"><a href="#cb107-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlim</span>(<span class="dv">0</span>, <span class="fu">unique</span>(allFeatures<span class="sc">$</span>protein_length)) <span class="sc">+</span></span>
+<span id="cb107-25"><a href="#cb107-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Precursors"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Residue"</span>) <span class="sc">+</span>  <span class="co">#6. </span></span>
+<span id="cb107-26"><a href="#cb107-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> allFeatures<span class="sc">$</span>seqOrder, <span class="at">labels =</span> allFeatures<span class="sc">$</span>EG_PrecursorId) <span class="sc">+</span></span>
+<span id="cb107-27"><a href="#cb107-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb107-28"><a href="#cb107-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> phospho, <span class="at">y =</span> seqOrder), <span class="at">data =</span> allFeatures) <span class="sc">+</span> </span>
+<span id="cb107-29"><a href="#cb107-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>,<span class="st">"blue"</span>,<span class="st">"grey"</span>), <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span>,<span class="st">"FALSE"</span>,<span class="st">"NA"</span>))  <span class="co">#5.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mouse-diet-two-factors-PTM-SC_files/figure-html/unnamed-chunk-77-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb108"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb108-1"><a href="#cb108-1" aria-hidden="true" tabindex="-1"></a>plot_along_protein <span class="ot">&lt;-</span> <span class="cf">function</span>(poi_data, color_variable, colors, <span class="at">protein_length =</span> <span class="cn">NULL</span>, <span class="at">feature_names =</span> <span class="cn">NULL</span>, <span class="at">protein_name =</span> <span class="cn">NULL</span>, <span class="at">gene_name =</span> <span class="cn">NULL</span>)</span>
+<span id="cb108-2"><a href="#cb108-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb108-3"><a href="#cb108-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">sum</span>(<span class="sc">!</span>(<span class="fu">unique</span>(poi_data[[color_variable]]) <span class="sc">%in%</span> <span class="fu">names</span>(colors))) <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"color_variable:"</span>,  color_variable,<span class="st">" contains levels in poi_data object for which no colors are provided in argument colors"</span>)) <span class="co">#1.</span></span>
+<span id="cb108-4"><a href="#cb108-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb108-5"><a href="#cb108-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(protein_length)) <span class="cf">if</span>(protein_length <span class="sc">&lt;</span> <span class="fu">max</span>(poi_data<span class="sc">$</span>end)) <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"Some peptide sequences map beyond protein length: "</span>,<span class="fu">max</span>(poi_data<span class="sc">$</span>end),<span class="st">" &gt; "</span>, protein_length)) <span class="co">#2. </span></span>
+<span id="cb108-6"><a href="#cb108-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb108-7"><a href="#cb108-7" aria-hidden="true" tabindex="-1"></a>  poi_data<span class="sc">$</span>seqOrder <span class="ot">&lt;-</span> <span class="fu">nrow</span>(poi_data)<span class="sc">:</span><span class="dv">1</span> <span class="co">#3. </span></span>
+<span id="cb108-8"><a href="#cb108-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb108-9"><a href="#cb108-9" aria-hidden="true" tabindex="-1"></a>  poi_plot <span class="ot">&lt;-</span> poi_data <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y=</span>seqOrder)) <span class="sc">+</span></span>
+<span id="cb108-10"><a href="#cb108-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> start, <span class="at">xend =</span> end, <span class="at">yend =</span> seqOrder, <span class="at">color =</span> .data[[color_variable]]),</span>
+<span id="cb108-11"><a href="#cb108-11" aria-hidden="true" tabindex="-1"></a>                  <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span> <span class="co">#4. </span></span>
+<span id="cb108-12"><a href="#cb108-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb108-13"><a href="#cb108-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> colors, <span class="at">breaks =</span> <span class="fu">names</span>(colors)) <span class="sc">+</span> <span class="co">#5.</span></span>
+<span id="cb108-14"><a href="#cb108-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span> </span>
+<span id="cb108-15"><a href="#cb108-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Precursors"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Residue"</span>) <span class="co">#6. </span></span>
+<span id="cb108-16"><a href="#cb108-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb108-17"><a href="#cb108-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.null</span>(feature_names)) {</span>
+<span id="cb108-18"><a href="#cb108-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span>(feature_names <span class="sc">%in%</span> <span class="fu">names</span>(poi_data))) <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"No variable with name"</span>, feature_names, <span class="st">"in poi_data object"</span>)) <span class="cf">else</span> poi_plot <span class="ot">&lt;-</span> poi_plot <span class="sc">+</span> <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> poi_data<span class="sc">$</span>seqOrder, <span class="at">labels =</span> poi_data[[feature_names]])} <span class="co">#7.</span></span>
+<span id="cb108-19"><a href="#cb108-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb108-20"><a href="#cb108-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(protein_length)) poi_plot <span class="ot">&lt;-</span> poi_plot <span class="sc">+</span> <span class="fu">xlim</span>(<span class="dv">0</span>,protein_length) <span class="co">#8.</span></span>
+<span id="cb108-21"><a href="#cb108-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb108-22"><a href="#cb108-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(protein_length) <span class="sc">|</span> <span class="sc">!</span><span class="fu">is.null</span>(protein_name) <span class="sc">|</span> <span class="sc">!</span><span class="fu">is.null</span>(gene_name)) <span class="co">#9.</span></span>
+<span id="cb108-23"><a href="#cb108-23" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb108-24"><a href="#cb108-24" aria-hidden="true" tabindex="-1"></a>      subtitle <span class="ot">&lt;-</span> <span class="fu">paste0</span>(protein_name, </span>
+<span id="cb108-25"><a href="#cb108-25" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">ifelse</span>(<span class="fu">is.null</span>(protein_name) <span class="sc">|</span> <span class="fu">is.null</span>(gene_name),<span class="st">""</span>,<span class="st">"/"</span>), </span>
+<span id="cb108-26"><a href="#cb108-26" aria-hidden="true" tabindex="-1"></a>                         gene_name, </span>
+<span id="cb108-27"><a href="#cb108-27" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">ifelse</span>(<span class="sc">!</span><span class="fu">is.null</span>(protein_name) <span class="sc">|</span> <span class="sc">!</span><span class="fu">is.null</span>(gene_name) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.null</span>(protein_length),<span class="st">": "</span>, <span class="st">""</span>),</span>
+<span id="cb108-28"><a href="#cb108-28" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">round</span>(<span class="fu">calculate_coverage</span>(</span>
+<span id="cb108-29"><a href="#cb108-29" aria-hidden="true" tabindex="-1"></a>                           poi_data<span class="sc">$</span>start,</span>
+<span id="cb108-30"><a href="#cb108-30" aria-hidden="true" tabindex="-1"></a>                           poi_data<span class="sc">$</span>end,</span>
+<span id="cb108-31"><a href="#cb108-31" aria-hidden="true" tabindex="-1"></a>                           protein_length)<span class="sc">*</span><span class="dv">100</span>,</span>
+<span id="cb108-32"><a href="#cb108-32" aria-hidden="true" tabindex="-1"></a>                           <span class="dv">1</span>), </span>
+<span id="cb108-33"><a href="#cb108-33" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"% coverage"</span></span>
+<span id="cb108-34"><a href="#cb108-34" aria-hidden="true" tabindex="-1"></a>                         )</span>
+<span id="cb108-35"><a href="#cb108-35" aria-hidden="true" tabindex="-1"></a>    poi_plot <span class="ot">&lt;-</span> poi_plot <span class="sc">+</span>   <span class="fu">labs</span>(<span class="at">subtitle =</span> subtitle)</span>
+<span id="cb108-36"><a href="#cb108-36" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb108-37"><a href="#cb108-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(poi_plot)</span>
+<span id="cb108-38"><a href="#cb108-38" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+
+
+
 </section>
 </section>
 

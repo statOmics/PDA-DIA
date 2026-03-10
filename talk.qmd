@@ -558,5 +558,8 @@ Repeated measures:
 knitr::include_graphics("./figs/mouse-diet-norm-issues.png")
 ```
 
+[case](./mouse-diet-two-factors-PTM-SC.html)
+
+
 # [OmicsGMF](./figs/eurobioc2026_Clement.pdf) 
 # References

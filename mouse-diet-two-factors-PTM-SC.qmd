@@ -1482,3 +1482,97 @@ outplot <- ptm_protein |>
 print(outplot)
 }
 ```
+
+## Protein mapping
+
+Read fasta file 
+
+```{r}
+fastaFile <- "data/20240124_Uniprot_MusMusculus_Reviewed_AA_ensdb112.fasta"
+fasta <- seqinr::read.fasta(fastaFile, seqtype = "AA", as.string = T) #2.
+```
+
+1. Extract the proteins from the protein file. 
+2. Calculate the length of the protein
+
+```{r}
+# read in fasta file for protein sequence & length -> to calculate the coverage
+mapping <- data.frame(Accession = fasta |> names() |> stringr::str_split_i("\\|", 1),
+                      Protein.Sequence = unlist(fasta)) #1. 
+```
+
+
+```{r}
+target_feature <- inferencesUsage |> 
+  filter(contrast == colnames(L)[1]) |>
+  arrange(pval) |> 
+  pull(feature)
+target_feature <- target_feature[i]
+prot <- rowData(qf[["usage"]])[target_feature, "PG_ProteinGroups"]
+
+allFeatures <- rowData(qf[["usage"]]) |> data.frame() |> select("EG_PrecursorId", "PEP_StrippedSequence", "PG_ProteinGroups" ) |> filter( PG_ProteinGroups == prot)
+allFeatures$protein_sequences <- mapping |> filter(Accession==prot) |> pull(Protein.Sequence)
+
+allFeatures$sig =  (rowData(qf[["usage"]])[allFeatures$EG_PrecursorId, colnames(L)[1]])$adjPval < 0.05
+allFeatures <- allFeatures |> mutate(tmp = str_locate_all(protein_sequences, PEP_StrippedSequence), #3.
+         start = purrr::map(tmp, ~ .x[, "start"]),
+         end = purrr::map(tmp, ~ .x[, "end"])) |> #4.
+  unnest(c(start, end)) |> 
+  mutate(
+         phospho = regexpr(pattern = "\\[Phos", allFeatures$EG_PrecursorId) |> c() -1 + start, 
+         protein_length = nchar(protein_sequences)
+         )
+allFeatures$seqOrder <- nrow(allFeatures):1
+allFeatures |> ggplot(aes(y=seqOrder)) +
+    geom_segment(aes(x = start, xend = end, yend = seqOrder, color = sig),
+                  linewidth = 2) + 
+    xlim(0, unique(allFeatures$protein_length)) +
+  ylab("Precursors") + xlab("Residue") +  #6. 
+  scale_y_continuous(breaks = allFeatures$seqOrder, labels = allFeatures$EG_PrecursorId) +
+  theme_minimal() + 
+  geom_point(aes(x = phospho, y = seqOrder), data = allFeatures) + 
+  scale_color_manual(values = c("red","blue","grey"), breaks = c("TRUE","FALSE","NA"))  #5.
+
+```
+
+
+```{r}
+plot_along_protein <- function(poi_data, color_variable, colors, protein_length = NULL, feature_names = NULL, protein_name = NULL, gene_name = NULL)
+{
+    if(sum(!(unique(poi_data[[color_variable]]) %in% names(colors))) > 0) stop(paste0("color_variable:",  color_variable," contains levels in poi_data object for which no colors are provided in argument colors")) #1.
+  
+  if(!is.null(protein_length)) if(protein_length < max(poi_data$end)) stop(paste0("Some peptide sequences map beyond protein length: ",max(poi_data$end)," > ", protein_length)) #2. 
+  
+  poi_data$seqOrder <- nrow(poi_data):1 #3. 
+  
+  poi_plot <- poi_data |> ggplot(aes(y=seqOrder)) +
+    geom_segment(aes(x = start, xend = end, yend = seqOrder, color = .data[[color_variable]]),
+                  linewidth = 2) + #4. 
+    
+    scale_color_manual(values = colors, breaks = names(colors)) + #5.
+  theme_minimal() + 
+  ylab("Precursors") + xlab("Residue") #6. 
+  
+  if (!is.null(feature_names)) {
+    if(!(feature_names %in% names(poi_data))) stop(paste0("No variable with name", feature_names, "in poi_data object")) else poi_plot <- poi_plot + scale_y_continuous(breaks = poi_data$seqOrder, labels = poi_data[[feature_names]])} #7.
+  
+  if(!is.null(protein_length)) poi_plot <- poi_plot + xlim(0,protein_length) #8.
+
+  if(!is.null(protein_length) | !is.null(protein_name) | !is.null(gene_name)) #9.
+    {
+      subtitle <- paste0(protein_name, 
+                         ifelse(is.null(protein_name) | is.null(gene_name),"","/"), 
+                         gene_name, 
+                         ifelse(!is.null(protein_name) | !is.null(gene_name) & !is.null(protein_length),": ", ""),
+                         round(calculate_coverage(
+                           poi_data$start,
+                           poi_data$end,
+                           protein_length)*100,
+                           1), 
+                         "% coverage"
+                         )
+    poi_plot <- poi_plot +   labs(subtitle = subtitle)
+    }
+  return(poi_plot)
+}
+```
