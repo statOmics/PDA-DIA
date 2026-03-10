@@ -357,7 +357,7 @@ precursorCommonDens <- qf[precursorsCommon, , "precursors_norm"] |>
       group = colname) +
   geom_density() +
   theme_minimal() +
-   labs(subtitle = "Median normalised log2 precursor intensities (common)")
+   labs(subtitle = "Normalised log2 precursor intensities (common)")
 precursorCommonDens
 ```
 
@@ -413,7 +413,7 @@ precursorDens <- qf[, , "precursors_norm"] |>
       group = colname) +
   geom_density() +
   theme_minimal() +
-   labs(subtitle = "Median normalised log2 precursor intensities")
+   labs(subtitle = "Normalised log2 precursor intensities")
 precursorDens
 ```
 
@@ -430,7 +430,7 @@ qf[, , "precursors_norm"] |>
   xlab("sample") +
   geom_boxplot() +
   theme_minimal() +
-   labs(subtitle = "Median normalised log2 precursor intensities")
+   labs(subtitle = "Normalised log2 precursor intensities")
 ```
 
 
@@ -447,7 +447,7 @@ qf[, , "proteins"] |>
   xlab("sample") +
   geom_boxplot() +
   theme_minimal() +
-   labs(subtitle = "log2 protein intensities (median normalised precursors)")
+   labs(subtitle = "log2 protein intensities (Normalised precursors)")
 ```
 
 ```{r}
@@ -461,7 +461,7 @@ protDens <- qf[, , "proteins"] |>
       group = colname) +
   geom_density() +
   theme_minimal() +
-   labs(subtitle = "log2 protein intensities (median normalised precursors)")
+   labs(subtitle = "log2 protein intensities (Normalised precursors)")
 protDens
 ```
 
@@ -538,7 +538,7 @@ rownames(corMat) <- qf$sampleId
 corMat |> 
   ggcorrplot::ggcorrplot() +
   scale_fill_viridis_c() +
-  labs(title = "Correlation matrix (median normalised)",
+  labs(title = "Correlation matrix (Normalised)",
        fill = "Correlation") +
   theme(axis.text.x = element_text(angle = 90))
 ```

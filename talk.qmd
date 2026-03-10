@@ -6,15 +6,62 @@ title: The msqrob2 universe - 10 years later
 source("R/knitr_setup.R")
 ```
 
+```{r, echo = FALSE, out.width = "20%", fig.cap = ""}
+knitr::include_graphics("figs/msqrob2.png")
+```
+
 # Background
 
-Why proteomics? 
-While genes provide the blueprint, proteins are the active functional molecules of life, driving cellular processes, signaling, structure, disease mechanisms, etc.
+## msqrob2-team
+
+Current and former PhD students and postdocs
+
+- Ludger Goeminne
+- Adriaan Sticker
+- Nina Demeulemeester
+- Stijn Vandenbulcke
+- Alexandre Seghers
+- Christophe Vanderaa (postdoc)
+- Lucas Beerlandt
+- Luca De Corso
+
+UGent-VIB PI's
+
+- Kris Gevaert (wet-lab)
+- Lennart Martens (proteomics informatics)
+
+University of Padua
+
+- Davide Risso (PI - Statistical Genomics)
+- Cristian Castiglione (postdoc)
+
+
+## Christian de Duve (1917 - 2013)
+
+- Belgian Nobel price winner 
+- Pioneer in biochemistry and biotechnology
+- Amazing definition of life: 
+
+1. Life is one 
+2. Life is chemistry 
+3. Life is information
+
+## Why proteomics? 
+
+While genes provide the blueprint, 
+proteins are the active functional molecules of life, 
+
+ - driving cellular processes, 
+ - signaling, 
+ - structure, 
+ - disease mechanisms, 
+ - etc.
 
 ```{r echo=FALSE}
 #| layout-ncol: 2
 knitr::include_graphics(c("./figs/Dogma_Euk.png","./figs/cellProteins.png"))
 ```
+
 
 ## Conventional MS-based workflow
 
@@ -36,35 +83,6 @@ knitr::include_graphics("figs/lfq_workflow.png")
     - Non-random missingness
 
 $\rightarrow$ Unbalanced pepide identifications across samples and messy data
-
-## Data Dependent Acquisition 
-
-![](https://www.creative-proteomics.com/blog/wp-content/uploads/2024/01/principles-applications-and-comparative-workflow-of-dia-and-dda.jpg)
-
-- m/z range into sequential windows (e.g., 400–425, 425–450 m/z) 
-- MS2 spectra are complex as many peptides mixed
-- Deconvolution of the MS2 signal 
-- With dedicated software such as Spectronaut or DIA-NN
-- Quantification using MS1 or MS2 peaks
-
-## Labelled MS-based proteomics
-
-
-
-```{r, echo = FALSE, out.width = "60%", fig.cap = "Overview of an TMT-based proteomics workflow."}
-knitr::include_graphics("figs/tmt_workflow.png")
-```
-
-
-- MT-based workflow highly overlap with  label-free
-workflows. 
-- Additional sample preparation step: digested peptides from
-each sample are labelled with a TMT reagent 
-- Samples with different TMT reagents are pooled in a single TMT mixture
-- Quantification at the MS2 level.
-- TMT reagents isobaric: same peptide with different TMT labels have same
-mass for intact ion at MS1. 
-- TMT reporter ions released upon fragmentation during MS2 have label-specific masses. 
 
 ## Level of quantification
 
@@ -91,6 +109,23 @@ knitr::include_graphics("./figs/spikeinShen.png")
 - After MaxQuant search with match between runs option
 - Only 50% of all peptides are quantified in all samples
 $\rightarrow$ **vast amount of missingness**
+
+# Pre-processing
+
+- Filtering
+- log-transformation
+
+```{r echo=FALSE}
+#| layout-ncol: 2
+knitr::include_graphics(c("./figs/ups-spikein.png","./figs/ups-spikein-log.png"))
+```
+
+- normalisation
+
+```{r echo=FALSE}
+#| layout-ncol: 2
+knitr::include_graphics(c("./figs/shen-spikein-log-nonorm.png","./figs/shen-spikein-norm.png"))
+```
 
 # MSqRob [@Goeminne2016-tr] 
 
@@ -122,7 +157,7 @@ knitr::include_graphics("./figs/msqrob_fit4.png")
 
 ## Estimation 
 
-- Robust regression for outliers
+- Robust regression for outliers (see later)
 - Penalise $\boldsymbol{\beta}^\text{treat}$  
 $\rightarrow$ exploit link between ridge regression and mixed models to estimate penalty: 
 $$
@@ -249,11 +284,6 @@ knitr::include_graphics(c(
   "./figs/msqrobSum_robust6.png"))
 ```
 
-### Comparison with other methods 
-
-```{r}
-knitr::include_graphics("msqrobsum_sum_novel.png")
-```
 
 
 ## Robust summarisation & inference
@@ -265,10 +295,10 @@ $$y_i = \mathbf{x}_i^t \boldsymbol{\beta} + \epsilon_i$$
 - $x_{ig}^{group} = 1$ if sample i in group g\\  $x_{ig}^{group}=0$ otherwise
 
 ```{r}
-knitr::include_graphics("msqrobsum_sum_novel.png")
+knitr::include_graphics("./figs/robustSum.png")
 ```
 
-${\color{red}{\text{msqrob2}}}$: robust M-estimation + ridge regression$
+${\color{red}{\text{msqrob2}}}$: robust M-estimation + ridge regression
 
 ## Performance peptide-level msqrob2 vs protein-level msqrob2
 
@@ -343,91 +373,119 @@ knitr::include_graphics("figs/tmt_workflow.png")
 ```
 
 Complex correlation structure: 
+
 - Multiple samples in same run -> mixture 
 - Mixtures often run in technical repeats
 - Effects of label 
 
 ## Protein level models 
 
-Run effects
+**Run effects**
 
-- label-free experiments contain only a single sample per run so run-specific effects will be absorbed in the residuals. 
-- In labelled experiments samples are multiplexed.
-- Contemporary designs typically involve multiple MS runs
-- If all treatments are present in each run, then the run effect can be estimated
-using fixed effect. Indeed, for these designs run acts as a blocking variable as all treatment effects can be estimated within each run.
-- For more complex designs this is no longer possible and the
-uncertainty in the estimation of the mean model parameters can involve
-both within and between run variability. 
-- For these designs we can resort to mixed models where the run effect is modelled using
+- Contemporary labelled designs typically involve multiple MS runs
+- Block on run effect: possible if all treatments are present in each run
+- For more complex designs no longer possible 
+
+$\rightarrow$ comparisons involve within and between run variability 
+
+$\rightarrow$  resort to mixed models where run effect is modelled using
 **random effects**
-- they are considered as a random sample from
-the population of all possible runs
+
+- runs considered as a random sample from the population of all possible runs
 - $u_{run} \sim N(0,\sigma^2_\text{run})$.
 
-TMT-label: 
+**TMT-label** 
+
   - impurities during production may lead to unreproducible effects. 
   - random effect to account for labelling effects: $u^\text{label}_l \sim N(0, \sigma^{2,\text{label}})$.
 
-Sometimes the same sample mix is run multiple times on the MS, technical replication
-- $u_m^\text{mix} \sim N(0,\sigma^2_\text{mix})$
+**Technical repeats**
+
+Sometimes same sample mix multiple times on the MS 
+
+$\rightarrow$ technical replication
+
+$\rightarrow u_m^\text{mix} \sim N(0,\sigma^2_\text{mix})$
 
 $$
 y_{rlm} =
 \mathbf{x}^T_{rlm} \boldsymbol{\beta} +
 u_r^\text{run} + u_l^\text{label} + u_m^\text{mix} + \epsilon_{rlm}
 $$
-with $y_{rlm}$ protein level intensities for the sample labelled with label $l$ of mix $m$ quantified in run $r$ and $u_r, u_l, u_m$ random effects that model the hierarchical correlation structure. 
+with 
+
+- $y_{rlm}$: protein level intensities for sample labelled with label $l$ of mix $m$ quantified in run $r$ 
+- $u_r, u_l, u_m$ random effects that model hierarchical correlation structure. 
 
 ## Ion-level models 
 
-Ion-level data induce additional levels of correlation. 
-- Spectrum level: Intensities for the different reporter ions in a TMT run within the same spectrum (PSM)
-will be more similar than the intensities between PSMs. 
-in each label of a run multiple i.e. 
+Ion-level data induce additional levels of correlation.
+
+**Spectrum level**
+
+- Spectrum level: Intensities for different reporter ions in a TMT run within the same spectrum (PSM) will be more similar than the intensities between PSMs. 
 - $u^\text{PSM}_{rp} \sim
 N(0,\sigma^{2,\text{PSM}})
 
-- Protein level: Multiple ions are picked up for each protein. Hence, intensities
-from different PSMs for a protein in the same label of a run will be
-more alike than intensities of different PSMs for the same protein
-between labels of runs, and we will address this correlation with a
-label-specific random effect nested in run, 
+**Protein level**
+
+- Multiple ions are picked up for each protein
+- address correlation with label-specific random effect nested in run, 
 - $u_{rl}^{label} \sim N(0,\sigma^{2,\text{label}})$.
 
 $$
-y_{rlm} =
+y_{rlmp} =
 \mathbf{x}^T_{rlm} \boldsymbol{\beta} +
-u_r^\text{run} + u_l^\text{label} + u_m^\text{mix} + \epsilon_{rlm}
+u_r^\text{run} + u_l^\text{label} + u_m^\text{mix} + u_{rl}^\text{label} + u_{rp}^\text{PSM} + \epsilon_{rlm}
 $$
 ```{r, echo = FALSE,}
 knitr::include_graphics("figs/msqrob2tmt-spikein.png")
 ```
 
-# msqrob2PTM 
+# msqrob2PTM [DemeulemeesterEtAl2024], [@VanLeeneEtal2026]
 
-- Post-translational modifications (PTMs) are chemical changes made to a protein after it has been synthesized.
-- These modifications alter the protein’s activity, stability, localization, or interactions with other molecules.
-- More importantly, these PTMs often act as key switches in many cellular pathways that play vital roles in e.g. cell proliferation, metastasis and ageing.
-- We can readily adopt differential abundance of PTMs using msqrob2 at the peptide or precursor level, i.e. peptidoform differential abundance.
-- However, the differential abundant PTMs can be due 
-- We therefore ported the concept of differential usage towards the PTM context, i.e. usage is defined as the relative fold change of the PTM corrected for the fold change at the protein level: 
+- Post-translational modifications (PTMs): chemical changes made to protein after synthesis.
+- Modifications alter protein’s activity, stability, localization, or interactions with other molecules.
+- act as key switches in many cellular pathways 
+- Play vital roles in e.g. cell proliferation, metastasis and ageing.
+
+- Differential abundance of PTMs using msqrob2 at the peptide or precursor level, i.e. peptidoform differential abundance.
+
+```{r, echo = FALSE,}
+knitr::include_graphics("figs/ptm-protein.png")
+```
+
+- Differential abundant PTMs can be due protein abundance
+
+- Port concept of differential usage towards PTMs: 
+
 $$\log_2 DU = \log_2 FC^\text{PTM} - log_2 FC^\text{protein}$$
 
-Depending on the design of the experiment, e.g. can the PTM and protein level quantification be done on the same sampled, paired design or only on independent samples we propose different workflows. 
+Two designs: PTM and protein level quantification be done 
 
-- Paired samples 
+- on same sample: paired design 
+- using independent samples
 
-    1. Perform regular data processing at the protein-level: log2-transformation, normalisation and summarisation
-    2. Calculate relative log2 transformed abundances at peptidoform level 
-    $$ y^\text{pep,rel}_i = y^\text{pep}_i - y^\text{prot}_i
-    3. Perform a conventional differential msqrob2 analysis on the relative peptidoform level. This immediately gives us 
-    4. Optionally 
+
+Paired samples 
+
+1. Perform regular data processing at the protein-level: 
+  
+    - log2-transformation, 
+    - normalisation and 
+    - summarisation
+
+2. Calculate relative log2 transformed abundances at peptidoform level 
+$$y^\text{pep,rel}_i = y^\text{pep}_i - y^\text{prot}_i$$
+3. Perform conventional differential msqrob2 analysis on the relative peptidoform level. $\rightarrow$ Immediately gives us diferential usages!
     
-        a. aggregate relative log2 transformed abundances at peptidoform level at PTM-level
-        b. perform a differential msqrob2 analysis at PTM-level
+4. Optionally 
+    
+  a. aggregate relative log2 transformed abundances at peptidoform level at PTM-level
+  b. perform a differential msqrob2 analysis at PTM-level
 
-- Unpaired PTM-level and protein samples (Default MSstatsTMT approach also used for paired designs)
+
+Unpaired PTM-level and protein samples (Default MSstatsTMT approach also used for paired designs)
 
   1. Perform regular msqrob2 differential analysis at the protein-level
   2. Perform regular msqrob2 differential analysis at the peptidoform (PTM-level)
@@ -440,8 +498,65 @@ SE_\widehat{DU} &=& \sqrt{(SE_\widehat{FC}^{PTM})^2 + (SE_\widehat{FC}^{protein}
 \end{array}
 $$
 
-# Case study
+# DIA-mouse study 
+
+## Data independent acquisition 
+
+![](https://www.creative-proteomics.com/blog/wp-content/uploads/2024/01/principles-applications-and-comparative-workflow-of-dia-and-dda.jpg)
 
 
+- m/z range into sequential windows (e.g., 400–425, 425–450 m/z) 
+- MS2 spectra are complex as many peptides mixed
+- Deconvolution of the MS2 signal 
+- With dedicated software such as Spectronaut or DIA-NN
 
+    - Identification based on spectral libraries
+    - Library free: FASTA database to predict in silico spectra, retention times, and ion mobilities, which are then used to search the DIA data
+    - Use of decoys sequences to estimate false discovery rate of ID 
+    
+- Quantification using MS2 and/or MS1 peaks
+
+## Study design 
+
+Molecular effects of dietary DINCH exposure? 
+
+- on proteome, phosphoproteome and acetylome profiles of 
+- visceral (VIS) and subcutaneous (SC) adipose tissue in 
+- male and female C57BL/6N mice. 
+- 3 male and 3 female mice fed with
+
+```{r echo=FALSE}
+knitr::include_graphics("./figs/mouse-diet-norm-mds.png")
+```
+
+4 diets: 
+
+- standard plant-based diet (chow), 
+- a standard high-fat diet (HFD) 
+- HFD with low dosis of DINCH 
+- HFD with high dosis of DINCH
+
+3 Factors: 
+- Diet
+- sex
+- tissue 
+
+Repeated measures: 
+- VIS and SC
+
+
+## Model 
+
+~ sex * diet * tissue + (1|mouse)
+
+- Possible in msqrob2! 
+- Not in other software. 
+
+- Due to technical issues we only look at specific subset. 
+
+```{r echo=FALSE}
+knitr::include_graphics("./figs/mouse-diet-norm-issues.png")
+```
+
+# [OmicsGMF](./figs/eurobioc2026_Clement.pdf) 
 # References

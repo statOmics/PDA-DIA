@@ -58185,16 +58185,33 @@ dietlow + 0.5 * dietlow:sexm._GPDEAIEDGEEGS[Phospho (STY)]EDDAEWVVTKDK_3 _GPDEAI
 <span id="cb114-5"><a href="#cb114-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf)), <span class="at">rowvars =</span> <span class="st">"PG_ProteinGroups"</span>) <span class="sc">|&gt;</span> <span class="co">#2</span></span>
 <span id="cb114-6"><a href="#cb114-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>()</span>
 <span id="cb114-7"><a href="#cb114-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb114-8"><a href="#cb114-8" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(ptm, protein) <span class="sc">|&gt;</span></span>
-<span id="cb114-9"><a href="#cb114-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb114-10"><a href="#cb114-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> colname,</span>
-<span id="cb114-11"><a href="#cb114-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> value) <span class="sc">+</span></span>
-<span id="cb114-12"><a href="#cb114-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> rowname), <span class="at">linewidth =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb114-13"><a href="#cb114-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">colour =</span> sampleGroup)) <span class="sc">+</span></span>
-<span id="cb114-14"><a href="#cb114-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> assay, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb114-15"><a href="#cb114-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(target_feature) <span class="sc">+</span></span>
-<span id="cb114-16"><a href="#cb114-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb114-17"><a href="#cb114-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb114-8"><a href="#cb114-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb114-9"><a href="#cb114-9" aria-hidden="true" tabindex="-1"></a>ptm_protein <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ptm, protein)</span>
+<span id="cb114-10"><a href="#cb114-10" aria-hidden="true" tabindex="-1"></a>ylims <span class="ot">&lt;-</span> ptm_protein <span class="sc">|&gt;</span> </span>
+<span id="cb114-11"><a href="#cb114-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(assay) <span class="sc">|&gt;</span> </span>
+<span id="cb114-12"><a href="#cb114-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">cent =</span> <span class="fu">mean</span>(<span class="fu">range</span>(value,<span class="at">na.rm=</span><span class="cn">TRUE</span>)), <span class="at">ampl =</span> <span class="fu">diff</span>(<span class="fu">range</span>(value,<span class="at">na.rm=</span><span class="cn">TRUE</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb114-13"><a href="#cb114-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">lower =</span> cent <span class="sc">-</span> <span class="fu">max</span>(ampl)<span class="sc">/</span><span class="dv">2</span>, </span>
+<span id="cb114-14"><a href="#cb114-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">upper =</span> cent <span class="sc">+</span> <span class="fu">max</span>(ampl)<span class="sc">/</span><span class="dv">2</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb114-15"><a href="#cb114-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(cent, ampl))</span>
+<span id="cb114-16"><a href="#cb114-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb114-17"><a href="#cb114-17" aria-hidden="true" tabindex="-1"></a>outplot <span class="ot">&lt;-</span> ptm_protein <span class="sc">|&gt;</span></span>
+<span id="cb114-18"><a href="#cb114-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb114-19"><a href="#cb114-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> colname,</span>
+<span id="cb114-20"><a href="#cb114-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> value) <span class="sc">+</span></span>
+<span id="cb114-21"><a href="#cb114-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> rowname), <span class="at">linewidth =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb114-22"><a href="#cb114-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">colour =</span> sampleGroup)) <span class="sc">+</span></span>
+<span id="cb114-23"><a href="#cb114-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> assay, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb114-24"><a href="#cb114-24" aria-hidden="true" tabindex="-1"></a>  ggh4x<span class="sc">::</span><span class="fu">facetted_pos_scales</span>(</span>
+<span id="cb114-25"><a href="#cb114-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">list</span>(</span>
+<span id="cb114-26"><a href="#cb114-26" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">1</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">1</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)])),</span>
+<span id="cb114-27"><a href="#cb114-27" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">2</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">2</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)])),</span>
+<span id="cb114-28"><a href="#cb114-28" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">3</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">3</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)]))</span>
+<span id="cb114-29"><a href="#cb114-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb114-30"><a href="#cb114-30" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb114-31"><a href="#cb114-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="fu">paste</span>(target_feature, <span class="st">"</span><span class="sc">\n</span><span class="st"> padj PTM ="</span>, inferencesPTM <span class="sc">|&gt;</span> <span class="fu">filter</span>(feature <span class="sc">==</span> target_feature) <span class="sc">|&gt;</span> <span class="fu">pull</span>(adjPval) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">3</span>), <span class="st">", padj usage ="</span>, inferencesUsage <span class="sc">|&gt;</span> <span class="fu">filter</span>(feature <span class="sc">==</span> target_feature) <span class="sc">|&gt;</span> <span class="fu">pull</span>(adjPval) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">3</span>))) <span class="sc">+</span></span>
+<span id="cb114-32"><a href="#cb114-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb114-33"><a href="#cb114-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb114-34"><a href="#cb114-34" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(outplot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -58265,7 +58282,7 @@ dietlow + 0.5 * dietlow:sexm._GPDEAIEDGEEGS[Phospho (STY)]EDDAEWVVTKDK_3 _GPDEAI
 <span id="cb116-36"><a href="#cb116-36" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">3</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">3</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)]))</span>
 <span id="cb116-37"><a href="#cb116-37" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb116-38"><a href="#cb116-38" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb116-39"><a href="#cb116-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(target_feature) <span class="sc">+</span></span>
+<span id="cb116-39"><a href="#cb116-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">subtitle =</span> <span class="fu">paste</span>(target_feature, <span class="st">"</span><span class="sc">\n</span><span class="st"> padj PTM ="</span>, inferencesPTM <span class="sc">|&gt;</span> <span class="fu">filter</span>(feature <span class="sc">==</span> target_feature) <span class="sc">|&gt;</span> <span class="fu">pull</span>(adjPval) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">3</span>), <span class="st">", padj usage ="</span>, inferencesUsage <span class="sc">|&gt;</span> <span class="fu">filter</span>(feature <span class="sc">==</span> target_feature) <span class="sc">|&gt;</span> <span class="fu">pull</span>(adjPval) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="at">digits =</span> <span class="dv">3</span>))) <span class="sc">+</span></span>
 <span id="cb116-40"><a href="#cb116-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
 <span id="cb116-41"><a href="#cb116-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>())</span>
 <span id="cb116-42"><a href="#cb116-42" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(outplot)</span>
@@ -58337,120 +58354,6 @@ dietlow + 0.5 * dietlow:sexm._GPDEAIEDGEEGS[Phospho (STY)]EDDAEWVVTKDK_3 _GPDEAI
 <div>
 <figure class="figure">
 <p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-77-10.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb117"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>){</span>
-<span id="cb117-2"><a href="#cb117-2" aria-hidden="true" tabindex="-1"></a>target_feature <span class="ot">&lt;-</span> inferencesPTM <span class="sc">|&gt;</span> </span>
-<span id="cb117-3"><a href="#cb117-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(feature <span class="sc">%in%</span> inferencesUsage<span class="sc">$</span>feature) <span class="sc">|&gt;</span></span>
-<span id="cb117-4"><a href="#cb117-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(contrast <span class="sc">==</span> <span class="fu">colnames</span>(L)[<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
-<span id="cb117-5"><a href="#cb117-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pval) <span class="sc">|&gt;</span> </span>
-<span id="cb117-6"><a href="#cb117-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(feature)</span>
-<span id="cb117-7"><a href="#cb117-7" aria-hidden="true" tabindex="-1"></a>target_feature <span class="ot">&lt;-</span> target_feature[i]</span>
-<span id="cb117-8"><a href="#cb117-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb117-9"><a href="#cb117-9" aria-hidden="true" tabindex="-1"></a>ptm <span class="ot">&lt;-</span>  qf[target_feature, , <span class="fu">c</span>(<span class="st">"precursorsPTM_norm"</span>, <span class="st">"usage"</span>)] <span class="sc">|&gt;</span> <span class="co">#1</span></span>
-<span id="cb117-10"><a href="#cb117-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf)), <span class="at">rowvars =</span> <span class="st">"PG_ProteinGroups"</span>) <span class="sc">|&gt;</span> <span class="co">#2</span></span>
-<span id="cb117-11"><a href="#cb117-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>()</span>
-<span id="cb117-12"><a href="#cb117-12" aria-hidden="true" tabindex="-1"></a>protein <span class="ot">&lt;-</span> qf[<span class="fu">unique</span>(ptm<span class="sc">$</span>PG_ProteinGroups), , <span class="fu">c</span>(<span class="st">"proteins"</span>)] <span class="sc">|&gt;</span> <span class="co">#1</span></span>
-<span id="cb117-13"><a href="#cb117-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">longForm</span>(<span class="at">colvars =</span> <span class="fu">colnames</span>(<span class="fu">colData</span>(qf)), <span class="at">rowvars =</span> <span class="st">"PG_ProteinGroups"</span>) <span class="sc">|&gt;</span> <span class="co">#2</span></span>
-<span id="cb117-14"><a href="#cb117-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>()</span>
-<span id="cb117-15"><a href="#cb117-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb117-16"><a href="#cb117-16" aria-hidden="true" tabindex="-1"></a>ptm_protein <span class="ot">&lt;-</span> <span class="fu">rbind</span>(ptm, protein)</span>
-<span id="cb117-17"><a href="#cb117-17" aria-hidden="true" tabindex="-1"></a>ylims <span class="ot">&lt;-</span> ptm_protein <span class="sc">|&gt;</span> </span>
-<span id="cb117-18"><a href="#cb117-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(assay) <span class="sc">|&gt;</span> </span>
-<span id="cb117-19"><a href="#cb117-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">cent =</span> <span class="fu">mean</span>(<span class="fu">range</span>(value,<span class="at">na.rm=</span><span class="cn">TRUE</span>)), <span class="at">ampl =</span> <span class="fu">diff</span>(<span class="fu">range</span>(value,<span class="at">na.rm=</span><span class="cn">TRUE</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb117-20"><a href="#cb117-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">lower =</span> cent <span class="sc">-</span> <span class="fu">max</span>(ampl)<span class="sc">/</span><span class="dv">2</span>, </span>
-<span id="cb117-21"><a href="#cb117-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">upper =</span> cent <span class="sc">+</span> <span class="fu">max</span>(ampl)<span class="sc">/</span><span class="dv">2</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb117-22"><a href="#cb117-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(cent, ampl))</span>
-<span id="cb117-23"><a href="#cb117-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb117-24"><a href="#cb117-24" aria-hidden="true" tabindex="-1"></a>outplot <span class="ot">&lt;-</span> ptm_protein <span class="sc">|&gt;</span></span>
-<span id="cb117-25"><a href="#cb117-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb117-26"><a href="#cb117-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> colname,</span>
-<span id="cb117-27"><a href="#cb117-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> value) <span class="sc">+</span></span>
-<span id="cb117-28"><a href="#cb117-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> rowname), <span class="at">linewidth =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
-<span id="cb117-29"><a href="#cb117-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">colour =</span> sampleGroup)) <span class="sc">+</span></span>
-<span id="cb117-30"><a href="#cb117-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> assay, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
-<span id="cb117-31"><a href="#cb117-31" aria-hidden="true" tabindex="-1"></a>  ggh4x<span class="sc">::</span><span class="fu">facetted_pos_scales</span>(</span>
-<span id="cb117-32"><a href="#cb117-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="fu">list</span>(</span>
-<span id="cb117-33"><a href="#cb117-33" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">1</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">1</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)])),</span>
-<span id="cb117-34"><a href="#cb117-34" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">2</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">2</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)])),</span>
-<span id="cb117-35"><a href="#cb117-35" aria-hidden="true" tabindex="-1"></a>      assay <span class="sc">==</span> ylims<span class="sc">$</span>assay[<span class="dv">3</span>] <span class="sc">~</span> <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">unlist</span>(ylims[<span class="dv">3</span>,<span class="fu">c</span>(<span class="st">"lower"</span>,<span class="st">"upper"</span>)]))</span>
-<span id="cb117-36"><a href="#cb117-36" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb117-37"><a href="#cb117-37" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb117-38"><a href="#cb117-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(target_feature) <span class="sc">+</span></span>
-<span id="cb117-39"><a href="#cb117-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb117-40"><a href="#cb117-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb117-41"><a href="#cb117-41" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(outplot)</span>
-<span id="cb117-42"><a href="#cb117-42" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-4.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-5.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-6.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-7.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-8.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-9.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="mouse-diet-two-factors-PTM-VIS_files/figure-html/unnamed-chunk-78-10.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

@@ -77,3 +77,6 @@ precursors <- precursors |> #4.
            (grepl("low",R_FileName) | grepl("high",R_FileName)) 4.
   )
 ```
+
+
+Intermediate: [mouse-diet-two-factors-up-to-QC](./mouse-diet-two-factors-intermediate.qmd)

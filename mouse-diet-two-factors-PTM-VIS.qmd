@@ -1436,16 +1436,33 @@ protein <- qf[unique(ptm$PG_ProteinGroups), , c("proteins")] |> #1
   longForm(colvars = colnames(colData(qf)), rowvars = "PG_ProteinGroups") |> #2
   data.frame()
 
-rbind(ptm, protein) |>
+
+ptm_protein <- rbind(ptm, protein)
+ylims <- ptm_protein |> 
+  group_by(assay) |> 
+  summarise(cent = mean(range(value,na.rm=TRUE)), ampl = diff(range(value,na.rm=TRUE))) |> 
+  mutate(lower = cent - max(ampl)/2, 
+         upper = cent + max(ampl)/2) |> 
+  select(-c(cent, ampl))
+
+outplot <- ptm_protein |>
   ggplot() +
   aes(x = colname,
       y = value) +
   geom_line(aes(group = rowname), linewidth = 0.1) +
   geom_point(aes(colour = sampleGroup)) +
   facet_wrap(~ assay, scales = "free") +
-  ggtitle(target_feature) +
+  ggh4x::facetted_pos_scales(
+    y = list(
+      assay == ylims$assay[1] ~ scale_y_continuous(limits = unlist(ylims[1,c("lower","upper")])),
+      assay == ylims$assay[2] ~ scale_y_continuous(limits = unlist(ylims[2,c("lower","upper")])),
+      assay == ylims$assay[3] ~ scale_y_continuous(limits = unlist(ylims[3,c("lower","upper")]))
+    )
+    ) +
+  labs(subtitle = paste(target_feature, "\n padj PTM =", inferencesPTM |> filter(feature == target_feature) |> pull(adjPval) |> round(digits = 3), ", padj usage =", inferencesUsage |> filter(feature == target_feature) |> pull(adjPval) |> round(digits = 3))) +
   theme_minimal() +
   theme(axis.text.x = element_blank())
+print(outplot)
 ```
 
 ```{r}
@@ -1505,97 +1522,10 @@ outplot <- ptm_protein |>
       assay == ylims$assay[3] ~ scale_y_continuous(limits = unlist(ylims[3,c("lower","upper")]))
     )
     ) +
-  ggtitle(target_feature) +
+  labs(subtitle = paste(target_feature, "\n padj PTM =", inferencesPTM |> filter(feature == target_feature) |> pull(adjPval) |> round(digits = 3), ", padj usage =", inferencesUsage |> filter(feature == target_feature) |> pull(adjPval) |> round(digits = 3))) +
   theme_minimal() +
   theme(axis.text.x = element_blank())
 print(outplot)
 }
 ```
 
-```{r}
-for (i in 1:10){
-target_feature <- inferencesPTM |> 
-  filter(feature %in% inferencesUsage$feature) |>
-  filter(contrast == colnames(L)[2]) |>
-  arrange(pval) |> 
-  pull(feature)
-target_feature <- target_feature[i]
-
-ptm <-  qf[target_feature, , c("precursorsPTM_norm", "usage")] |> #1
-  longForm(colvars = colnames(colData(qf)), rowvars = "PG_ProteinGroups") |> #2
-  data.frame()
-protein <- qf[unique(ptm$PG_ProteinGroups), , c("proteins")] |> #1
-  longForm(colvars = colnames(colData(qf)), rowvars = "PG_ProteinGroups") |> #2
-  data.frame()
-
-ptm_protein <- rbind(ptm, protein)
-ylims <- ptm_protein |> 
-  group_by(assay) |> 
-  summarise(cent = mean(range(value,na.rm=TRUE)), ampl = diff(range(value,na.rm=TRUE))) |> 
-  mutate(lower = cent - max(ampl)/2, 
-         upper = cent + max(ampl)/2) |> 
-  select(-c(cent, ampl))
-
-outplot <- ptm_protein |>
-  ggplot() +
-  aes(x = colname,
-      y = value) +
-  geom_line(aes(group = rowname), linewidth = 0.1) +
-  geom_point(aes(colour = sampleGroup)) +
-  facet_wrap(~ assay, scales = "free") +
-  ggh4x::facetted_pos_scales(
-    y = list(
-      assay == ylims$assay[1] ~ scale_y_continuous(limits = unlist(ylims[1,c("lower","upper")])),
-      assay == ylims$assay[2] ~ scale_y_continuous(limits = unlist(ylims[2,c("lower","upper")])),
-      assay == ylims$assay[3] ~ scale_y_continuous(limits = unlist(ylims[3,c("lower","upper")]))
-    )
-    ) +
-  ggtitle(target_feature) +
-  theme_minimal() +
-  theme(axis.text.x = element_blank())
-print(outplot)
-}
-```
-
-```{r}
-library(omicsGMF)
-seP <- getWithColData(qf, "precursorsPTM_norm") |> 
-  as("SingleCellExperiment")
-X <- model.matrix(~diet*sex,colData(se))
-seP <- runGMF(
-    seP, 
-    X = X,
-    family = gaussian(), 
-    ncomponents = 3, 
-    name = "GMF")
-# se <- runCVGMF(
-#     se, 
-#     X = X,                          # Covariate matrix
-#     family = gaussian(),            # Gaussian model for proteomics data
-#     ncomponents = c(1:5))  
-```
-
-```{r}
-plotReducedDim(seP, dimred = "GMF", colour_by = "sampleGroup")
-```
-
-
-```{r}
-library(omicsGMF)
-se <- getWithColData(qf, "proteins") |> 
-  as("SingleCellExperiment")
-seN <- runGMF(
-    se, 
-    family = gaussian(), 
-    ncomponents = 3, 
-    name = "GMF")
-# se <- runCVGMF(
-#     se, 
-#     X = X,                          # Covariate matrix
-#     family = gaussian(),            # Gaussian model for proteomics data
-#     ncomponents = c(1:5))  
-```
-
-```{r}
-plotReducedDim(seN, dimred = "GMF", colour_by = "sampleGroup")
-```

@@ -13,11 +13,12 @@ createOneVersusAllContrasts <- function(formula, coldata, var,
                                         ridge = FALSE,
                                         nullHypothesis = " = 0") {
     params <- .getParamNames(formula, coldata, var, ridge)
-    averages <- sapply(seq_along(params), function(i) {
-        paramSum <- paste(params[-i], collapse = " + ")
-        paste0("(", paramSum, ") / ", length(params) - 1)
+    averages <-
+      sapply(0:length(params), function(i) {
+        paramSum <- ifelse(i == 0, paste(params, collapse = " + ") , paste(params[-i], collapse = " + "))
+        paste0("(", paramSum, ") / ", length(params))
     })
-    paste0(params, " - ", averages, nullHypothesis)
+    paste0(c("",params), " - ", averages, nullHypothesis)
 }
 
 .getParamNames <- function(formula, coldata, var, ridge) {
