@@ -22,7 +22,7 @@ knitr::include_graphics("figs/msqrob2.png")
 MS-based proteomics experiments often imposes a complex correlation
 structure among observations. Addressing this correlation is key for
 correct statistical inference and reliable biomarker discovery. This
-`msqrob2` book provides a set of (mixed) model-based workflows
+`msqrob2` course provides a set of model-based workflows
 dedicated to differential abundance analysis for label-free as well
 as labeled MS-based proteomics data. The key features of `msqrob2`
 workflows are:
